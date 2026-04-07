@@ -1,0 +1,130 @@
+---
+/**
+ * StatsSection.astro
+ * Strip count-up stat horizontal
+ */
+---
+<section class="stats-section" id="stats-section">
+  <div class="container-main">
+    <div class="stats-container">
+      
+      <div class="stat-item">
+        <span class="stat-num" data-stat-target="75">0</span>
+        <span class="stat-label">Anggota Aktif</span>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-num" data-stat-target="2025">0</span>
+        <span class="stat-label">Tahun Angkatan</span>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-num" data-stat-target="1">0</span>
+        <span class="stat-label">Keluarga</span>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-num" data-stat-raw="&infin;">&infin;</span>
+        <span class="stat-label">Kenangan</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .stats-section {
+    position: relative;
+    z-index: 10;
+    margin: 4rem 0;
+  }
+
+  .stats-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 3rem var(--gutter);
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .stat-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+  }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 600;
+    color: var(--color-water-light);
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsla(0, 0%, 100%, 0.6);
+  }
+</style>
+
+<script>
+  async function initStats() {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const nums = document.querySelectorAll<HTMLElement>('[data-stat-target]');
+    
+    if (nums.length === 0) return;
+
+    function showAll() {
+      nums.forEach(num => { num.innerText = num.getAttribute('data-stat-target') ?? '0'; });
+    }
+
+    if (prefersReduced) {
+      showAll();
+      return;
+    }
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      nums.forEach(num => {
+        const target = parseInt(num.getAttribute('data-stat-target') ?? '0', 10);
+        
+        ScrollTrigger.create({
+          trigger: ".stats-container",
+          start: "top 85%",
+          onEnter: () => {
+            const obj = { val: 0 };
+            gsap.to(obj, {
+              val: target,
+              duration: 2,
+              ease: "power2.out",
+              onUpdate: () => {
+                num.innerText = String(Math.round(obj.val));
+              }
+            });
+          },
+          once: true
+        });
+      });
+    } catch(err) {
+      showAll();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initStats);
+  document.addEventListener('astro:after-swap', initStats);
+</script>

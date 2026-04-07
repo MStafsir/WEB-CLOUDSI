@@ -1,0 +1,193 @@
+---
+/**
+ * BaseLayout.astro
+ * Layout utama Cloudsi Connect — head, meta, fonts, canvas, slot
+ * Props: title (wajib), description, ogImage
+ * Dependencies: tokens.css, global.css, WaterRipple.astro, ViewTransitions
+ */
+
+import { ClientRouter } from 'astro:transitions';
+import WaterRipple from '../components/canvas/WaterRipple.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'Cloudsi Connect — Platform Profil Angkatan Sistem Informasi. Mempererat koneksi, membangun masa depan bersama.',
+  ogImage = '/og-default.jpg',
+} = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? 'https://cloudsi.vercel.app');
+const fullTitle = `${title} | Cloudsi Connect`;
+---
+
+<!DOCTYPE html>
+<html lang="id" dir="ltr">
+  <head>
+    <!-- ============================================
+         META — Charset, Viewport, Theme
+         ============================================ -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="hsl(210, 60%, 6%)" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- ============================================
+         SEO — Title, Description, Canonical
+         ============================================ -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl.href} />
+
+    <!-- ============================================
+         OPEN GRAPH — Social sharing meta
+         ============================================ -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonicalUrl.href} />
+    <meta property="og:site_name" content="Cloudsi Connect" />
+    <meta property="og:locale" content="id_ID" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- ============================================
+         IMPORT MAP — OGL CDN
+         ============================================ -->
+    <script type="importmap">
+      {
+        "imports": {
+          "ogl": "https://unpkg.com/ogl"
+        }
+      }
+    </script>
+
+    <!-- ============================================
+         FONTS — Preconnect + Preload Google Fonts
+         Cormorant Garamond: 300, 400, 600
+         Plus Jakarta Sans: 300–700
+         ============================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+      />
+    </noscript>
+
+    <!-- ============================================
+         STYLES — Design Tokens + Global CSS
+         ============================================ -->
+    <link rel="stylesheet" href="/src/styles/global.css" />
+
+    <!-- ============================================
+         FAVICON
+         ============================================ -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- ============================================
+         ASTRO VIEW TRANSITIONS (ClientRouter in v5)
+         ============================================ -->
+    <ClientRouter />
+  </head>
+
+  <body>
+    <!-- WebGL Water Ripple Canvas — fixed, z-0, pointer-events: none -->
+    <WaterRipple />
+
+    <!-- Main Content — z-10 agar di atas canvas -->
+    <div class="relative z-10">
+      <slot />
+    </div>
+
+    <!-- ============================================
+         LENIS SMOOTH SCROLL — Inisialisasi global
+         ============================================ -->
+    <script>
+      async function initLenis() {
+        const prefersReduced = window.matchMedia(
+          '(prefers-reduced-motion: reduce)'
+        ).matches;
+        
+        // Mobile override: jika < 768px, nonaktifkan Lenis untuk native scroll
+        const isMobile = window.innerWidth < 768;
+        if (prefersReduced || isMobile) return;
+
+        const [{ default: Lenis }, { gsap }, { ScrollTrigger }] = await Promise.all([
+          import('lenis'),
+          import('gsap'),
+          import('gsap/ScrollTrigger')
+        ]);
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const lenis = new Lenis({
+          duration: 1.4,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          wheelMultiplier: 1.2,
+          touchMultiplier: 1.5,
+        });
+
+        // Integrasi GSAP ScrollTrigger
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+
+        // Cleanup on page transition
+        document.addEventListener('astro:before-swap', () => {
+          lenis.destroy();
+          ScrollTrigger.getAll().forEach(t => t.kill());
+        }, { once: true });
+      }
+
+      document.addEventListener('DOMContentLoaded', initLenis);
+      document.addEventListener('astro:after-swap', initLenis);
+    </script>
+
+    <!-- ============================================
+         GLOBAL FADE-IN OBSERVER
+         Adds .is-visible to .fade-in elements when they enter viewport
+         ============================================ -->
+    <script>
+      function initFadeInObserver() {
+        const fadeEls = document.querySelectorAll('.fade-in');
+        if (!fadeEls.length) return;
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        fadeEls.forEach(el => observer.observe(el));
+      }
+
+      document.addEventListener('DOMContentLoaded', initFadeInObserver);
+      document.addEventListener('astro:after-swap', initFadeInObserver);
+    </script>
+  </body>
+</html>

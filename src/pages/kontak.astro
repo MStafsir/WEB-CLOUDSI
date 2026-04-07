@@ -1,0 +1,29 @@
+---
+/**
+ * kontak.astro
+ * Halaman Kontak — form pesan dan info kontak
+ * Dependencies: BaseLayout, Header, Footer, Contact section
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import PageTransition from '../components/layout/PageTransition.astro';
+import Contact from '../components/sections/Contact.astro';
+---
+
+<BaseLayout title="Kontak" description="Hubungi Cloudsi Connect — Kirim pesan atau temukan informasi kontak angkatan Sistem Informasi.">
+  <Header />
+  <PageTransition>
+    <main id="main-content" class="page-offset">
+      <Contact />
+    </main>
+  </PageTransition>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .page-offset {
+    padding-top: 5rem;
+  }
+</style>

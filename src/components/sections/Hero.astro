@@ -1,0 +1,303 @@
+---
+/**
+ * Hero.astro
+ * Section hero utama — judul besar, tagline, CTA buttons, ScrollIndicator
+ */
+import Button from '../ui/Button.astro';
+---
+
+<section class="hero-section" aria-label="Hero">
+  <div class="hero-container container-main">
+    
+    <!-- 1. Badge Kecil -->
+    <div class="hero-badge" data-hero-badge>
+      ANGKATAN 2025 &middot; SISTEM INFORMASI
+    </div>
+
+    <!-- 2. Heading Utama -->
+    <h1 class="hero-heading" data-hero-heading>
+      CLOUDSI
+    </h1>
+
+    <!-- 3. Subheading -->
+    <h2 class="hero-subheading" data-hero-anim="sub">
+      Cloud &middot; Sky &middot; Information
+    </h2>
+
+    <!-- 4. Deskripsi -->
+    <p class="hero-desc" data-hero-anim="desc">
+      75 jiwa, satu angkatan, satu langit yang sama.
+    </p>
+
+    <!-- 5. CTA Buttons -->
+    <div class="hero-cta" data-hero-anim="cta">
+      <Button variant="secondary" size="lg" href="/anggota" class="cta-kenali">
+        Kenali Kami
+      </Button>
+      <a href="/tentang" class="cta-perjalanan">
+        Perjalanan Kami
+      </a>
+    </div>
+
+  </div>
+
+  <!-- 6. Scroll Indicator -->
+  <div class="scroll-indicator" id="hero-scroll-indicator">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="chevron">
+      <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    position: relative;
+    width: 100%;
+    height: 100svh; /* Gunakan svh untuk mobile viewport */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    overflow: hidden; /* Mencegah elemen bergeser keluar body */
+  }
+
+  .hero-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* 1. Badge */
+  .hero-badge {
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px; /* Pill shape */
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: hsla(0, 0%, 100%, 0.85);
+    margin-bottom: 2rem;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /* 2. Heading */
+  .hero-heading {
+    font-family: var(--font-display);
+    font-size: var(--font-size-hero);
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    margin: 0;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #ffffff 0%, var(--color-water-light) 50%, var(--color-accent-gold) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /* 3. Subheading */
+  .hero-subheading {
+    font-family: var(--font-body);
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    font-weight: 400;
+    opacity: 0; /* Animated */
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: white;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    will-change: transform, opacity;
+  }
+
+  /* 4. Deskripsi */
+  .hero-desc {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0; /* Animated */
+    color: hsla(0, 0%, 100%, 0.75);
+    margin: 0 0 2.5rem 0;
+    will-change: transform, opacity;
+  }
+
+  /* 5. CTA */
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    opacity: 0; /* Animated */
+    will-change: transform, opacity;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Kustomisasi cta-kenali diatur lewat Button component + override berikut */
+  .cta-kenali {
+    border: 1px solid var(--glass-border) !important;
+  }
+  .cta-kenali:hover {
+    background: var(--glass-bg-hover) !important;
+    border-color: var(--glass-border-hover) !important;
+  }
+
+  .cta-perjalanan {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem; /* Menyamai Button size lg/md */
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 12px;
+    border: 1px solid transparent; /* Border transparan default */
+    color: var(--color-accent-gold);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .cta-perjalanan:hover {
+    background: hsla(45, 85%, 65%, 0.08); /* Gold tipis */
+  }
+
+  /* 6. Scroll Indicator */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+    will-change: transform;
+    animation: bounce 2s infinite ease-in-out;
+  }
+
+  .scroll-indicator.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .chevron {
+    color: white;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 8px); }
+  }
+
+  @media(max-width: 768px) {
+    .hero-heading { letter-spacing: 0.1em; }
+    .hero-subheading { letter-spacing: 0.15em; }
+  }
+</style>
+
+<script>
+  async function initHero() {
+    const badge = document.querySelector('[data-hero-badge]');
+    const heading = document.querySelector('[data-hero-heading]');
+    const sub = document.querySelector('[data-hero-anim="sub"]');
+    const desc = document.querySelector('[data-hero-anim="desc"]');
+    const cta = document.querySelector('[data-hero-anim="cta"]');
+    
+    const allEls = [badge, heading, sub, desc, cta];
+    
+    if(!badge || !heading) return;
+
+    function showAll() {
+      allEls.forEach(el => {
+        if(el) {
+          (el as HTMLElement).style.opacity = '1';
+          (el as HTMLElement).style.transform = 'none';
+        }
+      });
+    }
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      showAll();
+      return;
+    }
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      const tl = gsap.timeline();
+      
+      tl.fromTo(badge, 
+        { y: 20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.2 }
+      )
+      .fromTo(heading, 
+        { scale: 0.95, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" },
+        0.4
+      )
+      .fromTo(sub,
+        { y: 15, opacity: 0 },
+        { y: 0, opacity: 0.6, duration: 0.6, ease: "power2.out" },
+        0.6
+      )
+      .fromTo(desc,
+        { y: 15, opacity: 0 },
+        { y: 0, opacity: 0.75, duration: 0.6, ease: "power2.out" },
+        0.8
+      )
+      .fromTo(cta,
+        { y: 15, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
+        1.0
+      );
+
+      gsap.to(heading, {
+        yPercent: 30,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero-section",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1
+        }
+      });
+
+      gsap.to(badge, {
+        yPercent: 50,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero-section",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1
+        }
+      });
+    } catch(err) {
+      console.warn('[Cloudsi] GSAP load gagal:', err);
+      showAll();
+    }
+
+    const indicator = document.getElementById('hero-scroll-indicator');
+    if(indicator) {
+       const heroSection = document.querySelector('.hero-section');
+       if (heroSection) {
+         const observer = new IntersectionObserver((entries) => {
+           if(entries[0].intersectionRatio < 0.9) {
+             indicator.classList.add('fade-out');
+           } else {
+             indicator.classList.remove('fade-out');
+           }
+         }, { threshold: [0.9] });
+         observer.observe(heroSection);
+       }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initHero);
+  document.addEventListener('astro:after-swap', initHero);
+</script>

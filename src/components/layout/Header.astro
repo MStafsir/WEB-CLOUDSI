@@ -1,0 +1,400 @@
+---
+/**
+ * Header.astro
+ * Navigasi utama Cloudsi Connect — glassmorphism navbar
+ */
+const currentPath = Astro.url.pathname;
+const navLinks = [
+  { href: '/', label: 'Beranda' },
+  { href: '/tentang', label: 'Tentang' },
+  { href: '/galeri', label: 'Galeri' },
+  { href: '/anggota', label: 'Anggota' },
+  { href: '/acara', label: 'Acara' },
+  { href: '/kontak', label: 'Kontak' },
+];
+---
+
+<header class="header-nav" id="main-header">
+  <div class="header-container">
+    
+    <!-- Logo Typography -->
+    <a href="/" class="header-logo-group">
+      <img src="https://via.placeholder.com/40" alt="Logo Cloudsi" class="header-logo-img" />
+      <div class="header-logo-text-group">
+        <h1 class="header-logo-text">CLOUDSI</h1>
+        <span class="header-logo-sub">Sistem Informasi '25</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav" aria-label="Desktop menu">
+      <ul class="nav-list">
+        {navLinks.map((link) => (
+          <li>
+            <a 
+              href={link.href} 
+              class:list={['nav-link', { 'active': link.href === currentPath || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
+            >
+              {link.label}
+              <span class="underline-hover"></span>
+              <span class="gold-dot"></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- Mobile Hamburger Toggle -->
+    <button id="hamburger-btn" class="hamburger-btn" aria-label="Toggle mobile menu" aria-expanded="false">
+      <span class="line line-1"></span>
+      <span class="line line-2"></span>
+      <span class="line line-3"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Overlay Navigation -->
+  <div id="mobile-menu" class="mobile-menu" aria-hidden="true">
+    <nav aria-label="Mobile menu" class="mobile-nav-container">
+      <ul class="mobile-nav-list">
+        {navLinks.map((link, index) => (
+          <li class="mobile-nav-item" style={`--delay: ${index * 80}ms`}>
+            <a 
+              href={link.href} 
+              class:list={['mobile-nav-link', { 'active': link.href === currentPath || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  /* Header Container Styling */
+  .header-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-glass-heavy);
+    -webkit-backdrop-filter: var(--blur-glass-heavy);
+    border-bottom: 1px solid var(--glass-border);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .header-nav.scrolled {
+    box-shadow: var(--shadow-glass);
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px; /* Mobile height */
+    padding: 0 var(--gutter);
+  }
+
+  @media(min-width: 768px) {
+    .header-container {
+      height: 72px; /* Desktop height */
+    }
+  }
+
+  /* Logo */
+  .header-logo-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .header-logo-img {
+    height: 36px;
+    width: auto;
+    border-radius: 4px; /* Optional: adjust based on logo shape */
+    object-fit: contain;
+  }
+
+  .header-logo-text-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1;
+  }
+  
+  .header-logo-text {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    padding: 0;
+  }
+
+  @media(min-width: 768px) {
+    .header-logo-text { font-size: 1.3rem; }
+    .header-logo-img { height: 42px; }
+  }
+
+  .header-logo-sub {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    opacity: 0.6;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Desktop Nav */
+  .desktop-nav {
+    display: none;
+  }
+
+  @media(min-width: 1024px) {
+    .desktop-nav {
+      display: block;
+    }
+  }
+
+  /* For 768px to 1023px tablet breakpoint */
+  @media(min-width: 768px) and (max-width: 1023px) {
+    .desktop-nav {
+      display: block;
+    }
+    .header-logo-text {
+        font-size: 1.3rem;
+    }
+  }
+
+  .nav-list {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+  }
+
+  .nav-link {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    color: hsla(0, 0%, 100%, 0.65);
+    text-decoration: none;
+    position: relative;
+    padding: 8px 0;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    transition: color 0.3s ease;
+  }
+
+  .nav-link:hover {
+    color: white;
+  }
+
+  /* Animated underline hover */
+  .underline-hover {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: white;
+    transition: width 0.3s ease;
+  }
+
+  .nav-link:hover .underline-hover {
+    width: 100%;
+  }
+
+  /* Active dot state */
+  .gold-dot {
+    position: absolute;
+    bottom: -6px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-accent-gold);
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+  }
+
+  .nav-link.active {
+    color: white;
+  }
+  
+  .nav-link.active .gold-dot {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+
+  /* Mobile Hamburger */
+  .hamburger-btn {
+    display: block;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 24px;
+    padding: 0;
+    position: relative;
+    z-index: 102; /* Bellow page transitions, above overlay */
+  }
+
+  @media(min-width: 768px) {
+    .hamburger-btn { display: none; }
+  }
+
+  .line {
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: white;
+    border-radius: 2px;
+    left: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease, top 0.3s ease;
+  }
+
+  .line-1 { top: 0; }
+  .line-2 { top: 11px; }
+  .line-3 { top: 22px; }
+
+  /* Hamburger Open State */
+  .hamburger-btn[aria-expanded="true"] .line-1 {
+    transform: rotate(45deg);
+    top: 11px;
+  }
+  .hamburger-btn[aria-expanded="true"] .line-2 {
+    opacity: 0;
+  }
+  .hamburger-btn[aria-expanded="true"] .line-3 {
+    transform: rotate(-45deg);
+    top: 11px;
+  }
+
+  /* Mobile Overlay */
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(4, 9, 16, 0.97); /* fallback for sky-deep roughly */
+    background: color-mix(in srgb, var(--color-sky-deep) 97%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 101;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .mobile-menu.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-nav-container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .mobile-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+  }
+
+  .mobile-nav-item {
+    margin: 1.5rem 0;
+    transform: translateX(30px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Slide in items when menu is open */
+  .mobile-menu.open .mobile-nav-item {
+    transform: translateX(0);
+    opacity: 1;
+    transition-delay: var(--delay);
+  }
+
+  .mobile-nav-link {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: hsla(0, 0%, 100%, 0.7);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .mobile-nav-link.active,
+  .mobile-nav-link:hover {
+    color: white;
+  }
+</style>
+
+<script is:inline>
+  function setupHeader() {
+    const header = document.getElementById('main-header');
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if(!header || !hamburgerBtn || !mobileMenu) return;
+
+    // Scroll Observer for shadow
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (window.scrollY > 20) {
+            header.classList.add('scrolled');
+          } else {
+            header.classList.remove('scrolled');
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // Initial check
+    if (window.scrollY > 20) header.classList.add('scrolled');
+
+    function toggleMenu() {
+      const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+      if (isExpanded) {
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      } else {
+        hamburgerBtn.setAttribute('aria-expanded', 'true');
+        mobileMenu.classList.add('open');
+        document.body.style.overflow = 'hidden'; // Stop background scrolling
+      }
+    }
+
+    hamburgerBtn.addEventListener('click', toggleMenu);
+
+    // Auto close menu at breakpoint 768px
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    function handleScreenChange(e) {
+      if (e.matches && mobileMenu.classList.contains('open')) {
+        toggleMenu(); // tutup saat geser ke desktop
+      }
+    }
+    mediaQuery.addEventListener('change', handleScreenChange);
+  }
+
+  document.addEventListener('DOMContentLoaded', setupHeader);
+  document.addEventListener('astro:after-swap', setupHeader);
+</script>

@@ -1,0 +1,332 @@
+---
+/**
+ * Contact.astro
+ * Section kontak — form pesan dan info kontak dengan validasi native & Astro API
+ */
+
+import GlassCard from '../ui/GlassCard.astro';
+import Button from '../ui/Button.astro';
+---
+
+<section class="contact section-pad" id="contact-section" aria-label="Kontak">
+  <div class="container-main">
+    <div class="contact-header fade-in">
+      <p class="section-eyebrow">Kontak</p>
+      <h2 class="section-title">
+        Mari <span class="text-gradient-water">terhubung</span>
+      </h2>
+      <p class="contact-subtitle">
+        Punya pertanyaan atau ingin berkolaborasi? Hubungi kami.
+      </p>
+    </div>
+
+    <div class="contact-grid">
+      <!-- Kolom Info -->
+      <div class="contact-info fade-in">
+        <GlassCard padding="md" class="info-card">
+          <div class="info-row">
+            <span class="info-icon">📍</span>
+            <div>
+              <h3 class="info-title">Lokasi</h3>
+              <p class="info-text">Universitas Tanjungpura<br/>Pontianak</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard padding="md" class="info-card">
+          <div class="info-row">
+            <span class="info-icon">📧</span>
+            <div>
+              <h3 class="info-title">Email</h3>
+              <p class="info-text">hello@cloudsi25.com</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard padding="md" class="info-card">
+          <div class="info-row">
+            <span class="info-icon">📱</span>
+            <div>
+              <h3 class="info-title">Instagram</h3>
+              <p class="info-text">@cloudsi25</p>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
+
+      <!-- Kolom Form -->
+      <GlassCard tag="div" padding="lg" class="contact-form-card fade-in">
+        <form class="contact-form" id="contact-form" novalidate>
+          
+          <!-- Honeypot -->
+          <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" />
+
+          <div class="form-group">
+            <label for="contact-name" class="form-label">Nama Lengkap</label>
+            <input
+              type="text"
+              id="contact-name"
+              name="name"
+              class="form-input"
+              placeholder="Nama lengkap"
+              minlength="2"
+              required
+            />
+            <span class="form-error-msg" id="error-name"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="contact-email" class="form-label">Email</label>
+            <input
+              type="email"
+              id="contact-email"
+              name="email"
+              class="form-input"
+              placeholder="email@contoh.com"
+              required
+            />
+            <span class="form-error-msg" id="error-email"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="contact-message" class="form-label">Pesan</label>
+            <div class="textarea-wrapper">
+              <textarea
+                id="contact-message"
+                name="message"
+                class="form-input form-textarea"
+                placeholder="Tulis pesan kamu..."
+                rows="5"
+                minlength="10"
+                maxlength="500"
+                required
+              ></textarea>
+              <div class="char-counter" id="char-counter">0 / 500</div>
+            </div>
+            <span class="form-error-msg" id="error-message"></span>
+          </div>
+
+          <Button variant="primary" size="md" type="submit" id="contact-submit" class="submit-btn-full">
+            <span class="btn-text">Kirim Pesan</span>
+            <span class="spinner-icon" style="display: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+            </span>
+          </Button>
+
+          <!-- Status Message Container -->
+          <div id="form-status-msg" class="form-status-msg" style="display: none;"></div>
+
+        </form>
+      </GlassCard>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Base Layout */
+  .contact-header { max-width: 600px; margin-bottom: 3rem; }
+  .section-eyebrow { font-family: var(--font-body); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-accent-gold); margin-bottom: 1rem; }
+  .section-title { font-family: var(--font-display); font-size: var(--font-size-h1); font-weight: 300; color: hsla(0, 0%, 100%, 0.95); margin-bottom: 0.75rem; }
+  .contact-subtitle { color: hsla(0, 0%, 100%, 0.5); }
+  
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (min-width: 768px) {
+    .contact-grid { grid-template-columns: 1fr 1.5fr; } /* 2 Kolom desktop */
+  }
+
+  /* Info Cards */
+  .contact-info { display: flex; flex-direction: column; gap: 1rem; }
+  .info-row { display: flex; gap: 1rem; align-items: flex-start; }
+  .info-icon { font-size: 1.5rem; line-height: 1; }
+  .info-title { font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: white; margin-bottom: 0.25rem; }
+  .info-text { font-size: 0.85rem; color: hsla(0, 0%, 100%, 0.5); line-height: 1.5; }
+
+  /* Form */
+  .contact-form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.5rem; position: relative; }
+  .form-label { font-size: 0.8rem; font-weight: 500; color: hsla(0, 0%, 100%, 0.7); letter-spacing: 0.04em; }
+  
+  .form-input {
+    background: hsla(200, 60%, 80%, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: hsla(0, 0%, 100%, 0.9);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-input::placeholder { color: hsla(0, 0%, 100%, 0.25); }
+  .form-input:focus { outline: none; border-color: var(--color-water-light); box-shadow: 0 0 0 3px hsla(190, 65%, 55%, 0.15); }
+  
+  /* Validation error visual */
+  .form-input.is-invalid {
+    border-color: #ef4444 !important;
+  }
+  .form-input.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+  }
+  
+  .form-error-msg {
+    font-size: 0.75rem;
+    color: #ef4444;
+    min-height: 1rem;
+    display: block;
+  }
+
+  .textarea-wrapper { position: relative; }
+  .form-textarea { resize: vertical; min-height: 120px; width: 100%; }
+  .char-counter {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 1rem;
+    font-size: 0.7rem;
+    color: hsla(0,0%,100%,0.4);
+    pointer-events: none;
+  }
+
+  /* Screen reader only for honeypot */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+  }
+
+  /* Button / State */
+  .submit-btn-full { width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+  
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+
+  .form-status-msg {
+    text-align: center;
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  .form-status-msg.success {
+    background: hsla(140, 60%, 40%, 0.1);
+    color: #4ade80;
+    border: 1px solid #4ade80;
+  }
+  .form-status-msg.error {
+    background: hsla(0, 80%, 60%, 0.1);
+    color: #f87171;
+    border: 1px solid #f87171;
+  }
+</style>
+
+<script is:inline>
+  function initContactForm() {
+    const form = document.getElementById('contact-form');
+    if (!form) return;
+
+    const nameInput = document.getElementById('contact-name');
+    const emailInput = document.getElementById('contact-email');
+    const messageInput = document.getElementById('contact-message');
+    const charCounter = document.getElementById('char-counter');
+    const submitBtn = document.getElementById('contact-submit');
+    const btnText = submitBtn?.querySelector('.btn-text');
+    const spinner = submitBtn?.querySelector('.spinner-icon');
+    const statusMsg = document.getElementById('form-status-msg');
+
+    // Real-time character counter for textarea
+    messageInput.addEventListener('input', () => {
+      const len = messageInput.value.length;
+      charCounter.textContent = `${len} / 500`;
+      validateField(messageInput, 'error-message', 'Pesan harus antara 10 - 500 karakter.');
+    });
+
+    // Real-time validation mapping
+    const validateField = (input, errorId, defaultMsg) => {
+      const errSpan = document.getElementById(errorId);
+      if (input.validity.valid) {
+        input.classList.remove('is-invalid');
+        errSpan.textContent = '';
+      } else {
+        input.classList.add('is-invalid');
+        // Native constraint validation messages or fallback
+        errSpan.textContent = input.validationMessage || defaultMsg;
+      }
+    };
+
+    nameInput.addEventListener('input', () => validateField(nameInput, 'error-name', 'Nama minimal 2 karakter.'));
+    emailInput.addEventListener('input', () => validateField(emailInput, 'error-email', 'Isi dengan email yang valid.'));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Trigger validasi manual (in case user belom ngetik apa-apa)
+      validateField(nameInput, 'error-name', 'Nama minimal 2 karakter.');
+      validateField(emailInput, 'error-email', 'Isi dengan email yang valid.');
+      validateField(messageInput, 'error-message', 'Pesan harus antara 10 - 500 karakter.');
+
+      if (!form.checkValidity()) {
+        return; // Stop jika ada error validation constraint HTML5
+      }
+
+      // Prepare UI for Loading
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      submitBtn.disabled = true;
+      btnText.textContent = 'Mengirim...';
+      spinner.style.display = 'inline-block';
+      statusMsg.style.display = 'none';
+      statusMsg.className = 'form-status-msg'; // reset classes
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        // Prepare UI Finish
+        statusMsg.style.display = 'block';
+        if (response.ok && result.success) {
+          // Success State
+          btnText.textContent = 'Pesan Terkirim! ✅';
+          form.reset();
+          charCounter.textContent = '0 / 500';
+          
+          statusMsg.classList.add('success');
+          statusMsg.textContent = 'Terima kasih! Pesan Anda telah kami terima.';
+          
+          // Reset button to original state after 3s
+          setTimeout(() => {
+            btnText.textContent = 'Kirim Pesan';
+            submitBtn.disabled = false;
+            statusMsg.style.display = 'none';
+          }, 4000);
+          
+        } else {
+          // Bad request or Blocked error state
+          throw new Error(result.message || 'Gagal mengirim. Coba lagi.');
+        }
+      } catch (error) {
+        // Form states: Error
+        btnText.textContent = 'Kirim Pesan';
+        submitBtn.disabled = false;
+        
+        statusMsg.style.display = 'block';
+        statusMsg.classList.add('error');
+        statusMsg.textContent = error.message || 'Gagal mengirim. Silakan coba beberapa saat lagi.';
+      } finally {
+         spinner.style.display = 'none';
+      }
+    });
+
+  }
+
+  // Bind to Astro lifecycle
+  document.addEventListener('DOMContentLoaded', initContactForm);
+  document.addEventListener('astro:after-swap', initContactForm);
+</script>

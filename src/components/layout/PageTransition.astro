@@ -1,0 +1,76 @@
+---
+/**
+ * PageTransition.astro
+ * View Transition implementasi wiping water wipe 
+ */
+---
+
+<div id="page-transition-overlay" class="page-transition-overlay"></div>
+
+<slot />
+
+<style is:global>
+  /* Custom Overlay styling */
+  #page-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--color-water-surface);
+    opacity: 0.15;
+    z-index: 9999;
+    pointer-events: none; /* Only see, no touch */
+    clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+  }
+
+  /* 
+   * Astro View Transition hooks for Liquid Wipe Effect
+   */
+
+  /* OUT animation (halaman lama) */
+  @keyframes liquidWipeOut {
+    from { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); }
+    to   { clip-path: polygon(0 0%, 100% 0%, 100% 0%, 0 0%); }
+  }
+
+  /* IN animation (halaman baru) */
+  @keyframes liquidWipeIn {
+    from { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
+    to   { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); }
+  }
+
+  /* Target Astro router animations when transition is active */
+  ::view-transition-old(root) {
+    animation: liquidWipeOut 400ms var(--ease-glass) both;
+  }
+  
+  ::view-transition-new(root) {
+    animation: liquidWipeIn 600ms var(--ease-water) both;
+  }
+
+  /* Optional Extra: we animate the overlay block directly via JS below */
+</style>
+
+<script is:inline>
+  // Script untuk mentrigger animasi overlay disaat transition event Astro berjalan
+  // Ini membantu mengkover efek 'swipe up overlay berwarna biru air 15% opacity'
+  document.addEventListener('astro:before-preparation', () => {
+    const overlay = document.getElementById('page-transition-overlay');
+    if(overlay) {
+      overlay.style.animation = 'liquidWipeIn 400ms cubic-bezier(0.23, 1, 0.32, 1) forwards';
+      overlay.style.pointerEvents = 'auto'; // Block accidental interaction
+    }
+  });
+
+  document.addEventListener('astro:after-swap', () => {
+    const overlay = document.getElementById('page-transition-overlay');
+    if(overlay) {
+      overlay.style.animation = 'liquidWipeOut 600ms cubic-bezier(0.16, 1, 0.3, 1) forwards';
+      // Kembalikan pointer events ke none
+      setTimeout(() => {
+         if (overlay) overlay.style.pointerEvents = 'none';
+      }, 600);
+    }
+  });
+</script>
