@@ -1,15 +1,15 @@
 ---
 /**
  * WaterRipple.astro
- * WebGL water ripple effect menggunakan OGL (Ping-pong height map fluid simulation)
- * Posisi fixed, z-index: 0, pointer-events: none
+ * OGL-based Physical Water Surface (Spring Simulation)
+ * Ultra-smooth, high-res raindrop ripples with pure video refraction (SIAKAD style).
  */
 ---
 
-<canvas id="water-ripple-canvas" class="water-ripple-canvas" aria-hidden="true"></canvas>
+<canvas id="water-canvas" class="water-canvas" aria-hidden="true"></canvas>
 
 <style>
-  .water-ripple-canvas {
+  .water-canvas {
     position: fixed;
     top: 0;
     left: 0;
@@ -18,62 +18,45 @@
     z-index: 0;
     pointer-events: none;
   }
-  
-  /* Fallback CSS Only */
-  :global(.webgl-fallback) .water-ripple-canvas {
-    pointer-events: auto; /* Untuk klik CSS ripples */
-    background: linear-gradient(135deg, var(--color-sky-deep), var(--color-sky-mid), var(--color-sky-surface));
-    background-size: 300% 300%;
-    animation: skyGradient 15s ease infinite;
-  }
-
-  @keyframes skyGradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
 </style>
 
 <script is:inline>
   (async function() {
-    async function initWaterRipple() {
+    'use strict';
+
+    function initWaterRipple() {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) return;
 
-      const canvas = document.getElementById('water-ripple-canvas');
+      const canvas = document.getElementById('water-canvas');
       if (!canvas) return;
 
-      // 1. Cek WebGL2 support
-      const gl = canvas.getContext('webgl2', { alpha: true });
-      if (!gl) {
-        console.warn('[Cloudsi] WebGL2 tidak didukung. Fallback ke CSS mode.');
-        document.body.classList.add('webgl-fallback');
-        return;
-      }
-
-      // Battery API check
       try {
         if ('getBattery' in navigator) {
-          const battery = await navigator.getBattery();
-          if (battery.level < 0.2 && !battery.charging) {
-             console.warn('[Cloudsi] Battery level low, disabling WebGL.');
-             document.body.classList.add('webgl-fallback');
-             return;
-          }
+          navigator.getBattery().then(battery => {
+            if (battery.level < 0.2 && !battery.charging) {
+               console.warn('[Cloudsi] Baterai rendah, mematikan efek air.');
+               return; 
+            }
+          });
         }
-      } catch (e) { /* Ignored */ }
+      } catch (e) {}
 
-      try {
-        const { Renderer, Program, Mesh, RenderTarget, Triangle } = await import('ogl');
+      import('ogl').then(({ Renderer, Program, Mesh, RenderTarget, Triangle, Texture }) => {
+        
+        // === DETEKSI PERANGKAT ===
+        const isMobile = window.innerWidth < 768 || ('ontouchstart' in window);
+        const dprLimit = isMobile ? 1.5 : 2;
 
         const renderer = new Renderer({
           canvas,
-          gl,
           alpha: true,
-          dpr: Math.min(window.devicePixelRatio, 2),
+          dpr: Math.min(window.devicePixelRatio, dprLimit),
         });
-
-        const simulationRes = 256;
+        const gl = renderer.gl;
+        
+        // Mobile: 256 (lancar), Desktop: 512 (super halus)
+        const simulationRes = isMobile ? 256 : 512;
 
         function createRT() {
           return new RenderTarget(gl, {
@@ -83,13 +66,30 @@
             internalFormat: gl.RGBA16F || gl.RGBA,
             format: gl.RGBA,
             depth: false,
+            minFilter: gl.LINEAR,
+            magFilter: gl.LINEAR,
           });
         }
 
-        // 3 buffers: current, previous, output
         let rtCurrent = createRT();
         let rtPrevious = createRT();
         let rtOutput = createRT();
+
+        const videoEl = document.getElementById('bg-hero-video');
+        let videoTex = null;
+        if (videoEl) {
+          // [FIX] Jangan load video secara buta kalau state-nya masih 0 (bisa bikin WebGL Crash)
+          // Berikan gambar dummy 1x1 pixel lebih dulu
+          videoTex = new Texture(gl, {
+            image: new Uint8Array([0, 0, 0, 255]),
+            width: 1, 
+            height: 1,
+            generateMipmaps: false,
+            minFilter: gl.LINEAR,
+            magFilter: gl.LINEAR,
+            flipY: true, 
+          });
+        }
 
         const simVertex = /* glsl */ `
           attribute vec2 position;
@@ -115,12 +115,15 @@
 
           void main() {
             vec2 texel = 1.0 / uResolution;
+            
             float current = texture2D(uCurrent, vUv).r;
             float previous = texture2D(uPrevious, vUv).r;
+            
             float top = texture2D(uCurrent, vUv - vec2(0.0, texel.y)).r;
             float bottom = texture2D(uCurrent, vUv + vec2(0.0, texel.y)).r;
             float left = texture2D(uCurrent, vUv - vec2(texel.x, 0.0)).r;
             float right = texture2D(uCurrent, vUv + vec2(texel.x, 0.0)).r;
+            
             float next = (top + bottom + left + right) * 0.5 - previous;
             next *= uDamping;
 
@@ -131,6 +134,7 @@
                 next -= drop;
               }
             }
+            
             next = clamp(next, -1.0, 1.0);
             gl_FragColor = vec4(next, 0.0, 0.0, 1.0);
           }
@@ -146,38 +150,57 @@
             uPrevious: { value: null },
             uResolution: { value: [simulationRes, simulationRes] },
             uDropPos: { value: [-1, -1] },
-            uDropRadius: { value: 0.012 },
-            uDropStrength: { value: 0.8 },
-            uDamping: { value: 0.985 },
+            uDropRadius: { value: 0.008 }, // [FIX] Diperkecil dari 0.02 agar riak tidak berlebihan dan pusing
+            uDropStrength: { value: 0.4 }, // [FIX] Kurangi kekuatan hantaman agar elegan
+            uDamping: { value: 0.95 },     // [FIX] Kurangi dari 0.985 agar gelombang cepat reda dan tenang
             uAddDrop: { value: false },
           },
         });
+        
         const simMesh = new Mesh(gl, { geometry: triangle, program: simProgram });
 
         const renderFragment = /* glsl */ `
           precision highp float;
           uniform sampler2D tWaterMap;
+          uniform sampler2D tVideoMap;
+          uniform bool uHasVideo;
           uniform vec2 uResolution;
+          uniform vec2 uVideoScale;
           varying vec2 vUv;
           
           void main() {
+            // Kita gunakan vUv asli tanpa pembalikkan karena flipY:true sudah menangani pembalikkan!
             float height = texture2D(tWaterMap, vUv).r;
             vec2 texel = 1.0 / uResolution;
+            
             float dx = texture2D(tWaterMap, vec2(vUv.x + texel.x, vUv.y)).r - texture2D(tWaterMap, vec2(vUv.x - texel.x, vUv.y)).r;
             float dy = texture2D(tWaterMap, vec2(vUv.x, vUv.y + texel.y)).r - texture2D(tWaterMap, vec2(vUv.x, vUv.y - texel.y)).r;
-            vec3 normal = normalize(vec3(-dx * 100.0, -dy * 100.0, 1.0));
+            vec3 normal = normalize(vec3(-dx * 40.0, -dy * 40.0, 1.0));
 
-            vec3 skyDeep = vec3(0.024, 0.043, 0.067); 
-            vec3 skyMid = vec3(0.063, 0.114, 0.176);  
-            vec3 waterLight = vec3(0.196, 0.698, 0.835);
-            vec3 bgColor = mix(skyDeep, skyMid, vUv.y);
+            // [FIX] Algoritma Skala Object-Cover Akurat untuk menyingkronkan ukuran video WebGL dengan HTML sepenuhnya
+            vec2 videoUv = (vUv - 0.5) * uVideoScale + 0.5;
+
+            // Distorsi/Refraksi UV: Pembayaran Lensa Air
+            vec2 distortion = normal.xy * 0.1; 
+            vec2 finalVideoUv = clamp(videoUv + distortion, 0.0, 1.0);
             
-            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
-            float spec = pow(max(dot(normal, lightDir), 0.0), 32.0);
-            vec3 color = mix(bgColor, waterLight, smoothstep(0.01, 0.5, height) * 0.4);
-            color += spec * waterLight * 0.5;
+            vec3 bgColor;
+            if (uHasVideo) {
+               bgColor = texture2D(tVideoMap, finalVideoUv).rgb;
+            } else {
+               bgColor = vec3(0.024, 0.043, 0.067); 
+            }
 
-            gl_FragColor = vec4(color, 1.0);
+            // Tint Overlay agar menyatu dengan gelapnya website
+            vec3 overlayColor = vec3(0.011, 0.057, 0.103);
+            bgColor = mix(bgColor, overlayColor, 0.55);
+
+            vec3 lightDir = normalize(vec3(0.5, 0.8, 1.0));
+            float spec = pow(max(dot(normal, lightDir), 0.0), 40.0);
+            
+            vec3 finalColor = bgColor + (vec3(1.0) * spec * 0.25); 
+
+            gl_FragColor = vec4(finalColor, 1.0);
           }
         `;
 
@@ -186,7 +209,10 @@
           fragment: renderFragment,
           uniforms: {
             tWaterMap: { value: null },
+            tVideoMap: { value: videoTex },
+            uHasVideo: { value: videoEl != null },
             uResolution: { value: [window.innerWidth, window.innerHeight] },
+            uVideoScale: { value: [1, 1] }, // Akan dikalkulasi di animate loop
           },
           transparent: false
         });
@@ -194,36 +220,55 @@
 
         let dropQueue = [];
         let rAFId;
-        let isDragging = false;
 
-        function resize() {
+        // [FIX] Pergerakan Y sudah benar secara otomatis karena kita menghilangkan balikan paksa shader. 
+        // Titik kursor langsung menyentuh titik sebenarnya!
+        function addDrop(x, y) {
+           dropQueue.push({ x: x / window.innerWidth, y: 1.0 - (y / window.innerHeight) });
+        }
+
+        window.addEventListener('resize', () => {
           renderer.setSize(window.innerWidth, window.innerHeight);
           renderProgram.uniforms.uResolution.value = [window.innerWidth, window.innerHeight];
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        function addDrop(x, y) {
-          dropQueue.push({ x: x / window.innerWidth, y: 1.0 - (y / window.innerHeight) });
-        }
-
-        window.addEventListener('click', (e) => addDrop(e.clientX, e.clientY));
-        window.addEventListener('pointerdown', (e) => { isDragging = true; addDrop(e.clientX, e.clientY); });
-        window.addEventListener('pointerup', () => { isDragging = false; });
-        
-        let lastMove = 0;
-        window.addEventListener('pointermove', (e) => {
-          if (isDragging && performance.now() - lastMove > 50) {
-            addDrop(e.clientX, e.clientY);
-            lastMove = performance.now();
-          }
         });
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
-        // Animation Loop — proper ping-pong: read from current+previous, write to output, then rotate
+        let lastMove = 0;
+        const moveThrottle = isMobile ? 40 : 20; // Mobile: lebih jarang agar tak kelebihan beban
+        const handleDragMove = (e) => {
+          if (performance.now() - lastMove > moveThrottle) {
+             const cx = e.touches ? e.touches[0].clientX : e.clientX;
+             const cy = e.touches ? e.touches[0].clientY : e.clientY;
+             addDrop(cx, cy);
+             lastMove = performance.now();
+          }
+        };
+
+        window.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('touchmove', handleDragMove, {passive: true});
+        
         function animate(t) {
           rAFId = requestAnimationFrame(animate);
 
-          // Set uniforms to READ from current and previous
+          // Cek kalau video sudah murni terestrak dan siap dinikmati (readyState 2+)
+          if (videoTex && videoEl && videoEl.readyState >= 2) {
+             // Timpa texture dummy 1x1 tadi dengan video aslinya!
+             if (videoTex.image instanceof Uint8Array) {
+               videoTex.image = videoEl;
+             }
+             videoTex.needsUpdate = true;
+             
+             // Kalkulasi Object-Cover Matematika Akurat
+             const cW = window.innerWidth;
+             const cH = window.innerHeight;
+             const vW = videoEl.videoWidth || 1920;
+             const vH = videoEl.videoHeight || 1080;
+             const scale = Math.max(cW / vW, cH / vH);
+             const rW = vW * scale;
+             const rH = vH * scale;
+             renderProgram.uniforms.uVideoScale.value = [cW / rW, cH / rH];
+          }
+
           simProgram.uniforms.uCurrent.value = rtCurrent.texture;
           simProgram.uniforms.uPrevious.value = rtPrevious.texture;
 
@@ -235,31 +280,29 @@
             simProgram.uniforms.uAddDrop.value = false;
           }
 
-          // WRITE to output (which is NOT being read)
           renderer.render({ scene: simMesh, target: rtOutput, clear: false });
 
-          // Render the output to screen
           renderProgram.uniforms.tWaterMap.value = rtOutput.texture;
           renderer.render({ scene: renderMesh });
 
-          // Rotate buffers: previous <- current, current <- output, output <- previous
           let tmp = rtPrevious;
           rtPrevious = rtCurrent;
           rtCurrent = rtOutput;
           rtOutput = tmp;
         }
+
+        setTimeout(() => addDrop(window.innerWidth/2, window.innerHeight/2), 500);
+
         rAFId = requestAnimationFrame(animate);
 
         document.addEventListener('astro:before-swap', () => {
           cancelAnimationFrame(rAFId);
-          window.removeEventListener('resize', resize);
-          renderer.gl.getExtension('WEBGL_lose_context')?.loseContext();
+          gl.getExtension('WEBGL_lose_context')?.loseContext();
         }, { once: true });
-
-      } catch (err) {
-        console.warn('[Cloudsi] WebGL Init Gagal, fallback ke CSS. Error:', err);
-        document.body.classList.add('webgl-fallback');
-      }
+        
+      }).catch(err => {
+        console.warn('Gagal muat modul OGL:', err);
+      });
     }
 
     document.addEventListener('DOMContentLoaded', initWaterRipple);

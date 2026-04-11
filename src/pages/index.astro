@@ -37,24 +37,10 @@ const featuredMembers = [ketua, ...rest].filter(Boolean);
       <!-- 3. Member Preview -->
       <MemberPreview members={featuredMembers} />
 
-      <!-- 4. Section teaser Galeri Placeholder -->
-      <section class="gallery-teaser section-pad">
+      <!-- 4. Section CTA Galeri -->
+      <section class="gallery-cta-section">
         <div class="container-main text-center">
-          <div class="teaser-grid">
-            <div class="teaser-item">
-               <img src="https://res.cloudinary.com/demo/image/upload/ar_1:1,c_fill,h_400/v1612456488/sample.jpg" alt="Galeri 1" width="400" height="400" loading="lazy" />
-               <div class="teaser-overlay"></div>
-            </div>
-            <div class="teaser-item hidden-mobile">
-               <img src="https://res.cloudinary.com/demo/image/upload/ar_1:1,c_fill,h_400/v1612456494/cld-sample.jpg" alt="Galeri 2" width="400" height="400" loading="lazy" />
-               <div class="teaser-overlay"></div>
-            </div>
-            <div class="teaser-item hidden-tablet">
-               <img src="https://res.cloudinary.com/demo/image/upload/ar_1:1,c_fill,h_400/v1612456491/cld-sample-4.jpg" alt="Galeri 3" width="400" height="400" loading="lazy" />
-               <div class="teaser-overlay"></div>
-            </div>
-          </div>
-          <a href="/galeri" class="gallery-cta-link">Momen Cloudsi &rarr;</a>
+          <a href="/galeri" class="gallery-cta-link">Lihat Album Momen CloudSI &rarr;</a>
         </div>
       </section>
     </main>
@@ -67,62 +53,29 @@ const featuredMembers = [ketua, ...rest].filter(Boolean);
 <style>
   .text-center { text-align: center; }
 
-  .gallery-teaser {
+  .gallery-cta-section {
     position: relative;
     z-index: 10;
-  }
-
-  .teaser-grid {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .teaser-item {
-    position: relative;
-    width: 250px;
-    aspect-ratio: 1/1;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--glass-border);
-  }
-
-  .teaser-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .teaser-overlay {
-    position: absolute;
-    inset: 0;
-    background: var(--glass-bg);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    padding: 3rem 0 6rem 0;
   }
 
   .gallery-cta-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-style: italic;
     color: white;
     text-decoration: none;
-    border-bottom: 1px solid var(--color-water-light);
-    padding-bottom: 4px;
-    transition: color 0.3s ease;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(100, 200, 255, 0.4);
+    transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
   }
 
   .gallery-cta-link:hover {
     color: var(--color-water-light);
-  }
-
-  @media(max-width: 768px) {
-    .hidden-tablet { display: none; }
-  }
-
-  @media(max-width: 480px) {
-    .hidden-mobile { display: none; }
+    border-color: var(--color-water-light);
+    transform: translateX(5px);
   }
 </style>

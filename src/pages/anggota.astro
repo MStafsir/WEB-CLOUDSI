@@ -18,20 +18,10 @@ import { getMembers } from '../lib/supabase';
 const supabaseMembers = await getMembers();
 const members = supabaseMembers.length > 0 ? supabaseMembers : MEMBERS_DATA;
 
-// Sorting Default: Pengurus duluan, lalu alphabetical per grup
-const roleOrder: Record<string, number> = {
-  'Ketua': 1,
-  'Wakil Ketua': 2,
-  'Sekretaris': 3,
-  'Bendahara': 4,
-  'Anggota': 5,
-};
-
-const sortedMembers = members.sort((a, b) => {
-  const roleDiff = (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99);
-  if (roleDiff !== 0) return roleDiff;
-  return a.full_name.localeCompare(b.full_name);
-});
+// Data sudah diurutkan di members-data.ts:
+// Pengurus Inti → DEV (Srilintang) → Anggota by NIM ascending
+// Tidak perlu sort ulang.
+const sortedMembers = members;
 ---
 
 <BaseLayout title="Anggota" description="Anggota Cloudsi Connect — Kenali setiap anggota keluarga besar Sistem Informasi Universitas Tanjungpura.">
@@ -43,7 +33,7 @@ const sortedMembers = members.sort((a, b) => {
       <section class="anggota-hero" aria-label="Hero Anggota">
         <div class="anggota-hero-content fade-in">
           <h1 class="hero-title">Anggota Cloudsi</h1>
-          <p class="hero-counter">75 Jiwa &middot; Satu Angkatan</p>
+          <p class="hero-counter">76 Jiwa &middot; Satu Angkatan</p>
         </div>
       </section>
 
@@ -240,7 +230,7 @@ const sortedMembers = members.sort((a, b) => {
 
   @media (min-width: 1024px) {
     .members-grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 
@@ -273,9 +263,9 @@ const sortedMembers = members.sort((a, b) => {
       let visibleCount = 0;
 
       memberItems.forEach(item => {
-        const name = item.getAttribute('data-name');
-        const nickname = item.getAttribute('data-nickname');
-        const role = item.getAttribute('data-role');
+        const name = item.getAttribute('data-name') || '';
+        const nickname = item.getAttribute('data-nickname') || '';
+        const role = item.getAttribute('data-role') || '';
 
         const matchesQuery = name.includes(query) || nickname.includes(query);
         let matchesRole = true;

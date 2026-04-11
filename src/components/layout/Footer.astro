@@ -22,16 +22,21 @@ const navLinks = [
       <!-- Kolom 1: Logo & Desc -->
       <div class="footer-col brand-col">
         <div class="footer-brand-logo">
-          <img src="https://via.placeholder.com/48" alt="Logo Cloudsi" class="footer-logo-img" />
+          <img src="/logo-angkatan-25.png" alt="Logo Cloudsi" class="footer-logo-img" />
           <h2 class="footer-logo-text">CLOUDSI</h2>
         </div>
         <p class="brand-desc">
-          Platform terpadu untuk saling terhubung dan berbagi momen<br>
-          bersama Keluarga Besar Sistem Informasi.
+          Website resmi CloudSI - Angkatan 2025 Program Studi Sistem Informasi Universitas Tanjungpura. 
+          Platform terpadu untuk saling terhubung dan berbagi momen bersama Keluarga Besar Sistem Informasi. Rumah kami untuk tumbuh bersama.
         </p>
+        <address class="brand-address">
+          <strong>Fakultas MIPA, UNTAN</strong><br>
+          Jl. Daya Nasional, Pontianak 78124<br>
+          Kalimantan Barat
+        </address>
       </div>
 
-      <!-- Kolom 2: Navigasi Ulang -->
+      <!-- Kolom 2: Navigasi -->
       <div class="footer-col nav-col">
         <h3 class="col-title">Navigasi</h3>
         <ul class="footer-links">
@@ -45,8 +50,19 @@ const navLinks = [
       <div class="footer-col social-col">
         <h3 class="col-title">Sosial Media</h3>
         <ul class="footer-links">
-          <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram Angkatan</a></li>
+          <li><a href="https://www.instagram.com/cloudsi.25?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">Instagram Angkatan</a></li>
           <li><a href="/kontak">Hubungi Kami</a></li>
+        </ul>
+      </div>
+
+      <!-- Kolom 4: Tautan Resmi -->
+      <div class="footer-col official-col">
+        <h3 class="col-title">Tautan Resmi</h3>
+        <ul class="footer-links">
+          <li><a href="https://untan.ac.id/" target="_blank" rel="noopener noreferrer">UNTAN Official</a></li>
+          <li><a href="https://mipa.untan.ac.id/#" target="_blank" rel="noopener noreferrer">Fakultas MIPA</a></li>
+          <li><a href="https://sisfo.untan.ac.id/" target="_blank" rel="noopener noreferrer">Sistem Informasi UNTAN</a></li>
+          <li><a href="https://mmfeb.untan.ac.id/siakad/" target="_blank" rel="noopener noreferrer">SIAKAD UNTAN</a></li>
         </ul>
       </div>
     
@@ -77,9 +93,22 @@ const navLinks = [
 
   .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 3rem;
     margin-bottom: 3rem;
+  }
+
+  .brand-address {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: hsla(0,0%,100%,0.5);
+    font-style: normal;
+    margin-top: 1rem;
+  }
+  
+  .brand-address strong {
+    color: white;
   }
 
   .footer-brand-logo {

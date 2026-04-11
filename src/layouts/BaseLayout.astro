@@ -8,6 +8,7 @@
 
 import { ClientRouter } from 'astro:transitions';
 import WaterRipple from '../components/canvas/WaterRipple.astro';
+import Preloader from '../components/ui/Preloader.astro';
 
 interface Props {
   title: string;
@@ -102,6 +103,11 @@ const fullTitle = `${title} | Cloudsi Connect`;
     <link rel="stylesheet" href="/src/styles/global.css" />
 
     <!-- ============================================
+         PRELOAD — Video background agar mulai download sedini mungkin
+         ============================================ -->
+    <link rel="preload" href="/bg-hero.mp4" as="video" type="video/mp4" />
+
+    <!-- ============================================
          FAVICON
          ============================================ -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -113,6 +119,15 @@ const fullTitle = `${title} | Cloudsi Connect`;
   </head>
 
   <body>
+    <!-- Preloader — Muat semua aset kritis sebelum website ditampilkan -->
+    <Preloader />
+
+    <!-- Global Looping Background Video -->
+    <div class="fixed inset-0 w-full h-full z-[-1] pointer-events-none">
+      <video id="bg-hero-video" src="/bg-hero.mp4" autoplay loop muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover"></video>
+      <div class="absolute inset-0 bg-[hsla(210,60%,6%,0.6)] backdrop-blur-[2px]"></div>
+    </div>
+
     <!-- WebGL Water Ripple Canvas — fixed, z-0, pointer-events: none -->
     <WaterRipple />
 

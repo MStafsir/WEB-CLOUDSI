@@ -26,7 +26,7 @@ import Button from '../ui/Button.astro';
 
     <!-- 4. Deskripsi -->
     <p class="hero-desc" data-hero-anim="desc">
-      75 jiwa, satu angkatan, satu langit yang sama.
+      76 jiwa, satu angkatan, satu langit yang sama.
     </p>
 
     <!-- 5. CTA Buttons -->
@@ -66,6 +66,7 @@ import Button from '../ui/Button.astro';
     flex-direction: column;
     align-items: center;
     text-align: center;
+    z-index: 2; /* Di atas animasi hero */
   }
 
   /* 1. Badge */
@@ -175,6 +176,7 @@ import Button from '../ui/Button.astro';
     transition: opacity 0.3s ease;
     will-change: transform;
     animation: bounce 2s infinite ease-in-out;
+    z-index: 2; /* Pastikan di atas overlay video */
   }
 
   .scroll-indicator.fade-out {

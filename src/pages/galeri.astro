@@ -1,129 +1,154 @@
 ---
 /**
  * galeri.astro
- * Halaman Galeri — CSS masonry grid, lightbox, filter tabs per event
- * Dependencies: BaseLayout, Header, Footer, PageTransition, supabase.ts
+ * Halaman Galeri Statis — CSS Bento Grid khusus untuk 7 Foto + Stacking Cards
+ * Animasi interaktif: parallax + 3D tilt + Sticky Scroll-Driven Animations
+ * Dependencies: BaseLayout, Header, Footer, PageTransition
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import PageTransition from '../components/layout/PageTransition.astro';
-import { getEvents, getGallery } from '../lib/supabase';
 
-const events = await getEvents();
+// Data Stacking Cards sesuai urutan galeri
+const stackData = [
+  { id: 1, title: 'SINTA 2025', year: '2025', desc: '(System Information Academic Training) kegiatan pelatihan akademik untuk mahasiswa Sistem Informasi FMIPA UNTAN. Acara ini bertujuan memperkenalkan ilmu SI lebih dalam berupa Kuliah umum atau workshop.', badge: 'Awal Perjalanan' },
+  { id: 2, title: 'CIS', year: '2025', desc: 'Celebration of Information System Merupakan bentuk Transoformasi DNS/Dies Natalis Sistem Informasi untuk memperingatkan terbentuknya jurusan Sistem Informasi FMIPA UNTAN yang dimana kami disini sedang mensupport angkatan kami yang sedang bertanding di CIS.', badge: 'Pengabdian' },
+  { id: 3, title: 'OSI Badminton', year: '2025', desc: 'OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi', badge: 'Wawasan' },
+  { id: 4, title: 'OSI Badminton (Mahasiswi)', year: '2025 ', desc: 'OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami yang dimana ini adalah sesi foto para Mahasiswi Cloudsi di kegiatan OSI Badminton', badge: 'Puncak Harapan' },
+  { id: 5, title: 'Foto Angkatan Pertama', year: '2025', desc: 'FOTO ANGKATAN Pertama setelah pengurusan berkas dan Ospek Fakultas, kami berinisiasi untuk melakukan Foto bersama Angkatan Sistem Informasi untuk pertama kalinya dan disini tempat kami berkenalan kepada para keluarga Cloudsi kami', badge: 'Keakraban' },
+  { id: 6, title: 'OSI Badminton', year: '2025', desc: 'OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi', badge: 'Prestasi' },
+  { id: 7, title: 'Bukber Pertama', year: '2026', desc: 'BUKBER yang dimana ini merupakan BUKBER pertama angkatan Cloudsi dan kami berharap dari adanya inisiatif kegiatan seperti ini kami menjadi lebih akrab dan memperkuat keharmonisan yang dihadiri Lintas Agama di Cloudsi', badge: 'Selamanya' }
+];
 
-// Fetch gallery images untuk semua events
-interface GalleryItem {
-  id: string;
-  event_id: string;
-  event_title: string;
-  image_url: string;
-}
-
-let allImages: GalleryItem[] = [];
-for (const event of events) {
-  const images = await getGallery(event.id);
-  const mapped: GalleryItem[] = images.map(img => ({
-    id: img.id,
-    event_id: img.event_id,
-    event_title: event.title,
-    image_url: img.image_url,
-  }));
-  allImages = [...allImages, ...mapped];
-}
 ---
 
-<BaseLayout title="Galeri" description="Galeri Cloudsi Connect — Momen-momen berharga dari setiap kegiatan angkatan Sistem Informasi.">
+<BaseLayout title="Galeri" description="Album Kenangan CloudSI — Bento Grid Galeri Interaktif + Stacking Cards">
   <Header />
+  
+  <!-- Efek Ambience Water Orbs -->
+  <div class="water-orb orb-1"></div>
+  <div class="water-orb orb-2"></div>
+  
   <PageTransition>
     <main id="main-content">
 
       <!-- Hero mini -->
       <section class="galeri-hero">
         <div class="container-main galeri-hero-inner">
-          <h1 class="galeri-title">Galeri</h1>
-          <p class="galeri-sub">Momen yang terekam, kenangan yang abadi.</p>
+          <p class="eyebrow">CloudSI · 2025</p>
+          <h1 class="galeri-title">Album <em>Kenangan</em></h1>
+          <p class="galeri-sub">Tujuh bingkai sejarah yang mengukir cerita kita bersama.</p>
+          <div class="water-line"></div>
         </div>
       </section>
 
-      <!-- Filter Tabs -->
-      <section class="galeri-filters section-pad" style="padding-bottom: 0;">
+      <!-- Bento Grid Interaktif (7 Fotos Tanpa Spasi Kosong) -->
+      <section class="galeri-grid-section section-pad">
+        <div class="container-main bento-container">
+          
+          <div class="gallery-grid" id="galleryGrid">
+            
+            <!-- FOTO 1: Besar 2x2 (R1C1, R1C2, R2C1, R2C2) -->
+            <div class="photo-frame item-large masonry-item" data-rot="-13deg" data-rot-end="-1.5deg" style="--rot:-13deg; --rot-end:-1.5deg; transition-delay:0ms;">
+              <div class="photo-inner ph-1">
+                <img src="/galeri/1.jpg" alt="Foto 1" loading="eager" class="masonry-img">
+                <span class="caption overlay-text">SINTA 2025</span>
+              </div>
+            </div>
+
+            <!-- FOTO 2: Normal (R1C3) -->
+            <div class="photo-frame masonry-item" data-rot="10deg" data-rot-end="1deg" style="--rot:10deg; --rot-end:1deg; transition-delay:80ms;">
+              <div class="photo-inner ph-2">
+                <img src="/galeri/2.jpg" alt="Foto 2" loading="eager" class="masonry-img">
+                <span class="caption overlay-text">CIS</span>
+              </div>
+            </div>
+
+            <!-- FOTO 3: Tinggi 1x2 -> R2C3, R3C3 -->
+            <div class="photo-frame item-tall masonry-item" data-rot="-7deg" data-rot-end="1.5deg" style="--rot:-7deg; --rot-end:1.5deg; transition-delay:120ms;">
+              <div class="photo-inner ph-3">
+                <img src="/galeri/3.jpg" alt="Foto 3" loading="lazy" class="masonry-img">
+                <span class="caption overlay-text">OSI Badminton</span>
+              </div>
+            </div>
+
+            <!-- FOTO 4: Lebar 2x1 -> R3C1, R3C2 -->
+            <div class="photo-frame item-wide masonry-item" data-rot="9deg" data-rot-end="-1deg" style="--rot:9deg; --rot-end:-1deg; transition-delay:160ms;">
+              <div class="photo-inner ph-4">
+                <img src="/galeri/4.jpg" alt="Foto 4" loading="lazy" class="masonry-img">
+                <span class="caption overlay-text">OSI Badminton (Mahasiswi)</span>
+              </div>
+            </div>
+
+            <!-- FOTO 5: Lebar 2x1 -> R4C1, R4C2 -->
+            <div class="photo-frame item-wide masonry-item" data-rot="-5deg" data-rot-end="0.5deg" style="--rot:-5deg; --rot-end:0.5deg; transition-delay:200ms;">
+              <div class="photo-inner ph-5">
+                <img src="/galeri/5.jpg" alt="Foto 5" loading="lazy" class="masonry-img">
+                <span class="caption overlay-text">Foto Angkatan Pertama</span>
+              </div>
+            </div>
+
+            <!-- FOTO 6: Normal 1x1 -> R4C3 -->
+            <div class="photo-frame masonry-item" data-rot="14deg" data-rot-end="-2deg" style="--rot:14deg; --rot-end:-2deg; transition-delay:240ms;">
+              <div class="photo-inner ph-6">
+                <img src="/galeri/6.jpg" alt="Foto 6" loading="lazy" class="masonry-img">
+                <span class="caption overlay-text">OSI Badminton</span>
+              </div>
+            </div>
+
+            <!-- FOTO 7: Full 3x1 -> R5C1, R5C2, R5C3 -->
+            <div class="photo-frame item-full masonry-item" data-rot="-6deg" data-rot-end="2deg" style="--rot:-6deg; --rot-end:2deg; transition-delay:280ms;">
+              <div class="photo-inner ph-7" style="background-color: #081a30;">  
+                <img src="/galeri/7.jpg" alt="Foto 7" loading="lazy" class="masonry-img">
+                <span class="caption overlay-text">Bukber CloudSI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sticky Stacking Cards Section -->
+      <section class="stick-stack-section">
         <div class="container-main">
-          <div class="filter-tabs" id="filter-tabs" role="tablist" aria-label="Filter galeri berdasarkan event">
-            <button
-              class="filter-tab active"
-              data-filter="all"
-              role="tab"
-              aria-selected="true"
-            >
-              Semua
-            </button>
-            {events.map(event => (
-              <button
-                class="filter-tab"
-                data-filter={event.id}
-                role="tab"
-                aria-selected="false"
-              >
-                {event.title}
-              </button>
+          
+          <div class="stack-header">
+            <h2 class="galeri-title" style="font-size: clamp(2rem, 5vw, 3.5rem);">Kisah di Balik <em>Lensa</em></h2>
+            <p class="galeri-sub">Lebih dekat dengan memori yang menyatukan kita.</p>
+          </div>
+
+          <div class="stacking-container" id="stacking-container">
+            {stackData.map((card, i) => (
+              <div class="stack-card glass" style={`--card-index: ${i};`}>
+                <div class="stack-card-inner">
+                  <div class="stack-img-col">
+                    <img src={`/galeri/${card.id}.jpg`} alt={card.title} loading="lazy" />
+                  </div>
+                  <div class="stack-txt-col">
+                    <div class="stack-badge">{card.badge}</div>
+                    <h3 class="stack-title">{card.title}</h3>
+                    <div class="stack-year">{card.year}</div>
+                    <p class="stack-desc">{card.desc}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      <!-- Masonry Grid -->
-      <section class="galeri-grid-section section-pad">
-        <div class="container-main">
-          {allImages.length > 0 ? (
-            <div class="masonry-grid" id="masonry-grid">
-              {allImages.map((item, index) => (
-                <div
-                  class="masonry-item"
-                  data-event-id={item.event_id}
-                  data-lightbox-index={index}
-                >
-                  <img
-                    src={item.image_url}
-                    alt={`Galeri ${item.event_title}`}
-                    loading={index < 4 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    width="600"
-                    height="400"
-                    class="masonry-img"
-                  />
-                  <div class="masonry-overlay">
-                    <span class="overlay-text">{item.event_title}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div class="empty-state glass">
-              <p class="empty-text">Galeri akan segera diisi dengan momen-momen berharga angkatan.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <!-- Lightbox -->
-      <div
-        class="lightbox"
-        id="lightbox"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Lihat foto"
-        hidden
-      >
+      <!-- Lightbox (Tetap Dipertahankan untuk Bento Grid) -->
+      <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Lihat foto" hidden>
         <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
         <button class="lightbox-close" id="lightbox-close" aria-label="Tutup lightbox">&times;</button>
-        <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Foto sebelumnya">
+        <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Foto sebelumnya" style="display:none;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12L15 6"/></svg>
         </button>
-        <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Foto selanjutnya">
+        <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Foto selanjutnya" style="display:none;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18L15 12L9 6"/></svg>
         </button>
         <div class="lightbox-content">
+          <div id="lightbox-placeholder-text"></div>
           <img class="lightbox-img" id="lightbox-img" src="" alt="" />
           <p class="lightbox-caption" id="lightbox-caption"></p>
         </div>
@@ -135,427 +160,304 @@ for (const event of events) {
 </BaseLayout>
 
 <style>
-  /* Hero */
-  .galeri-hero {
-    position: relative;
-    height: 50vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    text-align: center;
-  }
+  /* =====================================================
+     ALBUM KENANGAN — UI Bento & Orbs
+     ===================================================== */
+  
+  .water-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+  .orb-1 { width: 50vw; height: 50vw; top: -10%; left: -15%; background: radial-gradient(circle, rgba(0,80,160,0.12) 0%, transparent 70%); animation: drift1 12s ease-in-out infinite; }
+  .orb-2 { width: 40vw; height: 40vw; bottom: 5%; right: -10%; background: radial-gradient(circle, rgba(0,160,180,0.08) 0%, transparent 70%); animation: drift2 15s ease-in-out infinite 2s; }
+  @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-20px)} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,15px)} }
 
-  .galeri-hero-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  /* Hero Section */
+  .galeri-hero { position: relative; padding-top: 8rem; padding-bottom: 2rem; display: flex; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+  .galeri-hero-inner { display: flex; flex-direction: column; align-items: center; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(100, 200, 255, 0.45); margin-bottom: 14px; font-family: var(--font-body); }
+  .galeri-title { font-family: var(--font-display); font-size: clamp(2.6rem, 6vw, 4.8rem); color: white; font-weight: 400; line-height: 1.1; margin: 0; }
+  .galeri-title em { font-style: italic; color: rgba(120, 210, 255, 0.9); }
+  .galeri-sub { color: rgba(255,255,255,0.3); margin-top: 18px; font-size: 15px; font-weight: 300; font-family: var(--font-body); }
+  .water-line { height: 1px; width: 150px; margin-top: 44px; background: linear-gradient(90deg, transparent, rgba(100,200,255,0.3), transparent); }
 
-  .galeri-title {
-    font-family: var(--font-display);
-    font-size: var(--font-size-h1);
-    font-weight: 300;
-    letter-spacing: 0.1em;
-    color: white;
-    margin: 0;
-  }
+  .bento-container { max-width: 960px; margin: 0 auto; position: relative; z-index: 10; }
 
-  .galeri-sub {
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    color: hsla(0, 0%, 100%, 0.6);
-    margin-top: 0.75rem;
-    font-style: italic;
+  /* Bento Grid Layout - Exactly matching 3x4 design then expanding */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 200px;
+    gap: 12px;
   }
-
-  /* Filter Tabs */
-  .filter-tabs {
-    display: flex;
-    gap: 0.75rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .filter-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .filter-tab {
-    flex-shrink: 0;
-    padding: 0.5rem 1.25rem;
-    border-radius: 9999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur-glass);
-    -webkit-backdrop-filter: var(--blur-glass);
-    color: hsla(0, 0%, 100%, 0.7);
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-glass);
-    white-space: nowrap;
-  }
-
-  .filter-tab:hover {
-    background: var(--glass-bg-hover);
-    border-color: var(--glass-border-hover);
-    color: white;
-  }
-
-  .filter-tab.active {
-    background: var(--color-water-surface);
-    border-color: var(--color-water-surface);
-    color: white;
-  }
-
-  /* Masonry Grid — CSS columns */
-  .masonry-grid {
-    column-count: 4;
-    column-gap: 12px;
-  }
-
-  @media (max-width: 1200px) {
-    .masonry-grid { column-count: 3; }
-  }
+  .item-large { grid-column: span 2; grid-row: span 2; }
+  .item-tall  { grid-row: span 2; }
+  .item-wide  { grid-column: span 2; }
+  .item-full  { grid-column: span 3; }
 
   @media (max-width: 768px) {
-    .masonry-grid { column-count: 2; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
+    .item-large   { grid-column: span 2; grid-row: span 2; }
+    .item-wide    { grid-column: span 2; }
+    .item-tall    { grid-row: span 2; }
+    .item-full    { grid-column: span 2; }
   }
 
-  .masonry-item {
-    break-inside: avoid;
-    margin-bottom: 12px;
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: opacity var(--duration-normal) var(--ease-glass),
-                transform var(--duration-normal) var(--ease-glass);
-  }
+  /* Photo Frame Interaktif */
+  .photo-frame { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06); cursor: pointer; position: relative; will-change: transform, opacity; opacity: 0; transform: translateY(100px) rotate(var(--rot, 0deg)) scale(0.85); transition: opacity 0.65s ease, transform 0.95s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease; }
+  .photo-frame.is-visible { opacity: 1; transform: translateY(0) rotate(var(--rot-end, 0deg)) scale(1); }
+  .photo-frame:hover { border-color: rgba(100, 200, 255, 0.35) !important; box-shadow: 0 20px 60px rgba(0, 100, 255, 0.22), 0 0 0 1px rgba(100, 200, 255, 0.12) !important; z-index: 20; }
+  
+  .photo-inner { width: 100%; height: 100%; display: flex; align-items: flex-end; padding: 12px; position: relative; box-sizing: border-box; }
+  .photo-inner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%); pointer-events: none; z-index: 1; }
+  .photo-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  .caption { position: relative; z-index: 2; font-size: 11px; font-family: var(--font-body); font-weight: 500; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.9); background: rgba(0, 10, 30, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; }
 
-  .masonry-item.hidden {
-    display: none;
-  }
-
-  .masonry-img {
+  /* Gallery Shimmer Effect */
+  .photo-frame::before,
+  .stack-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
-    height: auto;
-    display: block;
-    transition: transform var(--duration-normal) var(--ease-water);
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsla(200, 80%, 90%, 0.08), transparent);
+    transition: left 0.8s var(--ease-water);
+    pointer-events: none;
+    z-index: 10;
   }
 
-  .masonry-item:hover .masonry-img {
-    transform: scale(1.03);
+  .photo-frame:hover::before,
+  .stack-card:hover::before {
+    left: 100%;
   }
 
-  /* Overlay */
-  .masonry-overlay {
-    position: absolute;
-    inset: 0;
-    background: hsla(210, 60%, 6%, 0.6);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    display: flex;
-    align-items: flex-end;
-    padding: 1rem;
+  /* =====================================================
+     STICKY STACKING CARDS SECTION
+     ===================================================== */
+  .stick-stack-section { padding: 4rem 0 10rem; position: relative; z-index: 10; }
+  .stack-header { text-align: center; margin-bottom: 5rem; }
+  .stacking-container { display: flex; flex-direction: column; position: relative; padding-bottom: 5rem; max-width: var(--container-max); margin: 0 auto; }
+
+  /* Mekanisme Tumpukan */
+  .stack-card {
+    position: sticky;
+    top: calc(80px + (var(--card-index) * 20px));
+    z-index: calc(10 + var(--card-index));
+    height: 70vh;
+    width: 100%;
+    margin-bottom: 60vh; 
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    transform-origin: top center;
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+    /* Mulai dari bawah untuk fallback & animasi awal */
+    transform: translateY(100px);
     opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-glass);
   }
-
-  .masonry-item:hover .masonry-overlay {
+  
+  .stack-card.in-view {
+    transform: translateY(0);
     opacity: 1;
   }
 
-  .overlay-text {
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    color: white;
-    font-weight: 500;
-  }
+  .stack-card:last-child { margin-bottom: 0; }
 
-  /* Empty State */
-  .empty-state {
-    padding: 4rem 2rem;
-    text-align: center;
-  }
-
-  .empty-text {
-    font-family: var(--font-body);
-    color: hsla(0, 0%, 100%, 0.5);
-    font-style: italic;
-    margin: 0;
-  }
-
-  /* ========== LIGHTBOX ========== */
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .lightbox[hidden] {
-    display: none;
-  }
-
-  .lightbox-backdrop {
-    position: absolute;
-    inset: 0;
-    background: hsla(210, 60%, 6%, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .lightbox-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 90vw;
-    max-height: 85vh;
-  }
-
-  .lightbox-img {
-    max-width: 90vw;
-    max-height: 80vh;
-    object-fit: contain;
-    border-radius: 8px;
-    transform: scale(0.8);
-    opacity: 0;
-    transition: transform 300ms var(--ease-water),
-                opacity 300ms var(--ease-water);
-  }
-
-  .lightbox.open .lightbox-img {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  .lightbox-caption {
-    margin-top: 1rem;
-    font-family: var(--font-body);
-    font-size: 0.85rem;
-    color: hsla(0, 0%, 100%, 0.6);
-    text-align: center;
-  }
-
-  .lightbox-close {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 2;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 2rem;
-    cursor: pointer;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity var(--duration-fast);
-    opacity: 0.7;
-  }
-
-  .lightbox-close:hover { opacity: 1; }
-
-  .lightbox-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur-glass);
-    -webkit-backdrop-filter: var(--blur-glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 50%;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    transition: all var(--duration-fast) var(--ease-glass);
-    opacity: 0.7;
-  }
-
-  .lightbox-nav:hover {
-    opacity: 1;
-    background: var(--glass-bg-hover);
-  }
-
-  .lightbox-prev { left: 1.5rem; }
-  .lightbox-next { right: 1.5rem; }
-
-  @media (max-width: 768px) {
-    .lightbox-prev { left: 0.5rem; }
-    .lightbox-next { right: 0.5rem; }
-    .lightbox-nav {
-      width: 40px;
-      height: 40px;
+  /* CSS Scroll-Driven Animations */
+  @supports (animation-timeline: view()) {
+    .stack-card {
+      /* Reset state dari IntersectionObserver fallback */
+      transform: none;
+      opacity: 1;
+      
+      /* Scale Down animasi saat didorong ke belakang oleh kartu berikutnya */
+      animation: stackScaleDown linear both;
+      animation-timeline: view();
+      /* Mulai animasi saat kartu ini melewati posisi `exit` (saat scroller utamanya melewatinya) */
+      animation-range: exit 0% exit 100%;
+    }
+    
+    /* Animasi masuknya juga via view(), sehingga tidak perlu JS */
+    .stack-card-inner {
+      animation: stackEnterFromBottom linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 30%;
     }
   }
+
+  @keyframes stackEnterFromBottom { 0% { transform: translateY(100px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  @keyframes stackScaleDown { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.97); opacity: 0.6; } }
+
+  /* Layout Konten Kartu (Kiri: Foto Besar, Kanan: Teks) */
+  .stack-card-inner { display: flex; height: 100%; width: 100%; }
+  .stack-img-col { flex: 1.3; height: 100%; padding: 24px; box-sizing: border-box; }
+  .stack-img-col img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+  .stack-txt-col { flex: 1; padding: 4rem; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
+  
+  .stack-badge { align-self: flex-start; padding: 6px 14px; background: rgba(100, 200, 255, 0.1); border: 1px solid rgba(100, 200, 255, 0.3); border-radius: 20px; color: var(--color-water-light); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem; }
+  .stack-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 400; color: white; margin: 0; line-height: 1.1; }
+  .stack-year { font-family: var(--font-body); font-size: 1.5rem; color: rgba(255, 255, 255, 0.3); margin-bottom: 2rem; font-style: italic; }
+  .stack-desc { font-family: var(--font-body); font-size: 1.15rem; line-height: 1.7; color: rgba(255, 255, 255, 0.85); font-weight: 300; }
+
+  @media (max-width: 900px) {
+    .stack-card { height: auto; min-height: 80vh; }
+    .stack-card-inner { flex-direction: column; }
+    .stack-img-col { flex: 1; height: auto; padding: 16px; }
+    .stack-img-col img { height: auto; aspect-ratio: 4 / 3; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+    .stack-txt-col { flex: none; padding: 2rem 1.5rem; text-align: center; justify-content: flex-start; }
+    .stack-badge { align-self: center; margin-bottom: 1.5rem; }
+    .stack-title { font-size: 2.2rem; }
+    .stack-desc { font-size: 1rem; }
+  }
+
+
+  /* ========== LIGHTBOX ======================= */
+  .lightbox { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+  .lightbox[hidden] { display: none; }
+  .lightbox-backdrop { position: absolute; inset: 0; background: hsla(210, 60%, 6%, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .lightbox-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 90vw; max-height: 85vh; }
+  #lightbox-placeholder-text { display: none; font-size: 3rem; color: rgba(100,180,255,0.5); font-family: monospace; margin-bottom: 2rem; }
+  .lightbox-img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 8px; transform: scale(0.8); opacity: 0; transition: transform 300ms var(--ease-water), opacity 300ms var(--ease-water); }
+  .lightbox.open .lightbox-img { transform: scale(1); opacity: 1; }
+  .lightbox-caption { margin-top: 1rem; font-family: var(--font-body); font-size: 0.85rem; color: hsla(0, 0%, 100%, 0.6); text-align: center; }
+  .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 2; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; transition: opacity var(--duration-fast); opacity: 0.7; }
+  .lightbox-close:hover { opacity: 1; }
 </style>
 
 <script is:inline>
-  function initGaleri() {
-    // ========== FILTER TABS ==========
-    const tabs = document.querySelectorAll('.filter-tab');
-    const items = document.querySelectorAll('.masonry-item');
+  function initGaleriInteraktif() {
+    const bentoFrames = document.querySelectorAll('#galleryGrid .photo-frame');
+    const stackCards = document.querySelectorAll('.stack-card');
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const filter = tab.getAttribute('data-filter');
-
-        // Update active tab
-        tabs.forEach(t => {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
+    // ── 1. BENTO: INTERSECTION OBSERVER (Animasi Masuk) ──
+    if(bentoFrames.length > 0) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
         });
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
+      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+      bentoFrames.forEach(f => observer.observe(f));
+    }
 
-        // Show/hide items
-        items.forEach(item => {
-          const eventId = item.getAttribute('data-event-id');
-          if (filter === 'all' || eventId === filter) {
-            item.classList.remove('hidden');
+    // ── 2. BENTO: PARALLAX SCROLL ──
+    const speeds = [0.030, -0.022, 0.020, -0.016, 0.015, -0.020, 0.018];
+    function onScrollBento() {
+      const scrollY = window.scrollY;
+      bentoFrames.forEach((frame, i) => {
+        if (!frame.classList.contains('is-visible')) return;
+        const speed = speeds[i % speeds.length];
+        const offsetY = scrollY * speed;
+        const rotEnd = frame.getAttribute('data-rot-end') || '0deg';
+        frame.style.transitionDelay = '0ms';
+        frame.style.transform = `translateY(${offsetY}px) rotate(${rotEnd}) scale(1)`;
+      });
+    }
+
+    // ── 3. STACKING CARDS: JAVASCRIPT FALLBACK ──
+    if (stackCards.length > 0 && !CSS.supports('animation-timeline: view()')) {
+      const stackObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting) entry.target.classList.add('in-view');
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+      stackCards.forEach(c => stackObserver.observe(c));
+    }
+
+    function onScrollStack() {
+      // Logic for fallback scaling down if scroll-driven animation isn't supported
+      if (!CSS.supports('animation-timeline: view()') && stackCards.length > 0) {
+        const scrollY = window.scrollY;
+        const viewHeight = window.innerHeight;
+        
+        stackCards.forEach((card) => {
+          if (!card.classList.contains('in-view')) return;
+          const stickyTopBase = 80;
+          const index = parseInt(card.style.getPropertyValue('--card-index'));
+          const stickyTopPos = stickyTopBase + (index * 20); // Posisi absolut lengket dalam viewport
+          const rect = card.getBoundingClientRect();
+          
+          // Jika kartu sudah mentok atau melampaui posisi lengket-nya
+          if (rect.top <= stickyTopPos + 2) {
+             const distToTop = Math.abs(rect.top - stickyTopPos);
+             // Kartu mulai terdesak ke belakang oleh kartu penumpuk dari bawah
+             const scrollProgress = Math.max(0, distToTop) / (viewHeight * 0.6); // Jarak 60vh scale
+             const scale = Math.max(0.95, 1 - (scrollProgress * 0.05));
+             const blurAmt = Math.min(4, scrollProgress * 10);
+             
+             card.style.transform = `scale(${scale})`;
+             card.style.filter = `brightness(${1 - scrollProgress * 0.2}) blur(${blurAmt}px)`;
           } else {
-            item.classList.add('hidden');
+             // Pastikan transform di reset ke Y=0 karena state `in-view`
+             card.style.transform = `translateY(0) scale(1)`;
+             card.style.filter = `brightness(1) blur(0px)`;
           }
         });
+      }
+    }
+
+    function onScrollMaster() {
+      onScrollBento();
+      onScrollStack();
+    }
+    window.addEventListener('scroll', onScrollMaster, { passive: true });
+
+    // ── 4. BENTO: 3D HOVER TILT ──
+    bentoFrames.forEach((frame, index) => {
+      frame.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        const dx = (e.clientX - cx) / (rect.width / 2), dy = (e.clientY - cy) / (rect.height / 2);
+        this.style.transform = `perspective(700px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg) scale(1.02) translateZ(5px)`;
+        this.style.transitionDelay = '0ms';
+        this.style.transition = 'transform 0.1s ease, box-shadow 0.1s ease, border-color 0.3s';
+      });
+      frame.addEventListener('mouseleave', function() {
+        const i = Array.from(bentoFrames).indexOf(this);
+        const offsetY = window.scrollY * speeds[i % speeds.length];
+        const rotEnd = this.getAttribute('data-rot-end') || '0deg';
+        this.style.transform = `translateY(${offsetY}px) rotate(${rotEnd}) scale(1)`;
+        this.style.transition = 'transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s';
       });
     });
 
-    // ========== LIGHTBOX ==========
+    // ── 5. LIGHTBOX BENTO LOGIC ──
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxCaption = document.getElementById('lightbox-caption');
     const closeBtn = document.getElementById('lightbox-close');
-    const prevBtn = document.getElementById('lightbox-prev');
-    const nextBtn = document.getElementById('lightbox-next');
     const backdrop = document.getElementById('lightbox-backdrop');
-
-    if (!lightbox || !lightboxImg) return;
-
-    let currentIndex = -1;
-    let previouslyFocused = null;
-    const focusableEls = [closeBtn, prevBtn, nextBtn].filter(Boolean);
-
-    function getVisibleItems() {
-      return Array.from(document.querySelectorAll('.masonry-item:not(.hidden)'));
-    }
-
-    function openLightbox(index) {
-      const visible = getVisibleItems();
-      if (index < 0 || index >= visible.length) return;
-
-      currentIndex = index;
-      previouslyFocused = document.activeElement;
-
-      const item = visible[index];
-      const img = item.querySelector('.masonry-img');
-      const caption = item.querySelector('.overlay-text');
-
-      lightboxImg.src = img.src;
-      lightboxImg.alt = img.alt;
-      lightboxCaption.textContent = caption ? caption.textContent : '';
-
-      lightbox.removeAttribute('hidden');
-      document.body.style.overflow = 'hidden';
-
-      // Animasi buka
-      requestAnimationFrame(() => {
-        lightbox.classList.add('open');
+    
+    bentoFrames.forEach((item) => {
+      item.addEventListener('click', () => {
+        const imgEl = item.querySelector('.masonry-img');
+        const captionEl = item.querySelector('.overlay-text');
+        if(imgEl) {
+          lightboxImg.src = imgEl.src;
+          lightboxImg.alt = imgEl.alt;
+        }
+        lightboxCaption.textContent = captionEl ? captionEl.textContent : '';
+        lightbox.removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => lightbox.classList.add('open'));
       });
-
-      // Focus trap — focus close button
-      if (closeBtn) closeBtn.focus();
-    }
+    });
 
     function closeLightbox() {
       lightbox.classList.remove('open');
       setTimeout(() => {
         lightbox.setAttribute('hidden', '');
         document.body.style.overflow = '';
-        // Return focus
-        if (previouslyFocused && previouslyFocused.focus) {
-          previouslyFocused.focus();
-        }
       }, 300);
     }
-
-    function navigate(direction) {
-      const visible = getVisibleItems();
-      let newIndex = currentIndex + direction;
-      if (newIndex < 0) newIndex = visible.length - 1;
-      if (newIndex >= visible.length) newIndex = 0;
-
-      // Quick transition
-      lightboxImg.style.opacity = '0';
-      lightboxImg.style.transform = 'scale(0.95)';
-      setTimeout(() => {
-        const item = visible[newIndex];
-        const img = item.querySelector('.masonry-img');
-        const caption = item.querySelector('.overlay-text');
-        lightboxImg.src = img.src;
-        lightboxImg.alt = img.alt;
-        lightboxCaption.textContent = caption ? caption.textContent : '';
-        currentIndex = newIndex;
-
-        requestAnimationFrame(() => {
-          lightboxImg.style.opacity = '1';
-          lightboxImg.style.transform = 'scale(1)';
-        });
-      }, 150);
-    }
-
-    // Click handlers
-    items.forEach((item, _) => {
-      item.addEventListener('click', () => {
-        const visible = getVisibleItems();
-        const visibleIndex = visible.indexOf(item);
-        openLightbox(visibleIndex);
-      });
-    });
-
     if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
     if (backdrop) backdrop.addEventListener('click', closeLightbox);
-    if (prevBtn) prevBtn.addEventListener('click', () => navigate(-1));
-    if (nextBtn) nextBtn.addEventListener('click', () => navigate(1));
-
-    // Keyboard
-    document.addEventListener('keydown', (e) => {
-      if (lightbox.hasAttribute('hidden')) return;
-
-      if (e.key === 'Escape') {
-        closeLightbox();
-      } else if (e.key === 'ArrowLeft') {
-        navigate(-1);
-      } else if (e.key === 'ArrowRight') {
-        navigate(1);
-      } else if (e.key === 'Tab') {
-        // Focus trap
-        e.preventDefault();
-        const active = document.activeElement;
-        const idx = focusableEls.indexOf(active);
-        const nextIdx = e.shiftKey
-          ? (idx <= 0 ? focusableEls.length - 1 : idx - 1)
-          : (idx >= focusableEls.length - 1 ? 0 : idx + 1);
-        focusableEls[nextIdx].focus();
-      }
-    });
+    document.addEventListener('keydown', (e) => { if(!lightbox.hasAttribute('hidden') && e.key === 'Escape') closeLightbox(); });
   }
 
-  document.addEventListener('DOMContentLoaded', initGaleri);
-  document.addEventListener('astro:after-swap', initGaleri);
+  document.addEventListener('DOMContentLoaded', initGaleriInteraktif);
+  document.addEventListener('astro:after-swap', initGaleriInteraktif);
 </script>

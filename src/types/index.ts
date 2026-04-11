@@ -10,11 +10,12 @@ export interface Member {
   id: string;
   full_name: string;
   nickname?: string;
-  role: 'Ketua' | 'Wakil Ketua' | 'Sekretaris' | 'Bendahara' | 'Anggota';
+  role: 'Ketua' | 'Wakil Ketua' | 'Sekretaris' | 'Bendahara' | 'Anggota' | 'DEV';
   quote?: string;
   photo_url: string;
   social_ig?: string;
   social_in?: string;
+  social_gh?: string;
   is_visible: boolean;
 }
 
