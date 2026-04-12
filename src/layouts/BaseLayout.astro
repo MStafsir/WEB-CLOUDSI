@@ -9,6 +9,7 @@
 import { ClientRouter } from 'astro:transitions';
 import WaterRipple from '../components/canvas/WaterRipple.astro';
 import Preloader from '../components/ui/Preloader.astro';
+import '../styles/global.css';
 
 interface Props {
   title?: string;
@@ -103,8 +104,7 @@ const fullTitle = title;
     <!-- ============================================
          STYLES — Design Tokens + Global CSS
          ============================================ -->
-    <link rel="stylesheet" href="/src/styles/global.css" />
-
+    
     <!-- ============================================
          PRELOAD — Video background agar mulai download sedini mungkin
          ============================================ -->
