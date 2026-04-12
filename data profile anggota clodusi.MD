@@ -265,7 +265,7 @@ export const MEMBERS_DATA_FULL: MemberRaw[] = [
   // === ANGGOTA BIASA ===
   {
     id: "1024",
-    name: "M. Sholichin Tafsir Srilintang",
+    name: "MUHAMAD SHOLICHIN TAFSIR SRILINTANG",
     nim: "H1101251016",
     email: "h1101251016@untan.ac.id",
     photoUrl: "/members/1024.jpg",

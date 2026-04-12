@@ -48,13 +48,25 @@ const sortedMembers = members;
               <input type="text" id="member-search" class="search-input" placeholder="Cari berdasarkan nama atau panggilan..." />
             </div>
             
-            <div class="filter-wrap">
-              <select id="member-role-filter" class="filter-select">
+            <div class="filter-wrap custom-dropdown" id="role-dropdown-wrap">
+              <!-- Select asli disembunyikan untuk logic -->
+              <select id="member-role-filter" class="filter-select" style="display: none;">
                 <option value="Semua">Semua Peran</option>
                 <option value="Pengurus">Pengurus Inti</option>
                 <option value="Anggota">Anggota Biasa</option>
               </select>
-              <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+
+              <!-- UI Dropdown Kaca Kustom -->
+              <button type="button" class="dropdown-trigger" id="role-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span id="role-dropdown-label">Semua Peran</span>
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+
+              <ul class="dropdown-list" id="role-dropdown-list" role="listbox" aria-hidden="true">
+                <li class="dropdown-option is-selected" role="option" data-value="Semua">Semua Peran</li>
+                <li class="dropdown-option" role="option" data-value="Pengurus">Pengurus Inti</li>
+                <li class="dropdown-option" role="option" data-value="Anggota">Anggota Biasa</li>
+              </ul>
             </div>
           </div>
 
@@ -126,6 +138,8 @@ const sortedMembers = members;
     padding: 1rem;
     border-radius: 16px;
     margin-bottom: 3rem;
+    position: relative;
+    z-index: 50; /* Memastikan dropdown muncul di atas member-grid */
   }
 
   @media (min-width: 768px) {
@@ -175,14 +189,13 @@ const sortedMembers = members;
     box-shadow: 0 0 0 3px hsla(190, 65%, 55%, 0.15);
   }
 
-  .filter-wrap {
+  .filter-wrap.custom-dropdown {
     position: relative;
-    min-width: 200px;
+    min-width: 210px;
   }
 
-  .filter-select {
+  .dropdown-trigger {
     width: 100%;
-    appearance: none;
     background: hsla(0, 0%, 100%, 0.05);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
@@ -192,27 +205,82 @@ const sortedMembers = members;
     font-size: 0.95rem;
     outline: none;
     cursor: pointer;
-    transition: border-color var(--duration-fast) var(--ease-glass);
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: border-color var(--duration-fast) var(--ease-glass), box-shadow var(--duration-fast);
   }
 
-  .filter-select option {
-    background: var(--color-sky-deep);
-    color: white;
-  }
-
-  .filter-select:focus {
+  .dropdown-trigger:focus, .dropdown-trigger.is-open {
     border-color: var(--color-water-light);
+    box-shadow: 0 0 0 3px hsla(190, 65%, 55%, 0.15);
   }
 
   .dropdown-icon {
     position: absolute;
     right: 1.2rem;
-    top: 50%;
-    transform: translateY(-50%);
     width: 18px;
     height: 18px;
     color: hsla(0, 0%, 100%, 0.6);
     pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dropdown-trigger.is-open .dropdown-icon {
+    transform: rotate(180deg);
+  }
+
+  /* List Dropdown Kaca (Custom Glass UI) */
+  .dropdown-list {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: hsla(210, 60%, 13%, 0.7); /* Deep water tint */
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.5rem;
+    margin: 0;
+    list-style: none;
+    z-index: 100;
+    
+    /* Reveal Animation Physics */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top center;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .dropdown-list.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  .dropdown-option {
+    padding: 0.8rem 1rem;
+    color: hsla(0, 0%, 100%, 0.75);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .dropdown-option:hover {
+    background: hsla(190, 65%, 55%, 0.15);
+    color: white;
+  }
+
+  .dropdown-option.is-selected {
+    background: hsla(190, 65%, 55%, 0.25);
+    color: var(--color-water-light);
+    font-weight: 600;
   }
 
   /* Grid Anggota */
@@ -235,7 +303,7 @@ const sortedMembers = members;
   }
 
   .member-item {
-    transition: opacity 0.4s var(--ease-water), transform 0.4s var(--ease-water);
+    will-change: transform, opacity;
   }
 
   .empty-state {
@@ -247,7 +315,7 @@ const sortedMembers = members;
   }
 </style>
 
-<script is:inline>
+<script>
   function initAnggotaDirectory() {
     const searchInput = document.getElementById('member-search');
     const roleSelect = document.getElementById('member-role-filter');
@@ -294,6 +362,61 @@ const sortedMembers = members;
       }
     }
 
+    // === CUSTOM DROPDOWN LOGIC ===
+    const trigger = document.getElementById('role-dropdown-trigger');
+    const label = document.getElementById('role-dropdown-label');
+    const list = document.getElementById('role-dropdown-list');
+    const options = document.querySelectorAll('.dropdown-option');
+
+    function openDropdown() {
+      if(!trigger || !list) return;
+      trigger.classList.add('is-open');
+      list.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      list.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeDropdown() {
+      if(!trigger || !list) return;
+      trigger.classList.remove('is-open');
+      list.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      list.setAttribute('aria-hidden', 'true');
+    }
+
+    if (trigger && list) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        trigger.classList.contains('is-open') ? closeDropdown() : openDropdown();
+      });
+
+      options.forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute('data-value');
+          const text = opt.innerText;
+
+          if (roleSelect) roleSelect.value = val;
+          if (label) label.innerText = text;
+          
+          options.forEach(o => o.classList.remove('is-selected'));
+          opt.classList.add('is-selected');
+
+          closeDropdown();
+          if (roleSelect) roleSelect.dispatchEvent(new Event('change'));
+        });
+      });
+
+      // Tutup otomatis bila ngeklik diluar dropdown
+      document.addEventListener('click', (e) => {
+        if (!trigger.contains(e.target as Node) && !list.contains(e.target as Node)) {
+          closeDropdown();
+        }
+      });
+    }
+
+    // Event listener search dan (hidden) filter select
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         clearTimeout(debounceTimer);
@@ -331,6 +454,31 @@ const sortedMembers = members;
         activeCards.forEach(c => c.classList.remove('is-active'));
       }
     });
+
+    // Add Reversible GSAP Scroll Scrub
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReduced) {
+      import('gsap').then(({ gsap }) => {
+        import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+          gsap.registerPlugin(ScrollTrigger);
+          memberItems.forEach(item => {
+            gsap.fromTo(item, 
+              { opacity: 0, y: 40, scale: 0.95 },
+              {
+                opacity: 1, y: 0, scale: 1,
+                ease: 'power2.out',
+                scrollTrigger: {
+                  trigger: item,
+                  start: 'top 95%',
+                  end: 'top 80%',
+                  scrub: 1
+                }
+              }
+            );
+          });
+        });
+      }).catch(err => console.warn('GSAP scrub fallback'));
+    }
   }
 
   // Init on load

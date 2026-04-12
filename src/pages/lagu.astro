@@ -1,0 +1,333 @@
+---
+/**
+ * lagu.astro
+ * Halaman Lagu Angkatan
+ * Dependencies: BaseLayout, Header, Footer, PageTransition
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import PageTransition from '../components/layout/PageTransition.astro';
+---
+
+<BaseLayout title="Lagu Angkatan" description="Lagu Angkatan Cloudsi Connect — Dengarkan lagu kebanggaan angkatan Sistem Informasi.">
+  <Header />
+  <PageTransition>
+    <main id="main-content">
+
+      <!-- Hero mini -->
+      <section class="lagu-hero">
+        <div class="container-main lagu-hero-inner">
+          <h1 class="lagu-title">Lagu Angkatan</h1>
+          <p class="lagu-sub">Nantikan lagu kebanggaan angkatan kami.</p>
+        </div>
+      </section>
+
+      <!-- Content -->
+      <section class="lagu-content-section section-pad">
+        <div class="container-main">
+            <div class="lyrics-panel glass">
+              
+              <!-- Floating Icon at top -->
+              <div class="lyrics-icon-wrap" aria-hidden="true">
+                <img src="/icon-lagu.png" alt="Musik Cloudsi" class="empty-vector" loading="lazy" width="180" height="180" />
+              </div>
+
+              <!-- Header Lagu -->
+              <div class="lyrics-header">
+                <h2 class="song-maintitle">Mars Cloudsi</h2>
+                <p class="song-key">Do = C</p>
+              </div>
+
+              <!-- Lyrics Body -->
+              <div class="lyrics-body">
+                
+                <div class="lyric-stanza">
+                  <h3 class="stanza-label">Verse 1</h3>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="C">Terbang tinggi ke langit yang </span>
+                    <span class="c-block" data-c="F">biru dan </span>
+                    <span class="c-block" data-c="C">cerah.</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="F">Bersama cloudsi </span>
+                    <span class="c-block" data-c="G">membangun generasi yang </span>
+                    <span class="c-block" data-c="C">cerah</span>
+                  </p>
+                </div>
+
+                <div class="lyric-stanza">
+                  <h3 class="stanza-label">Pre-Chorus</h3>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="F">Hei angkat </span>
+                    <span class="c-block" data-c="G">tangan</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="Em">Tunjukan semangat yang </span>
+                    <span class="c-block" data-c="Am">hebat</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="Dm">Gembiralah kita </span>
+                    <span class="c-block" data-c="G">rayakan, kebersamaan </span>
+                    <span class="c-block" data-c="C">ini</span>
+                  </p>
+                </div>
+
+                <div class="lyric-stanza highlight-stanza">
+                  <h3 class="stanza-label">Chorus</h3>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="F">Jaya dalam </span>
+                    <span class="c-block" data-c="G">ilmu, dalam sportifitas </span>
+                    <span class="c-block" data-c="C">kita ber</span><span class="c-block" data-c="Am">satu.</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="Dm">Bersama-sama </span>
+                    <span class="c-block" data-c="G">meraih pres</span><span class="c-block" data-c="C">tasi</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="F">Bersama </span>
+                    <span class="c-block" data-c="G">anak sistem infor</span><span class="c-block" data-c="C">masi</span>
+                  </p>
+                </div>
+
+                <div class="lyric-stanza">
+                  <h3 class="stanza-label">Verse 2</h3>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="C">Kita bangun fondasi </span>
+                    <span class="c-block" data-c="F">bersama yang </span>
+                    <span class="c-block" data-c="C">kuat.</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="F">Digitalisasi bi</span>
+                    <span class="c-block" data-c="G">kin kita </span>
+                    <span class="c-block" data-c="C">hebat.</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="F">Masa depan yang cerah, </span>
+                    <span class="c-block" data-c="Em">cita cita ter</span><span class="c-block" data-c="Am">wujud</span>
+                  </p>
+                  <p class="lyric-line">
+                    <span class="c-block" data-c="Dm">bersama mahasiswa </span>
+                    <span class="c-block" data-c="G">sistem infor</span><span class="c-block" data-c="C">masi</span>
+                  </p>
+                </div>
+
+              </div>
+            </div>
+        </div>
+      </section>
+
+    </main>
+  </PageTransition>
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .lagu-hero {
+    position: relative;
+    height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    text-align: center;
+  }
+
+  .lagu-hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .lagu-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-h1);
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: white;
+    margin: 0;
+  }
+
+  .lagu-sub {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: hsla(0, 0%, 100%, 0.6);
+    margin-top: 0.75rem;
+    font-style: italic;
+  }
+
+  /* Lyrics Panel Container */
+  .lyrics-panel {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    border-radius: 24px;
+    background: hsla(210, 60%, 15%, 0.15);
+    border: 1px solid hsla(210, 60%, 60%, 0.1);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2), 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  @media (min-width: 768px) {
+    .lyrics-panel {
+      padding: 5rem 4rem;
+    }
+  }
+
+  /* Decorative Icon */
+  .lyrics-icon-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  
+  .empty-vector {
+    width: 160px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 32px;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 30px rgba(56, 189, 248, 0.4));
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  /* Lyrics Header */
+  .lyrics-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    position: relative;
+  }
+
+  .lyrics-header::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: var(--color-accent-gold);
+    margin: 1.5rem auto 0;
+    border-radius: 2px;
+  }
+
+  .song-maintitle {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    background: linear-gradient(135deg, #ffffff 0%, #a5d8ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+  }
+
+  .song-key {
+    font-family: var(--font-body);
+    color: var(--color-water-light);
+    font-weight: 500;
+    letter-spacing: 0.15em;
+  }
+
+  /* Lyrics Typography & Chords */
+  .lyrics-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .lyric-stanza {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .highlight-stanza {
+    padding: 1.5rem 2rem;
+    background: hsla(200, 60%, 80%, 0.03);
+    border-left: 2px solid var(--color-water-light);
+    border-radius: 0 12px 12px 0;
+  }
+
+  .stanza-label {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: hsla(0, 0%, 100%, 0.4);
+    margin-bottom: 0.8rem;
+  }
+
+  .lyric-line {
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    line-height: 2;
+    margin: 0;
+    /* Glass Effect Font */
+    color: hsla(0, 0%, 100%, 0.95);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  }
+
+  .c-block {
+    position: relative;
+    display: inline-block;
+    margin-top: 1.8rem; /* Memberikan ruang ekstra untuk kord di atas */
+    white-space: pre-wrap; /* Menjaga spasi antar kata */
+  }
+
+  .c-block::before {
+    content: attr(data-c);
+    position: absolute;
+    top: -1.7rem;
+    left: 0;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-accent-gold);
+    /* Glimmer effect for chords */
+    text-shadow: 0 0 12px hsla(45, 100%, 50%, 0.4);
+    pointer-events: none;
+    letter-spacing: normal;
+  }
+
+  @media (max-width: 640px) {
+    .lyric-line {
+      font-size: 1.05rem;
+    }
+    .highlight-stanza {
+      padding: 1rem 1.25rem;
+    }
+  }
+</style>
+
+<script>
+  async function initLaguAnim() {
+    const el = document.querySelector('.lyrics-panel');
+    if (!el) return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      gsap.fromTo(el, 
+        { opacity: 0, y: 40, scale: 0.95 },
+        {
+          opacity: 1, y: 0, scale: 1,
+          ease: 'back.out(1.5)',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 95%',
+            end: 'bottom 85%',
+            scrub: 1
+          }
+        }
+      );
+    } catch (e) {}
+  }
+  document.addEventListener('DOMContentLoaded', initLaguAnim);
+  document.addEventListener('astro:after-swap', initLaguAnim);
+</script>

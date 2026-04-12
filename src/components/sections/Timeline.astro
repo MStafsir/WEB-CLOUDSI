@@ -231,11 +231,16 @@ function formatDate(dateStr: string): string {
       return;
     }
 
+    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
+    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
+      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
+    }
+
     // Garis: animate scaleY via GSAP
     try {
       if (line) {
-        const { gsap } = await import('gsap');
-        const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+        const { gsap } = await importWithTimeout(() => import('gsap'));
+        const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
         gsap.registerPlugin(ScrollTrigger);
 
         gsap.fromTo(line,

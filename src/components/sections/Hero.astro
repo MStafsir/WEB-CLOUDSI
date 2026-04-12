@@ -227,8 +227,16 @@ import Button from '../ui/Button.astro';
     }
 
     try {
-      const { gsap } = await import('gsap');
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      // Timeout wrapper: jika Vite 504, jangan hang selamanya
+      function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
+        return Promise.race([
+          fn(),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error('Import timeout')), ms))
+        ]);
+      }
+
+      const { gsap } = await importWithTimeout(() => import('gsap'));
+      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
       gsap.registerPlugin(ScrollTrigger);
 
       const tl = gsap.timeline();

@@ -305,23 +305,31 @@ const { members } = Astro.props;
       return;
     }
 
+    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
+    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
+      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
+    }
+
     try {
-      const { gsap } = await import('gsap');
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { gsap } = await importWithTimeout(() => import('gsap'));
+      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
       gsap.registerPlugin(ScrollTrigger);
 
-      gsap.to(cards, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".member-preview-section",
-          start: "top 80%",
-          toggleActions: "play none none none"
+      gsap.fromTo(cards, 
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".member-grid",
+            start: "top 90%",
+            end: "bottom 60%",
+            scrub: 1
+          }
         }
-      });
+      );
     } catch(err) {
       showAll();
     }

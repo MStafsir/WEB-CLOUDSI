@@ -9,7 +9,7 @@ import type { Member } from '../types/index';
 
 export const MEMBERS_DATA: Member[] = [
   // === PENGURUS INTI (Posisi 1-6) ===
-  { id: "1001", full_name: "Phasacola Grey Kalista", nickname: "Phasacola", role: "Ketua", quote: "", photo_url: "/members/1001.jpg", social_ig: "https://www.instagram.com/phasacola?igsh=azlhNzRiZHYxMWdl", social_in: "phasacola-grey", is_visible: true },
+  { id: "1001", full_name: "Phasacola Grey Kalista", nickname: "Phasacola", role: "Ketua", quote: "", photo_url: "/members/1001.jpeg", social_ig: "https://www.instagram.com/phasacola?igsh=azlhNzRiZHYxMWdl", social_in: "phasacola-grey", is_visible: true },
   { id: "1002", full_name: "Rifkitio Hardiono", nickname: "Rifkitio", role: "Wakil Ketua", quote: "", photo_url: "/members/1002.jpg", social_ig: "", social_in: "rifkitio-hardiono", is_visible: true },
   { id: "1003", full_name: "Ellen Fitri Shanika Karrin Malau", nickname: "Ellen", role: "Sekretaris", quote: "", photo_url: "/members/1003.jpg", social_ig: "https://www.instagram.com/shaskyrell8?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==", social_in: "ellen-fitri-shanika", is_visible: true },
   { id: "1004", full_name: "Dhini Zakiyatul Wafa", nickname: "Dhini", role: "Sekretaris", quote: "", photo_url: "/members/1004.jpg", social_ig: "https://www.instagram.com/zkwaf.xz?igsh=NTJqaTFqcm96dTg2", social_in: "dhini-zakiyatul-wafa", is_visible: true },
@@ -35,7 +35,7 @@ export const MEMBERS_DATA: Member[] = [
   // NIM: H1101251009
   { id: "1029", full_name: "Fahriello Ardhayana", nickname: "Fahriello", role: "Anggota", quote: "", photo_url: "/members/1029.jpg", social_ig: "https://www.instagram.com/riloo._?igsh=NTUzbTdodTQxd3Ew", social_in: "fahriello-ardhayana", is_visible: true },
   // NIM: H1101251010
-  { id: "1016", full_name: "Nasywa Akmalia Hanif", nickname: "Nasywa", role: "Anggota", quote: "", photo_url: "/members/1016.jpg", social_ig: "https://www.instagram.com/nnassh._?igsh=NmgxeG12aWhrNXNm", social_in: "nasywa-akmalia-hanif", is_visible: true },
+  { id: "1016", full_name: "Nasywa Akmalia Hanif", nickname: "Nasywa", role: "Anggota", quote: "", photo_url: "/members/1016.jpeg", social_ig: "https://www.instagram.com/nnassh._?igsh=NmgxeG12aWhrNXNm", social_in: "nasywa-akmalia-hanif", is_visible: true },
   // NIM: H1101251011
   { id: "1030", full_name: "Gendis Setyawan", nickname: "Gendis", role: "Anggota", quote: "", photo_url: "/members/1030.jpg", social_ig: "https://www.instagram.com/genndisn/", social_in: "gendis-setyawan", is_visible: true },
   // NIM: H1101251012
@@ -69,7 +69,7 @@ export const MEMBERS_DATA: Member[] = [
   // NIM: H1101251031
   { id: "1020", full_name: "Syarif Hizra Muhammad Zacky", nickname: "Syarif", role: "Anggota", quote: "", photo_url: "/members/1020.jpg", social_ig: "https://www.instagram.com/rivelza.zkysan?igsh=MW41NHRwaDZpMWI1ZQ%3D%3D&utm_source=qr", social_in: "syarif-hizra-zacky", is_visible: true },
   // NIM: H1101251032
-  { id: "1041", full_name: "Rezki Firmansyah", nickname: "Rezki", role: "Anggota", quote: "", photo_url: "/members/1041.jpg", social_ig: "https://www.instagram.com/headless_dreamer100?igsh=MThyczE2eDA1NjV3bA==", social_in: "rezki-firmansyah", is_visible: true },
+  { id: "1041", full_name: "Rezki Firmansyah", nickname: "Rezki", role: "Anggota", quote: "", photo_url: "/members/1041.jpeg", social_ig: "https://www.instagram.com/headless_dreamer100?igsh=MThyczE2eDA1NjV3bA==", social_in: "rezki-firmansyah", is_visible: true },
   // NIM: H1101251033
   { id: "1042", full_name: "Alfonsius Pernandes Roby", nickname: "Alfonsius", role: "Anggota", quote: "", photo_url: "/members/1042.jpg", social_ig: "https://www.instagram.com/alfonzhs.robb?igsh=MWxsN3JrbmJ0eWhydA==", social_in: "alfonsius-pernandes-roby", is_visible: true },
   // NIM: H1101251034

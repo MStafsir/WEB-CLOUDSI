@@ -95,9 +95,14 @@
       return;
     }
 
+    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
+    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
+      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
+    }
+
     try {
-      const { gsap } = await import('gsap');
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { gsap } = await importWithTimeout(() => import('gsap'));
+      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
       gsap.registerPlugin(ScrollTrigger);
 
       nums.forEach(num => {
@@ -105,19 +110,16 @@
         
         ScrollTrigger.create({
           trigger: ".stats-container",
-          start: "top 85%",
-          onEnter: () => {
-            const obj = { val: 0 };
-            gsap.to(obj, {
-              val: target,
-              duration: 2,
-              ease: "power2.out",
-              onUpdate: () => {
-                num.innerText = String(Math.round(obj.val));
-              }
-            });
-          },
-          once: true
+          start: "top 95%",
+          end: "bottom 30%",
+          scrub: 1, 
+          onUpdate: (self) => {
+            // progress is 0.0 to 1.0 based on scroll position
+            // use a subtle ease-out function x * (2 - x) for visual juice
+            const easeOut = self.progress * (2 - self.progress);
+            const currentVal = Math.round(target * easeOut);
+            num.innerText = String(currentVal);
+          }
         });
       });
     } catch(err) {

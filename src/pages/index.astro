@@ -79,3 +79,42 @@ const featuredMembers = [ketua, ...rest].filter(Boolean);
     transform: translateX(5px);
   }
 </style>
+
+<script>
+  async function initGalleryCta() {
+    const cta = document.querySelector('.gallery-cta-link');
+    if (!cta) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
+      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
+    }
+
+    try {
+      const { gsap } = await importWithTimeout(() => import('gsap'));
+      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
+      gsap.registerPlugin(ScrollTrigger);
+
+      gsap.fromTo(cta,
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          scrollTrigger: {
+            trigger: ".gallery-cta-section",
+            start: "top 95%",
+            end: "bottom 85%",
+            scrub: 1
+          }
+        }
+      );
+    } catch(err) {
+      // do nothing fallback
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initGalleryCta);
+  document.addEventListener('astro:after-swap', initGalleryCta);
+</script>

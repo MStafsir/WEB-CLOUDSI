@@ -75,7 +75,9 @@ function formatDate(dateStr: string): string {
             </div>
           ) : (
             <div class="empty-state glass">
-              <p class="empty-icon" aria-hidden="true">📅</p>
+              <div class="empty-icon-wrap" aria-hidden="true">
+                <img src="/icon-acara.png" alt="Acara Empty" class="empty-vector" loading="lazy" width="200" height="200" />
+              </div>
               <p class="empty-text">Acara akan segera ditambahkan.</p>
               <p class="empty-sub">Pantau terus halaman ini untuk informasi kegiatan terbaru.</p>
             </div>
@@ -230,9 +232,25 @@ function formatDate(dateStr: string): string {
     margin: 0 auto;
   }
 
-  .empty-icon {
-    font-size: 3rem;
-    margin: 0 0 1rem 0;
+  .empty-icon-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .empty-vector {
+    width: 140px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 28px; /* Sudut membulat estetik mencocokkan glassmorphism */
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.3));
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
   }
 
   .empty-text {
@@ -263,22 +281,31 @@ function formatDate(dateStr: string): string {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) { showAll(); return; }
 
+    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
+    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
+      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
+    }
+
     try {
-      const { gsap } = await import('gsap');
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { gsap } = await importWithTimeout(() => import('gsap'));
+      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
       gsap.registerPlugin(ScrollTrigger);
 
-      gsap.fromTo(cards,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1, y: 0, duration: 0.7, stagger: 0.1, ease: 'power2.out',
-          scrollTrigger: {
-            trigger: '.event-grid',
-            start: 'top 85%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
+      cards.forEach(card => {
+        gsap.fromTo(card,
+          { opacity: 0, scale: 0.95, y: 30 },
+          {
+            opacity: 1, scale: 1, y: 0,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 95%',
+              end: 'top 75%',
+              scrub: 1
+            }
+          }
+        );
+      });
     } catch(err) { showAll(); }
   }
 

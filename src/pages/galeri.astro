@@ -328,12 +328,13 @@ const stackData = [
   .lightbox-close:hover { opacity: 1; }
 </style>
 
-<script is:inline>
+<script>
   function initGaleriInteraktif() {
     const bentoFrames = document.querySelectorAll('#galleryGrid .photo-frame');
     const stackCards = document.querySelectorAll('.stack-card');
 
-    // ── 1. BENTO: INTERSECTION OBSERVER (Animasi Masuk) ──
+    // ── 1. BENTO: INTERSECTION OBSERVER (Animasi Masuk Bebas Konflik) ──
+    // Kita gunakan ini agar tidak bertabrakan dengan sistem transform Parallax dan 3D Hover
     if(bentoFrames.length > 0) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -404,6 +405,15 @@ const stackData = [
       onScrollStack();
     }
     window.addEventListener('scroll', onScrollMaster, { passive: true });
+
+    // CLEANUP MEMORY LEAK UNTUK ASTRO VIEW TRANSITIONS
+    const cleanup = () => {
+      window.removeEventListener('scroll', onScrollMaster);
+      if (typeof observer !== 'undefined') observer.disconnect();
+      if (typeof stackObserver !== 'undefined') stackObserver.disconnect();
+      document.removeEventListener('astro:before-swap', cleanup);
+    };
+    document.addEventListener('astro:before-swap', cleanup);
 
     // ── 4. BENTO: 3D HOVER TILT ──
     bentoFrames.forEach((frame, index) => {

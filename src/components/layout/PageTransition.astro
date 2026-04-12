@@ -5,72 +5,59 @@
  */
 ---
 
-<div id="page-transition-overlay" class="page-transition-overlay"></div>
-
 <slot />
 
 <style is:global>
-  /* Custom Overlay styling */
-  #page-transition-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--color-water-surface);
-    opacity: 0.15;
-    z-index: 9999;
-    pointer-events: none; /* Only see, no touch */
-    clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
-  }
-
   /* 
-   * Astro View Transition hooks for Liquid Wipe Effect
+   * Astro View Transition hooks for Smooth Fade & Scale Effect
+   * Jauh lebih ringan di GPU daripada clip-path, menghindari lag di halaman berat (Anggota).
    */
 
-  /* OUT animation (halaman lama) */
-  @keyframes liquidWipeOut {
-    from { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); }
-    to   { clip-path: polygon(0 0%, 100% 0%, 100% 0%, 0 0%); }
+  /* OUT animation (halaman lama memudar dan sedikit menyusut) */
+  @keyframes smoothFadeOut {
+    from { 
+      opacity: 1; 
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
+    to { 
+      opacity: 0; 
+      transform: translateY(-20px) scale(0.98);
+      filter: blur(4px);
+    }
   }
 
-  /* IN animation (halaman baru) */
-  @keyframes liquidWipeIn {
-    from { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
-    to   { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); }
+  /* IN animation (halaman baru muncul dan membesar dari bawah) */
+  @keyframes smoothFadeIn {
+    from { 
+      opacity: 0; 
+      transform: translateY(30px) scale(1.02);
+      filter: blur(6px);
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
   }
 
-  /* Target Astro router animations when transition is active */
+  /* Mengatur durasi dasar View Transitions */
+  ::view-transition-group(root) {
+    animation-duration: 700ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   ::view-transition-old(root) {
-    animation: liquidWipeOut 400ms var(--ease-glass) both;
+    animation: smoothFadeOut 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
   }
   
   ::view-transition-new(root) {
-    animation: liquidWipeIn 600ms var(--ease-water) both;
+    animation: smoothFadeIn 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 50ms; /* Tunggu halaman lama sedikit bersembunyi */
   }
 
-  /* Optional Extra: we animate the overlay block directly via JS below */
+  /* Cegah elemen yang "on-top" seperti transisi dari gangguan layout */
+  ::view-transition-image-pair(root) {
+    isolation: auto;
+  }
 </style>
-
-<script is:inline>
-  // Script untuk mentrigger animasi overlay disaat transition event Astro berjalan
-  // Ini membantu mengkover efek 'swipe up overlay berwarna biru air 15% opacity'
-  document.addEventListener('astro:before-preparation', () => {
-    const overlay = document.getElementById('page-transition-overlay');
-    if(overlay) {
-      overlay.style.animation = 'liquidWipeIn 400ms cubic-bezier(0.23, 1, 0.32, 1) forwards';
-      overlay.style.pointerEvents = 'auto'; // Block accidental interaction
-    }
-  });
-
-  document.addEventListener('astro:after-swap', () => {
-    const overlay = document.getElementById('page-transition-overlay');
-    if(overlay) {
-      overlay.style.animation = 'liquidWipeOut 600ms cubic-bezier(0.16, 1, 0.3, 1) forwards';
-      // Kembalikan pointer events ke none
-      setTimeout(() => {
-         if (overlay) overlay.style.pointerEvents = 'none';
-      }, 600);
-    }
-  });
-</script>

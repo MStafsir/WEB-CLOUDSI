@@ -1,25 +1,53 @@
 ---
 /**
- * Preloader.astro — FIXED v2
- * Bug fixes:
- * - Removed import('ogl') from critical assets (was causing infinite hang)
- * - Added per-asset timeout wrapper (no single asset can block forever)
- * - Fixed fake interval ceiling (was capped at 60, now 85)
- * - Reduced safety timeout 6000ms → 3500ms
- * - Glass wipe transition logic untouched (was working)
+ * Preloader.astro — FIXED v4 (DEFINITIVE)
+ *
+ * AKAR MASALAH YANG DISELESAIKAN:
+ * 1. POLLING bg-hero-video → DIHAPUS. Elemen preloader sudah ada di DOM.
+ * 2. <style is:global> → <style is:inline>. Kebal Vite 504.
+ * 3. <style> shimmer → <style is:inline>. Kebal Vite 504.
+ * 4. View Transition bug: preloader div muncul ulang di navigasi →
+ *    Ditangani dengan astro:after-swap + astro:before-swap handler.
+ * 5. Module script failure → forceShowAllContent() inline safety net.
  */
 ---
 
 <!-- BYPASS INSTAN: Jika sudah pernah load, skip preloader -->
 <script is:inline>
-  if (sessionStorage.getItem('cloudsi_loaded')) {
-    document.documentElement.classList.add('is-loaded');
-  }
+  (function() {
+    // Cek sessionStorage
+    if (sessionStorage.getItem('cloudsi_loaded')) {
+      document.documentElement.classList.add('is-loaded');
+      // Langsung sembunyikan preloader DOM jika ada
+      var p = document.getElementById('initial-preloader');
+      if (p) {
+        p.style.display = 'none';
+        if (p.parentNode) p.parentNode.removeChild(p);
+      }
+    }
+
+    // KRITIS: Handle View Transition navigasi.
+    // Saat Astro swap DOM, preloader div BARU muncul lagi.
+    // Kita harus langsung buang yang baru itu.
+    document.addEventListener('astro:after-swap', function() {
+      if (sessionStorage.getItem('cloudsi_loaded')) {
+        document.documentElement.classList.add('is-loaded');
+        var p = document.getElementById('initial-preloader');
+        if (p) {
+          p.style.display = 'none';
+          if (p.parentNode) p.parentNode.removeChild(p);
+        }
+      }
+    });
+  })();
 </script>
 
-<style is:global>
+<!-- CSS inline — KEBAL terhadap Vite module pipeline -->
+<style is:inline>
   html.is-loaded #initial-preloader {
     display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 </style>
 
@@ -51,15 +79,16 @@
   style="transform: translateY(100%); transition: transform 600ms cubic-bezier(0.76,0,0.24,1);">
   <div class="absolute inset-0 bg-white/10 backdrop-blur-xl border-t border-b border-white/20 shadow-[0_0_80px_rgba(255,255,255,0.1)]">
     <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"
-      style="transform: translateX(-100%); animation: shimmer 1.5s infinite;"></div>
+      style="transform: translateX(-100%); animation: cloudsi-shimmer 1.5s infinite;"></div>
   </div>
   <div class="relative">
     <h2 class="font-serif text-2xl tracking-[0.6em] text-white/90 uppercase drop-shadow-md">Cloudsi</h2>
   </div>
 </div>
 
-<style>
-  @keyframes shimmer {
+<!-- Shimmer keyframes — is:inline agar tidak diproses Vite -->
+<style is:inline>
+  @keyframes cloudsi-shimmer {
     100% { transform: translateX(100%); }
   }
 </style>
@@ -68,11 +97,10 @@
 (function () {
   'use strict';
 
-  /**
-   * FIX UTAMA: Bungkus setiap promise dengan timeout
-   * Jika asset tidak selesai dalam N ms, anggap selesai (resolve paksa)
-   * Ini mencegah 1 asset hang memblokir seluruh loading screen
-   */
+  // =============================================
+  // UTILITAS
+  // =============================================
+
   function withTimeout(promise, ms) {
     var timeout = new Promise(function (resolve) {
       setTimeout(resolve, ms);
@@ -85,26 +113,58 @@
     initialEl.style.opacity = '0';
     initialEl.style.pointerEvents = 'none';
     sessionStorage.setItem('cloudsi_loaded', 'true');
+    document.documentElement.classList.add('is-loaded');
     setTimeout(function () {
       if (initialEl.parentNode) initialEl.parentNode.removeChild(initialEl);
     }, 850);
   }
 
+  /**
+   * NUCLEAR OPTION: Paksa tampilkan SEMUA konten halaman yang tersembunyi
+   * oleh animasi (opacity: 0). Ini menangani kasus dimana module script
+   * gagal load karena Vite 504.
+   */
+  function forceShowAllContent() {
+    var selectors = [
+      '[data-hero-badge]', '[data-hero-heading]', '[data-hero-anim]',
+      '.hero-badge', '.hero-heading', '.hero-subheading', '.hero-desc', '.hero-cta',
+      '.member-preview-card', '.tentang-title', '.tentang-sub',
+      '[data-tentang-anim]', '[data-event-card]', '.stack-card', '.photo-frame'
+    ];
+    var allEls = document.querySelectorAll(selectors.join(','));
+    for (var i = 0; i < allEls.length; i++) {
+      allEls[i].style.opacity = '1';
+      allEls[i].style.transform = 'none';
+      allEls[i].style.visibility = 'visible';
+    }
+  }
+
+  // =============================================
+  // MAIN PRELOADER LOGIC — HANYA UNTUK FIRST VISIT
+  // =============================================
+
   function initLogic() {
-    var initialEl = document.getElementById('initial-preloader');
-    var isFirstVisit = !sessionStorage.getItem('cloudsi_loaded');
-
-    if (!isFirstVisit) {
-      if (initialEl) initialEl.style.display = 'none';
+    // Jika sudah pernah load, JANGAN tampilkan preloader
+    if (sessionStorage.getItem('cloudsi_loaded')) {
+      var el = document.getElementById('initial-preloader');
+      if (el) {
+        el.style.display = 'none';
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }
       return;
     }
 
-    // Pastikan kalau gagal load style akibat Vite ngaco, kita paksa hidden
+    // Class is-loaded ada → skip
     if (document.documentElement.classList.contains('is-loaded')) {
-      if (initialEl) initialEl.style.display = 'none';
+      var el2 = document.getElementById('initial-preloader');
+      if (el2) {
+        el2.style.display = 'none';
+        if (el2.parentNode) el2.parentNode.removeChild(el2);
+      }
       return;
     }
 
+    var initialEl = document.getElementById('initial-preloader');
     if (!initialEl) return;
 
     var barEl = document.getElementById('preloader-bar');
@@ -112,8 +172,10 @@
     var progress = 0;
     var dismissed = false;
 
-    // Failsafe jika komponen preloader text tidak ditemukan akibat transisi aneh
-    if (!textEl || !barEl) return;
+    if (!textEl || !barEl) {
+      dismiss(initialEl);
+      return;
+    }
 
     function setProgress(val) {
       progress = Math.min(Math.round(val), 100);
@@ -122,14 +184,9 @@
     }
 
     // --- BANGUN DAFTAR ASET KRITIS ---
-    // PENTING: OGL *tidak* dimasukkan ke sini karena:
-    // 1. Bukan aset yang user lihat langsung
-    // 2. Load dari unpkg.com bisa lambat/timeout -> menyebabkan progress stuck
-    // OGL akan tetap load sendiri di background saat dibutuhkan
-
     var criticalAssets = [];
 
-    // Asset 1: Logo (paling cepat, biasanya < 200ms)
+    // Asset 1: Logo
     var img = new Image();
     img.src = '/logo-angkatan-25.png';
     criticalAssets.push(
@@ -139,88 +196,66 @@
           img.onload = resolve;
           img.onerror = resolve;
         }),
-        2000 // max 2 detik untuk logo
+        2000
       )
     );
 
-    // Asset 2: Font Cormorant Garamond
-    if (typeof document !== 'undefined' && document.fonts && typeof document.fonts.load === 'function') {
+    // Asset 2: Font
+    if (document.fonts && typeof document.fonts.load === 'function') {
       try {
         var fontPromise = document.fonts.load('300 1em "Cormorant Garamond"');
         if (fontPromise && typeof fontPromise.catch === 'function') {
           criticalAssets.push(
-            withTimeout(
-              fontPromise.catch(function () {}),
-              2500
-            )
+            withTimeout(fontPromise.catch(function () {}), 2500)
           );
         }
-      } catch (err) {
-        // Abaikan jika browser tidak support font timing API
-      }
+      } catch (err) {}
     }
 
-    // Asset 3: Video background (opsional, timeout cepat)
-    var videoEl = document.getElementById('bg-hero-video');
-    if (videoEl) {
-      criticalAssets.push(
-        withTimeout(
-          new Promise(function (resolve) {
-            // readyState >= 2 = sudah punya metadata, cukup untuk mulai play
-            if (videoEl.readyState >= 2) return resolve();
-            videoEl.addEventListener('loadeddata', resolve, { once: true });
-            videoEl.addEventListener('error', resolve, { once: true });
-          }),
-          3000 // max 3 detik untuk video, lalu lanjut saja
-        )
-      );
-    }
-
-    // --- FAKE PROGRESS SAAT MENUNGGU ASET ---
-    // Naik smooth dari 0 ke 85, sisanya tunggu assets selesai
+    // --- FAKE PROGRESS ---
     var fakeInterval = setInterval(function () {
       if (progress < 85) {
-        // Makin lambat makin mendekati 85 (easing natural)
-        var increment = (85 - progress) * 0.04 + 0.3;
+        var increment = (85 - progress) * 0.06 + 0.5;
         setProgress(progress + increment);
       } else {
         clearInterval(fakeInterval);
       }
-    }, 80);
+    }, 60);
 
     var loaded = 0;
-    var total = criticalAssets.length;
+    var total = criticalAssets.length || 1;
 
     criticalAssets.forEach(function (p) {
       p.then(function () {
         loaded++;
-        // Progress real dari asset: dari 85 ke 98
         var realProgress = 85 + ((loaded / total) * 13);
         if (realProgress > progress) setProgress(realProgress);
       });
     });
 
-    // Saat semua selesai (atau timeout masing-masing sudah terpenuhi)
+    // Saat semua selesai
     Promise.all(criticalAssets).then(function () {
       if (dismissed) return;
       dismissed = true;
       clearInterval(fakeInterval);
       setProgress(100);
-      setTimeout(function () { dismiss(initialEl); }, 400);
+      setTimeout(function () { dismiss(initialEl); }, 350);
     });
 
-    // SAFETY NET: Jika dalam 4 detik belum selesai, paksa dismiss
-    // Sebelumnya 6000ms -> terlalu lama, user menunggu 6 detik di 0%
+    // SAFETY NET INTERNAL: 3.5 detik
     setTimeout(function () {
       if (dismissed) return;
       dismissed = true;
       clearInterval(fakeInterval);
       setProgress(100);
       dismiss(initialEl);
-    }, 4000);
+    }, 3500);
   }
 
-  // --- GLASSMORPHISM PAGE TRANSITION ---
+  // =============================================
+  // GLASSMORPHISM PAGE TRANSITION
+  // =============================================
+
   function initPageTransition() {
     if (window.__cloudsiWipeInit) return;
     window.__cloudsiWipeInit = true;
@@ -251,31 +286,33 @@
     });
   }
 
-  // Daripada menunggu DOMContentLoaded (yang bisa di-BLOCK selaama berabad-abad jika ada module Javascript/Vite yang 504 Time Out),
-  // Kita ngecek langsung dengan poling. Begitu elemen HTML berhasil di-render oleh parser, langsung tancap gas!
-  var checkReady = setInterval(function() {
-    // Kita tunggu sampai elemen video (yang posisinya setelah preloader di BaseLayout) berhasil dimasukkan ke DOM
-    if (document.getElementById('initial-preloader') && document.getElementById('bg-hero-video')) {
-      clearInterval(checkReady);
-      
-      // Mencegah double-execution jika poling jalan 2x
-      if (!window.__cloudsiInitFired) {
-        window.__cloudsiInitFired = true;
-        initLogic();
-        initPageTransition();
-      }
+  // =============================================
+  // INISIALISASI
+  // =============================================
+
+  // Langsung jalankan — elemen preloader sudah ada di DOM
+  // (karena div preloader di-render DIATAS tag <script> ini)
+  initLogic();
+  initPageTransition();
+
+  // ABSOLUTE SAFETY NET: 4 detik
+  setTimeout(function() {
+    var el = document.getElementById('initial-preloader');
+    if (el && el.offsetParent !== null) {
+      // Preloader masih visible (offsetParent !== null = not display:none)
+      console.warn('[Cloudsi] Safety net: force dismissing after 4s');
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+      sessionStorage.setItem('cloudsi_loaded', 'true');
+      document.documentElement.classList.add('is-loaded');
+      setTimeout(function() {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      }, 850);
     }
-  }, 10);
-  
-  // Jika karena alasan ajaib DOMContentLoaded lari duluan
-  document.addEventListener('DOMContentLoaded', function () {
-    if (!window.__cloudsiInitFired) {
-      clearInterval(checkReady);
-      window.__cloudsiInitFired = true;
-      initLogic();
-      initPageTransition();
-    }
-  });
+
+    // Paksa tampilkan konten yang mungkin stuck
+    forceShowAllContent();
+  }, 4000);
 
 })();
 </script>

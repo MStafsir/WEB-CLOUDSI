@@ -140,6 +140,19 @@ const fullTitle = `${title} | Cloudsi Connect`;
          LENIS SMOOTH SCROLL — Inisialisasi global
          ============================================ -->
     <script>
+      /**
+       * Timeout wrapper untuk dynamic import — mencegah Vite 504
+       * dari memblokir inisialisasi Lenis selamanya
+       */
+      function importWithTimeout<T>(importFn: () => Promise<T>, ms: number = 5000): Promise<T> {
+        return Promise.race([
+          importFn(),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error(`Import timeout after ${ms}ms`)), ms)
+          )
+        ]);
+      }
+
       async function initLenis() {
         const prefersReduced = window.matchMedia(
           '(prefers-reduced-motion: reduce)'
@@ -149,31 +162,38 @@ const fullTitle = `${title} | Cloudsi Connect`;
         const isMobile = window.innerWidth < 768;
         if (prefersReduced || isMobile) return;
 
-        const [{ default: Lenis }, { gsap }, { ScrollTrigger }] = await Promise.all([
-          import('lenis'),
-          import('gsap'),
-          import('gsap/ScrollTrigger')
-        ]);
+        try {
+          const [{ default: Lenis }, { gsap }, { ScrollTrigger }] = await Promise.all([
+            importWithTimeout(() => import('lenis')),
+            importWithTimeout(() => import('gsap')),
+            importWithTimeout(() => import('gsap/ScrollTrigger'))
+          ]);
 
-        gsap.registerPlugin(ScrollTrigger);
+          gsap.registerPlugin(ScrollTrigger);
 
-        const lenis = new Lenis({
-          duration: 1.4,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          wheelMultiplier: 1.2,
-          touchMultiplier: 1.5,
-        });
+          const lenis = new Lenis({
+            duration: 1.4,
+            easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            wheelMultiplier: 1.2,
+            touchMultiplier: 1.5,
+          });
 
-        // Integrasi GSAP ScrollTrigger
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => lenis.raf(time * 1000));
-        gsap.ticker.lagSmoothing(0);
+          // Integrasi GSAP ScrollTrigger
+          lenis.on('scroll', ScrollTrigger.update);
+          gsap.ticker.add((time: number) => lenis.raf(time * 1000));
+          gsap.ticker.lagSmoothing(0);
 
-        // Cleanup on page transition
-        document.addEventListener('astro:before-swap', () => {
-          lenis.destroy();
-          ScrollTrigger.getAll().forEach(t => t.kill());
-        }, { once: true });
+          // Cleanup on page transition
+          const cleanup = () => {
+            lenis.destroy();
+            ScrollTrigger.getAll().forEach(t => t.kill());
+            document.removeEventListener('astro:before-swap', cleanup);
+          };
+          document.addEventListener('astro:before-swap', cleanup);
+        } catch (err) {
+          console.warn('[Cloudsi] Lenis/GSAP init gagal (Vite cache issue?):', err);
+          // Browser native scroll akan tetap berfungsi tanpa Lenis
+        }
       }
 
       document.addEventListener('DOMContentLoaded', initLenis);
@@ -203,6 +223,63 @@ const fullTitle = `${title} | Cloudsi Connect`;
 
       document.addEventListener('DOMContentLoaded', initFadeInObserver);
       document.addEventListener('astro:after-swap', initFadeInObserver);
+    </script>
+
+    <!-- ============================================
+         GLOBAL CONTENT SAFETY NET (is:inline = KEBAL VITE)
+         
+         MENGAPA INI DIPERLUKAN:
+         Komponen seperti Hero.astro, StatsSection.astro, MemberPreview.astro
+         menggunakan <script> (bukan is:inline). Astro mengubah ini menjadi
+         <script type="module"> yang DIPROSES oleh Vite.
+         
+         Jika Vite 504 (cache corruption), MODULE SCRIPT SELURUHNYA gagal load.
+         Akibatnya, kode showAll() fallback di dalam catch block TIDAK PERNAH
+         BISA JALAN — karena file .js nya sendiri yang gagal di-serve.
+         
+         Solusi: inline script ini KEBAL Vite dan akan paksa tampilkan
+         semua konten setelah 5 detik jika masih tersembunyi.
+         ============================================ -->
+    <script is:inline>
+      setTimeout(function() {
+        // Daftar selector elemen yang diketahui mulai dengan opacity: 0
+        // dan bergantung pada GSAP module scripts untuk ditampilkan
+        var selectors = [
+          '[data-hero-badge]',
+          '[data-hero-heading]',
+          '[data-hero-anim]',
+          '.hero-badge',
+          '.hero-heading', 
+          '.hero-subheading',
+          '.hero-desc',
+          '.hero-cta',
+          '.member-preview-card',
+          '.tentang-title',
+          '.tentang-sub',
+          '[data-tentang-anim]',
+          '[data-event-card]',
+          '.stack-card',
+          '.photo-frame',
+          '[data-stat-target]'
+        ];
+
+        var allEls = document.querySelectorAll(selectors.join(','));
+        var fixed = 0;
+        for (var i = 0; i < allEls.length; i++) {
+          var el = allEls[i];
+          var computed = window.getComputedStyle(el);
+          // Hanya paksa tampilkan jika masih tersembunyi
+          if (computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+            el.style.visibility = 'visible';
+            fixed++;
+          }
+        }
+        if (fixed > 0) {
+          console.warn('[Cloudsi] Global safety net: force-showed ' + fixed + ' hidden elements after 5s');
+        }
+      }, 5000);
     </script>
   </body>
 </html>
