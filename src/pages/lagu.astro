@@ -301,33 +301,38 @@ import PageTransition from '../components/layout/PageTransition.astro';
   }
 </style>
 
-<script>
-  async function initLaguAnim() {
-    const el = document.querySelector('.lyrics-panel');
-    if (!el) return;
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
+<script is:inline>
+  (function() {
+    function initLaguAnim() {
+      var el = document.querySelector('.lyrics-panel');
+      if (!el) return;
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) return;
 
-    try {
-      const { gsap } = await import('gsap');
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-      gsap.registerPlugin(ScrollTrigger);
+      Promise.all([
+        import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'),
+        import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm')
+      ]).then(function(modules) {
+        var gsap = modules[0].gsap || modules[0].default;
+        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+        gsap.registerPlugin(ScrollTrigger);
 
-      gsap.fromTo(el, 
-        { opacity: 0, y: 40, scale: 0.95 },
-        {
-          opacity: 1, y: 0, scale: 1,
-          ease: 'back.out(1.5)',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 95%',
-            end: 'bottom 85%',
-            scrub: 1
+        gsap.fromTo(el, 
+          { opacity: 0, y: 40, scale: 0.95 },
+          {
+            opacity: 1, y: 0, scale: 1,
+            ease: 'back.out(1.5)',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 95%',
+              end: 'bottom 85%',
+              scrub: 1
+            }
           }
-        }
-      );
-    } catch (e) {}
-  }
-  document.addEventListener('DOMContentLoaded', initLaguAnim);
-  document.addEventListener('astro:after-swap', initLaguAnim);
+        );
+      }).catch(function(e) {});
+    }
+    document.addEventListener('DOMContentLoaded', initLaguAnim);
+    document.addEventListener('astro:after-swap', initLaguAnim);
+  })();
 </script>

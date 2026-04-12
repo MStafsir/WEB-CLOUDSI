@@ -80,41 +80,44 @@ const featuredMembers = [ketua, ...rest].filter(Boolean);
   }
 </style>
 
-<script>
-  async function initGalleryCta() {
-    const cta = document.querySelector('.gallery-cta-link');
-    if (!cta) return;
+<script is:inline>
+  (function() {
+    function initGalleryCta() {
+      var cta = document.querySelector('.gallery-cta-link');
+      if (!cta) return;
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) return;
 
-    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
-      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
-    }
+      function importWithTimeout(fn, ms) {
+        ms = ms || 5000;
+        return Promise.race([fn(), new Promise(function(_, r) { setTimeout(function() { r(new Error('Import timeout')); }, ms); })]);
+      }
 
-    try {
-      const { gsap } = await importWithTimeout(() => import('gsap'));
-      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
-      gsap.registerPlugin(ScrollTrigger);
+      Promise.all([
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
+      ]).then(function(modules) {
+        var gsap = modules[0].gsap || modules[0].default;
+        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+        gsap.registerPlugin(ScrollTrigger);
 
-      gsap.fromTo(cta,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          scrollTrigger: {
-            trigger: ".gallery-cta-section",
-            start: "top 95%",
-            end: "bottom 85%",
-            scrub: 1
+        gsap.fromTo(cta,
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1, y: 0,
+            scrollTrigger: {
+              trigger: ".gallery-cta-section",
+              start: "top 95%",
+              end: "bottom 85%",
+              scrub: 1
+            }
           }
-        }
-      );
-    } catch(err) {
-      // do nothing fallback
+        );
+      }).catch(function(err) {});
     }
-  }
 
-  document.addEventListener('DOMContentLoaded', initGalleryCta);
-  document.addEventListener('astro:after-swap', initGalleryCta);
+    document.addEventListener('DOMContentLoaded', initGalleryCta);
+    document.addEventListener('astro:after-swap', initGalleryCta);
+  })();
 </script>

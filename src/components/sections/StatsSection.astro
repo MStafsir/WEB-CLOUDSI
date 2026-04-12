@@ -79,54 +79,52 @@
   }
 </style>
 
-<script>
-  async function initStats() {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const nums = document.querySelectorAll<HTMLElement>('[data-stat-target]');
-    
-    if (nums.length === 0) return;
+<script is:inline>
+  (function() {
+    function initStats() {
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var nums = document.querySelectorAll('[data-stat-target]');
+      
+      if (nums.length === 0) return;
 
-    function showAll() {
-      nums.forEach(num => { num.innerText = num.getAttribute('data-stat-target') ?? '0'; });
-    }
+      function showAll() {
+        nums.forEach(function(num) { num.innerText = num.getAttribute('data-stat-target') || '0'; });
+      }
 
-    if (prefersReduced) {
-      showAll();
-      return;
-    }
+      if (prefersReduced) { showAll(); return; }
 
-    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
-    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
-      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
-    }
+      function importWithTimeout(fn, ms) {
+        ms = ms || 5000;
+        return Promise.race([fn(), new Promise(function(_, r) { setTimeout(function() { r(new Error('Import timeout')); }, ms); })]);
+      }
 
-    try {
-      const { gsap } = await importWithTimeout(() => import('gsap'));
-      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
-      gsap.registerPlugin(ScrollTrigger);
+      Promise.all([
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
+      ]).then(function(modules) {
+        var gsap = modules[0].gsap || modules[0].default;
+        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+        gsap.registerPlugin(ScrollTrigger);
 
-      nums.forEach(num => {
-        const target = parseInt(num.getAttribute('data-stat-target') ?? '0', 10);
-        
-        ScrollTrigger.create({
-          trigger: ".stats-container",
-          start: "top 95%",
-          end: "bottom 30%",
-          scrub: 1, 
-          onUpdate: (self) => {
-            // progress is 0.0 to 1.0 based on scroll position
-            // use a subtle ease-out function x * (2 - x) for visual juice
-            const easeOut = self.progress * (2 - self.progress);
-            const currentVal = Math.round(target * easeOut);
-            num.innerText = String(currentVal);
-          }
+        nums.forEach(function(num) {
+          var target = parseInt(num.getAttribute('data-stat-target') || '0', 10);
+          
+          ScrollTrigger.create({
+            trigger: ".stats-container",
+            start: "top 95%",
+            end: "bottom 30%",
+            scrub: 1, 
+            onUpdate: function(self) {
+              var easeOut = self.progress * (2 - self.progress);
+              var currentVal = Math.round(target * easeOut);
+              num.innerText = String(currentVal);
+            }
+          });
         });
-      });
-    } catch(err) {
-      showAll();
+      }).catch(function(err) { showAll(); });
     }
-  }
 
-  document.addEventListener('DOMContentLoaded', initStats);
-  document.addEventListener('astro:after-swap', initStats);
+    document.addEventListener('DOMContentLoaded', initStats);
+    document.addEventListener('astro:after-swap', initStats);
+  })();
 </script>

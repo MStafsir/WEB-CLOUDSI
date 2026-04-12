@@ -199,115 +199,104 @@ import Button from '../ui/Button.astro';
   }
 </style>
 
-<script>
-  async function initHero() {
-    const badge = document.querySelector('[data-hero-badge]');
-    const heading = document.querySelector('[data-hero-heading]');
-    const sub = document.querySelector('[data-hero-anim="sub"]');
-    const desc = document.querySelector('[data-hero-anim="desc"]');
-    const cta = document.querySelector('[data-hero-anim="cta"]');
-    
-    const allEls = [badge, heading, sub, desc, cta];
-    
-    if(!badge || !heading) return;
+<script is:inline>
+  (function() {
+    function initHero() {
+      var badge = document.querySelector('[data-hero-badge]');
+      var heading = document.querySelector('[data-hero-heading]');
+      var sub = document.querySelector('[data-hero-anim="sub"]');
+      var desc = document.querySelector('[data-hero-anim="desc"]');
+      var cta = document.querySelector('[data-hero-anim="cta"]');
+      var allEls = [badge, heading, sub, desc, cta];
+      
+      if(!badge || !heading) return;
 
-    function showAll() {
-      allEls.forEach(el => {
-        if(el) {
-          (el as HTMLElement).style.opacity = '1';
-          (el as HTMLElement).style.transform = 'none';
-        }
-      });
-    }
+      function showAll() {
+        allEls.forEach(function(el) {
+          if(el) {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+          }
+        });
+      }
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      showAll();
-      return;
-    }
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) { showAll(); return; }
 
-    try {
-      // Timeout wrapper: jika Vite 504, jangan hang selamanya
-      function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
+      function importWithTimeout(fn, ms) {
+        ms = ms || 5000;
         return Promise.race([
           fn(),
-          new Promise<never>((_, rej) => setTimeout(() => rej(new Error('Import timeout')), ms))
+          new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Import timeout')); }, ms); })
         ]);
       }
 
-      const { gsap } = await importWithTimeout(() => import('gsap'));
-      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
-      gsap.registerPlugin(ScrollTrigger);
+      Promise.all([
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
+      ]).then(function(modules) {
+        var gsap = modules[0].gsap || modules[0].default;
+        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+        gsap.registerPlugin(ScrollTrigger);
 
-      const tl = gsap.timeline();
-      
-      tl.fromTo(badge, 
-        { y: 20, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.2 }
-      )
-      .fromTo(heading, 
-        { scale: 0.95, opacity: 0 }, 
-        { scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" },
-        0.4
-      )
-      .fromTo(sub,
-        { y: 15, opacity: 0 },
-        { y: 0, opacity: 0.6, duration: 0.6, ease: "power2.out" },
-        0.6
-      )
-      .fromTo(desc,
-        { y: 15, opacity: 0 },
-        { y: 0, opacity: 0.75, duration: 0.6, ease: "power2.out" },
-        0.8
-      )
-      .fromTo(cta,
-        { y: 15, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
-        1.0
-      );
+        var tl = gsap.timeline();
+        
+        tl.fromTo(badge, 
+          { y: 20, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.2 }
+        )
+        .fromTo(heading, 
+          { scale: 0.95, opacity: 0 }, 
+          { scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" },
+          0.4
+        )
+        .fromTo(sub,
+          { y: 15, opacity: 0 },
+          { y: 0, opacity: 0.6, duration: 0.6, ease: "power2.out" },
+          0.6
+        )
+        .fromTo(desc,
+          { y: 15, opacity: 0 },
+          { y: 0, opacity: 0.75, duration: 0.6, ease: "power2.out" },
+          0.8
+        )
+        .fromTo(cta,
+          { y: 15, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
+          1.0
+        );
 
-      gsap.to(heading, {
-        yPercent: 30,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".hero-section",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1
-        }
+        gsap.to(heading, {
+          yPercent: 30, ease: "none",
+          scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
+        });
+
+        gsap.to(badge, {
+          yPercent: 50, ease: "none",
+          scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
+        });
+      }).catch(function(err) {
+        console.warn('[Cloudsi] GSAP load gagal:', err);
+        showAll();
       });
 
-      gsap.to(badge, {
-        yPercent: 50,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".hero-section",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1
+      var indicator = document.getElementById('hero-scroll-indicator');
+      if(indicator) {
+        var heroSection = document.querySelector('.hero-section');
+        if (heroSection) {
+          var observer = new IntersectionObserver(function(entries) {
+            if(entries[0].intersectionRatio < 0.9) {
+              indicator.classList.add('fade-out');
+            } else {
+              indicator.classList.remove('fade-out');
+            }
+          }, { threshold: [0.9] });
+          observer.observe(heroSection);
         }
-      });
-    } catch(err) {
-      console.warn('[Cloudsi] GSAP load gagal:', err);
-      showAll();
+      }
     }
 
-    const indicator = document.getElementById('hero-scroll-indicator');
-    if(indicator) {
-       const heroSection = document.querySelector('.hero-section');
-       if (heroSection) {
-         const observer = new IntersectionObserver((entries) => {
-           if(entries[0].intersectionRatio < 0.9) {
-             indicator.classList.add('fade-out');
-           } else {
-             indicator.classList.remove('fade-out');
-           }
-         }, { threshold: [0.9] });
-         observer.observe(heroSection);
-       }
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', initHero);
-  document.addEventListener('astro:after-swap', initHero);
+    document.addEventListener('DOMContentLoaded', initHero);
+    document.addEventListener('astro:after-swap', initHero);
+  })();
 </script>

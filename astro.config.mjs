@@ -18,21 +18,12 @@ export default defineConfig({
     sitemap()
   ],
   vite: {
-    ssr: {
-      noExternal: ['gsap'],
-    },
     build: {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('node_modules/gsap')) {
-              return 'gsap';
-            }
             if (id.includes('node_modules/ogl')) {
               return 'ogl';
-            }
-            if (id.includes('node_modules/lenis')) {
-              return 'lenis';
             }
           }
         }

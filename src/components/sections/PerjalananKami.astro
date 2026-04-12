@@ -471,43 +471,37 @@ const TIMELINE_DATA = [
   }
 </style>
 
-<script>
+<script is:inline>
   document.addEventListener('DOMContentLoaded', initAwwwardsTimeline);
   document.addEventListener('astro:after-swap', initAwwwardsTimeline);
 
   function initAwwwardsTimeline() {
-    const isMobile = window.innerWidth < 640;
-    const isTablet = window.innerWidth < 1024;
-    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const disableParallax = isMobile || isTablet || isReduced;
+    var isMobile = window.innerWidth < 640;
+    var isTablet = window.innerWidth < 1024;
+    var isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var disableParallax = isMobile || isTablet || isReduced;
 
-    const items = document.querySelectorAll<HTMLElement>('[data-pk-item]');
+    var items = document.querySelectorAll('[data-pk-item]');
     if (items.length === 0) return;
 
-    const track = document.getElementById('pk-track');
-    const fillLine = document.getElementById('pk-global-fill');
+    var track = document.getElementById('pk-track');
+    var fillLine = document.getElementById('pk-global-fill');
 
-    // === 1. OBSERVER TUNGGAL (REVERSIBLE) ===
-    // '100% 0px -15% 0px' memastikan item tidak dibuang saat melewati atas layar,
-    // yang memungkinkan efek parallax / exit melapisinya dengan mulus daripada dihilangkan paksa.
-    const viewportOffset = '100% 0px -15% 0px'; 
-    const activeParallaxQueue = new Set<HTMLElement>();
+    var viewportOffset = '100% 0px -15% 0px'; 
+    var activeParallaxQueue = new Set();
 
-    const itemObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const item = entry.target as HTMLElement;
-        const wrap = item.querySelector('.pk-parallax-wrap') as HTMLElement;
+    var itemObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        var item = entry.target;
+        var wrap = item.querySelector('.pk-parallax-wrap');
         
         if (entry.isIntersecting) {
-          // Bawah masuk viewport / Atas masuk lagi layar
           item.classList.add('is-visible');
           if (wrap && !disableParallax) activeParallaxQueue.add(wrap);
         } else {
-          // Bawah keluar viewport ke bawah
           item.classList.remove('is-visible');
           if (wrap && !disableParallax) {
             activeParallaxQueue.delete(wrap);
-            // Reset state
             wrap.style.transform = '';
             wrap.style.opacity = '';
           }
@@ -515,54 +509,43 @@ const TIMELINE_DATA = [
       });
     }, { threshold: 0.1, rootMargin: viewportOffset });
 
-    items.forEach(item => itemObserver.observe(item));
+    items.forEach(function(item) { itemObserver.observe(item); });
 
+    var ticking = false;
+    var rAfAnimLoop = function() {
+      var vh = window.innerHeight;
+      var viewCenter = vh / 2;
 
-    // === 2. PARALLAX & SVG LINE TRACKING (Continuous 60FPS) ===
-    let ticking = false;
-    const rAfAnimLoop = () => {
-      const vh = window.innerHeight;
-      const viewCenter = vh / 2;
-
-      // UPDATE LINE TRACKING (ScaleY)
       if (track && fillLine) {
-        const trackRect = track.getBoundingClientRect();
-        const triggerPoint = vh * 0.7; // Titik "air" merespon
-        const trackHeight = trackRect.height;
-        
-        let distance = triggerPoint - trackRect.top;
-        
-        // Pengecekan rasio (0 sampai 1)
-        let ratio = distance / trackHeight;
+        var trackRect = track.getBoundingClientRect();
+        var triggerPoint = vh * 0.7;
+        var trackHeight = trackRect.height;
+        var distance = triggerPoint - trackRect.top;
+        var ratio = distance / trackHeight;
         ratio = Math.max(0, Math.min(1, ratio));
-        
-        // Aplikasikan scaleY - ini 100% akurat di semua browser
-        fillLine.style.transform = `scaleY(${ratio})`;
+        fillLine.style.transform = 'scaleY(' + ratio + ')';
       }
 
-      // UPDATE PARALLAX
       if (!disableParallax) {
-        activeParallaxQueue.forEach(wrap => {
-          const rect = wrap.getBoundingClientRect();
-          const objCenter = rect.top + rect.height / 2;
-          const distance = objCenter - viewCenter;
+        activeParallaxQueue.forEach(function(wrap) {
+          var rect = wrap.getBoundingClientRect();
+          var objCenter = rect.top + rect.height / 2;
+          var dist = objCenter - viewCenter;
           
-          // Cinematic Depth (-20px to 20px)
-          let depthY = (distance / viewCenter) * 20;
+          var depthY = (dist / viewCenter) * 20;
           depthY = Math.max(-20, Math.min(20, depthY));
           
-          let outScale = 1;
-          let outOpacity = 1;
+          var outScale = 1;
+          var outOpacity = 1;
 
-          // Exit Animation ke ATAS
-          if (distance < -viewCenter * 0.15) {
-            let progress = Math.abs(distance + (viewCenter * 0.15)) / (viewCenter * 0.85);
+          if (dist < -viewCenter * 0.15) {
+            var progress = Math.abs(dist + (viewCenter * 0.15)) / (viewCenter * 0.85);
             progress = Math.max(0, Math.min(1, progress));
             outScale = 1 - (0.04 * progress);
             outOpacity = 1 - (0.6 * progress);
           }
 
-          wrap.style.transform = `translateY(${depthY.toFixed(2)}px) scale(${outScale.toFixed(3)})`;
+          wrap.style.transform = 'translateY(' + depthY.toFixed(2) + 'px) scale(' + outScale.toFixed(3) + ')';
           wrap.style.opacity = outOpacity.toFixed(3);
         });
       }
@@ -570,7 +553,7 @@ const TIMELINE_DATA = [
       ticking = false;
     };
 
-    const handleScroll = () => {
+    var handleScroll = function() {
       if (!ticking) {
         window.requestAnimationFrame(rAfAnimLoop);
         ticking = true;
@@ -578,29 +561,25 @@ const TIMELINE_DATA = [
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Inisiasi render frame pertama
     window.requestAnimationFrame(rAfAnimLoop);
 
-    // CLEANUP PENTING untuk Astro View Transitions
-    const cleanup = () => {
+    var cleanup = function() {
       window.removeEventListener('scroll', handleScroll);
       itemObserver.disconnect();
       document.removeEventListener('astro:before-swap', cleanup);
     };
     document.addEventListener('astro:before-swap', cleanup);
 
-    // === 3. PHYSICS SPRING MODAL LOGIC ===
-    const cards = document.querySelectorAll<HTMLElement>('.pk-card');
-    const modal = document.getElementById('pk-modal');
-    const backdrop = document.getElementById('pk-modal-backdrop');
-    const btnClose = document.getElementById('pk-modal-close');
+    var cards = document.querySelectorAll('.pk-card');
+    var modal = document.getElementById('pk-modal');
+    var backdrop = document.getElementById('pk-modal-backdrop');
+    var btnClose = document.getElementById('pk-modal-close');
     
-    const mDate = document.getElementById('pk-modal-date');
-    const mTitle = document.getElementById('pk-modal-title');
-    const mDesc = document.getElementById('pk-modal-desc');
+    var mDate = document.getElementById('pk-modal-date');
+    var mTitle = document.getElementById('pk-modal-title');
+    var mDesc = document.getElementById('pk-modal-desc');
 
-    function openModal(date: string, title: string, desc: string) {
+    function openModal(date, title, desc) {
       if (!modal || !mDate || !mTitle || !mDesc) return;
       mDate.textContent = date;
       mTitle.textContent = title;
@@ -613,30 +592,32 @@ const TIMELINE_DATA = [
       if (!modal) return;
       modal.classList.remove('is-open');
       document.body.style.overflow = '';
-      setTimeout(() => {
+      setTimeout(function() {
         if (!modal.classList.contains('is-open')) {
            if(mDate) mDate.textContent = '';
            if(mTitle) mTitle.textContent = '';
            if(mDesc) mDesc.textContent = '';
         }
-      }, 300); // clear sesudah hilang
+      }, 300);
     }
 
-    cards.forEach(card => {
-      card.addEventListener('click', (e) => {
-        // Efek ripple native kecil di tombol? opsional, focus ke physics spec
-        const date = card.querySelector('.pk-date')?.textContent || '';
-        const title = card.querySelector('.pk-title')?.textContent || '';
-        const desc = card.querySelector('.pk-hidden-desc')?.textContent || '';
+    cards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        var dateEl = card.querySelector('.pk-date');
+        var titleEl = card.querySelector('.pk-title');
+        var descEl = card.querySelector('.pk-hidden-desc');
+        var date = dateEl ? dateEl.textContent : '';
+        var title = titleEl ? titleEl.textContent : '';
+        var desc = descEl ? descEl.textContent : '';
         openModal(date, title, desc);
       });
     });
 
-    backdrop?.addEventListener('click', closeModal);
-    btnClose?.addEventListener('click', closeModal);
+    if(backdrop) backdrop.addEventListener('click', closeModal);
+    if(btnClose) btnClose.addEventListener('click', closeModal);
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal?.classList.contains('is-open')) closeModal();
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) closeModal();
     });
   }
 </script>

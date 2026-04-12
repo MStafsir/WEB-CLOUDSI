@@ -218,60 +218,60 @@ function formatDate(dateStr: string): string {
   }
 </style>
 
-<script>
-  async function initTimeline() {
-    const cards = document.querySelectorAll('[data-timeline-card]');
-    const dots = document.querySelectorAll('[data-timeline-dot]');
-    const line = document.getElementById('timeline-line');
+<script is:inline>
+  (function() {
+    function initTimeline() {
+      var cards = document.querySelectorAll('[data-timeline-card]');
+      var dots = document.querySelectorAll('[data-timeline-dot]');
+      var line = document.getElementById('timeline-line');
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      cards.forEach(c => { c.classList.add('visible'); });
-      dots.forEach(d => { d.classList.add('visible'); });
-      return;
-    }
-
-    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
-    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
-      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
-    }
-
-    // Garis: animate scaleY via GSAP
-    try {
-      if (line) {
-        const { gsap } = await importWithTimeout(() => import('gsap'));
-        const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
-        gsap.registerPlugin(ScrollTrigger);
-
-        gsap.fromTo(line,
-          { scaleY: 0 },
-          {
-            scaleY: 1, ease: 'none',
-            scrollTrigger: {
-              trigger: '#timeline-component',
-              start: 'top 80%',
-              end: 'bottom 60%',
-              scrub: 1,
-            },
-          }
-        );
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) {
+        cards.forEach(function(c) { c.classList.add('visible'); });
+        dots.forEach(function(d) { d.classList.add('visible'); });
+        return;
       }
-    } catch(err) { /* GSAP optional for line */ }
 
-    // Cards & dots: IntersectionObserver
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.2 });
+      // Garis: animate scaleY via GSAP
+      if (line) {
+        Promise.all([
+          import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'),
+          import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm')
+        ]).then(function(modules) {
+          var gsap = modules[0].gsap || modules[0].default;
+          var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+          gsap.registerPlugin(ScrollTrigger);
 
-    cards.forEach(c => observer.observe(c));
-    dots.forEach(d => observer.observe(d));
-  }
+          gsap.fromTo(line,
+            { scaleY: 0 },
+            {
+              scaleY: 1, ease: 'none',
+              scrollTrigger: {
+                trigger: '#timeline-component',
+                start: 'top 80%',
+                end: 'bottom 60%',
+                scrub: 1,
+              },
+            }
+          );
+        }).catch(function(err) {});
+      }
 
-  document.addEventListener('DOMContentLoaded', initTimeline);
-  document.addEventListener('astro:after-swap', initTimeline);
+      // Cards & dots: IntersectionObserver
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+
+      cards.forEach(function(c) { observer.observe(c); });
+      dots.forEach(function(d) { observer.observe(d); });
+    }
+
+    document.addEventListener('DOMContentLoaded', initTimeline);
+    document.addEventListener('astro:after-swap', initTimeline);
+  })();
 </script>

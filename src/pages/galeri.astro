@@ -328,146 +328,146 @@ const stackData = [
   .lightbox-close:hover { opacity: 1; }
 </style>
 
-<script>
-  function initGaleriInteraktif() {
-    const bentoFrames = document.querySelectorAll('#galleryGrid .photo-frame');
-    const stackCards = document.querySelectorAll('.stack-card');
+<script is:inline>
+  (function() {
+    function initGaleriInteraktif() {
+      var bentoFrames = document.querySelectorAll('#galleryGrid .photo-frame');
+      var stackCards = document.querySelectorAll('.stack-card');
 
-    // ── 1. BENTO: INTERSECTION OBSERVER (Animasi Masuk Bebas Konflik) ──
-    // Kita gunakan ini agar tidak bertabrakan dengan sistem transform Parallax dan 3D Hover
-    if(bentoFrames.length > 0) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('is-visible');
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-      bentoFrames.forEach(f => observer.observe(f));
-    }
+      // 1. BENTO: INTERSECTION OBSERVER
+      if(bentoFrames.length > 0) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) entry.target.classList.add('is-visible');
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        bentoFrames.forEach(function(f) { observer.observe(f); });
+      }
 
-    // ── 2. BENTO: PARALLAX SCROLL ──
-    const speeds = [0.030, -0.022, 0.020, -0.016, 0.015, -0.020, 0.018];
-    function onScrollBento() {
-      const scrollY = window.scrollY;
-      bentoFrames.forEach((frame, i) => {
-        if (!frame.classList.contains('is-visible')) return;
-        const speed = speeds[i % speeds.length];
-        const offsetY = scrollY * speed;
-        const rotEnd = frame.getAttribute('data-rot-end') || '0deg';
-        frame.style.transitionDelay = '0ms';
-        frame.style.transform = `translateY(${offsetY}px) rotate(${rotEnd}) scale(1)`;
-      });
-    }
-
-    // ── 3. STACKING CARDS: JAVASCRIPT FALLBACK ──
-    if (stackCards.length > 0 && !CSS.supports('animation-timeline: view()')) {
-      const stackObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if(entry.isIntersecting) entry.target.classList.add('in-view');
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-      stackCards.forEach(c => stackObserver.observe(c));
-    }
-
-    function onScrollStack() {
-      // Logic for fallback scaling down if scroll-driven animation isn't supported
-      if (!CSS.supports('animation-timeline: view()') && stackCards.length > 0) {
-        const scrollY = window.scrollY;
-        const viewHeight = window.innerHeight;
-        
-        stackCards.forEach((card) => {
-          if (!card.classList.contains('in-view')) return;
-          const stickyTopBase = 80;
-          const index = parseInt(card.style.getPropertyValue('--card-index'));
-          const stickyTopPos = stickyTopBase + (index * 20); // Posisi absolut lengket dalam viewport
-          const rect = card.getBoundingClientRect();
-          
-          // Jika kartu sudah mentok atau melampaui posisi lengket-nya
-          if (rect.top <= stickyTopPos + 2) {
-             const distToTop = Math.abs(rect.top - stickyTopPos);
-             // Kartu mulai terdesak ke belakang oleh kartu penumpuk dari bawah
-             const scrollProgress = Math.max(0, distToTop) / (viewHeight * 0.6); // Jarak 60vh scale
-             const scale = Math.max(0.95, 1 - (scrollProgress * 0.05));
-             const blurAmt = Math.min(4, scrollProgress * 10);
-             
-             card.style.transform = `scale(${scale})`;
-             card.style.filter = `brightness(${1 - scrollProgress * 0.2}) blur(${blurAmt}px)`;
-          } else {
-             // Pastikan transform di reset ke Y=0 karena state `in-view`
-             card.style.transform = `translateY(0) scale(1)`;
-             card.style.filter = `brightness(1) blur(0px)`;
-          }
+      // 2. BENTO: PARALLAX SCROLL
+      var speeds = [0.030, -0.022, 0.020, -0.016, 0.015, -0.020, 0.018];
+      function onScrollBento() {
+        var scrollY = window.scrollY;
+        bentoFrames.forEach(function(frame, i) {
+          if (!frame.classList.contains('is-visible')) return;
+          var speed = speeds[i % speeds.length];
+          var offsetY = scrollY * speed;
+          var rotEnd = frame.getAttribute('data-rot-end') || '0deg';
+          frame.style.transitionDelay = '0ms';
+          frame.style.transform = 'translateY(' + offsetY + 'px) rotate(' + rotEnd + ') scale(1)';
         });
       }
-    }
 
-    function onScrollMaster() {
-      onScrollBento();
-      onScrollStack();
-    }
-    window.addEventListener('scroll', onScrollMaster, { passive: true });
+      // 3. STACKING CARDS: JS FALLBACK
+      var stackObserver;
+      if (stackCards.length > 0 && !CSS.supports('animation-timeline: view()')) {
+        stackObserver = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if(entry.isIntersecting) entry.target.classList.add('in-view');
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        stackCards.forEach(function(c) { stackObserver.observe(c); });
+      }
 
-    // CLEANUP MEMORY LEAK UNTUK ASTRO VIEW TRANSITIONS
-    const cleanup = () => {
-      window.removeEventListener('scroll', onScrollMaster);
-      if (typeof observer !== 'undefined') observer.disconnect();
-      if (typeof stackObserver !== 'undefined') stackObserver.disconnect();
-      document.removeEventListener('astro:before-swap', cleanup);
-    };
-    document.addEventListener('astro:before-swap', cleanup);
-
-    // ── 4. BENTO: 3D HOVER TILT ──
-    bentoFrames.forEach((frame, index) => {
-      frame.addEventListener('mousemove', function(e) {
-        const rect = this.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-        const dx = (e.clientX - cx) / (rect.width / 2), dy = (e.clientY - cy) / (rect.height / 2);
-        this.style.transform = `perspective(700px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg) scale(1.02) translateZ(5px)`;
-        this.style.transitionDelay = '0ms';
-        this.style.transition = 'transform 0.1s ease, box-shadow 0.1s ease, border-color 0.3s';
-      });
-      frame.addEventListener('mouseleave', function() {
-        const i = Array.from(bentoFrames).indexOf(this);
-        const offsetY = window.scrollY * speeds[i % speeds.length];
-        const rotEnd = this.getAttribute('data-rot-end') || '0deg';
-        this.style.transform = `translateY(${offsetY}px) rotate(${rotEnd}) scale(1)`;
-        this.style.transition = 'transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s';
-      });
-    });
-
-    // ── 5. LIGHTBOX BENTO LOGIC ──
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxCaption = document.getElementById('lightbox-caption');
-    const closeBtn = document.getElementById('lightbox-close');
-    const backdrop = document.getElementById('lightbox-backdrop');
-    
-    bentoFrames.forEach((item) => {
-      item.addEventListener('click', () => {
-        const imgEl = item.querySelector('.masonry-img');
-        const captionEl = item.querySelector('.overlay-text');
-        if(imgEl) {
-          lightboxImg.src = imgEl.src;
-          lightboxImg.alt = imgEl.alt;
+      function onScrollStack() {
+        if (!CSS.supports('animation-timeline: view()') && stackCards.length > 0) {
+          var scrollY = window.scrollY;
+          var viewHeight = window.innerHeight;
+          
+          stackCards.forEach(function(card) {
+            if (!card.classList.contains('in-view')) return;
+            var stickyTopBase = 80;
+            var index = parseInt(card.style.getPropertyValue('--card-index'));
+            var stickyTopPos = stickyTopBase + (index * 20);
+            var rect = card.getBoundingClientRect();
+            
+            if (rect.top <= stickyTopPos + 2) {
+              var distToTop = Math.abs(rect.top - stickyTopPos);
+              var scrollProgress = Math.max(0, distToTop) / (viewHeight * 0.6);
+              var scale = Math.max(0.95, 1 - (scrollProgress * 0.05));
+              var blurAmt = Math.min(4, scrollProgress * 10);
+              
+              card.style.transform = 'scale(' + scale + ')';
+              card.style.filter = 'brightness(' + (1 - scrollProgress * 0.2) + ') blur(' + blurAmt + 'px)';
+            } else {
+              card.style.transform = 'translateY(0) scale(1)';
+              card.style.filter = 'brightness(1) blur(0px)';
+            }
+          });
         }
-        lightboxCaption.textContent = captionEl ? captionEl.textContent : '';
-        lightbox.removeAttribute('hidden');
-        document.body.style.overflow = 'hidden';
-        requestAnimationFrame(() => lightbox.classList.add('open'));
+      }
+
+      function onScrollMaster() {
+        onScrollBento();
+        onScrollStack();
+      }
+      window.addEventListener('scroll', onScrollMaster, { passive: true });
+
+      var cleanup = function() {
+        window.removeEventListener('scroll', onScrollMaster);
+        if (observer) observer.disconnect();
+        if (stackObserver) stackObserver.disconnect();
+        document.removeEventListener('astro:before-swap', cleanup);
+      };
+      document.addEventListener('astro:before-swap', cleanup);
+
+      // 4. BENTO: 3D HOVER TILT
+      bentoFrames.forEach(function(frame) {
+        frame.addEventListener('mousemove', function(e) {
+          var rect = this.getBoundingClientRect();
+          var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+          var dx = (e.clientX - cx) / (rect.width / 2), dy = (e.clientY - cy) / (rect.height / 2);
+          this.style.transform = 'perspective(700px) rotateY(' + (dx * 5) + 'deg) rotateX(' + (-dy * 5) + 'deg) scale(1.02) translateZ(5px)';
+          this.style.transitionDelay = '0ms';
+          this.style.transition = 'transform 0.1s ease, box-shadow 0.1s ease, border-color 0.3s';
+        });
+        frame.addEventListener('mouseleave', function() {
+          var i = Array.from(bentoFrames).indexOf(this);
+          var offsetY = window.scrollY * speeds[i % speeds.length];
+          var rotEnd = this.getAttribute('data-rot-end') || '0deg';
+          this.style.transform = 'translateY(' + offsetY + 'px) rotate(' + rotEnd + ') scale(1)';
+          this.style.transition = 'transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s';
+        });
       });
-    });
 
-    function closeLightbox() {
-      lightbox.classList.remove('open');
-      setTimeout(() => {
-        lightbox.setAttribute('hidden', '');
-        document.body.style.overflow = '';
-      }, 300);
+      // 5. LIGHTBOX
+      var lightbox = document.getElementById('lightbox');
+      var lightboxImg = document.getElementById('lightbox-img');
+      var lightboxCaption = document.getElementById('lightbox-caption');
+      var closeBtn = document.getElementById('lightbox-close');
+      var backdrop = document.getElementById('lightbox-backdrop');
+      
+      bentoFrames.forEach(function(item) {
+        item.addEventListener('click', function() {
+          var imgEl = item.querySelector('.masonry-img');
+          var captionEl = item.querySelector('.overlay-text');
+          if(imgEl && lightboxImg) {
+            lightboxImg.src = imgEl.src;
+            lightboxImg.alt = imgEl.alt;
+          }
+          if(lightboxCaption) lightboxCaption.textContent = captionEl ? captionEl.textContent : '';
+          if(lightbox) {
+            lightbox.removeAttribute('hidden');
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(function() { lightbox.classList.add('open'); });
+          }
+        });
+      });
+
+      function closeLightbox() {
+        if(!lightbox) return;
+        lightbox.classList.remove('open');
+        setTimeout(function() {
+          lightbox.setAttribute('hidden', '');
+          document.body.style.overflow = '';
+        }, 300);
+      }
+      if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+      if (backdrop) backdrop.addEventListener('click', closeLightbox);
+      document.addEventListener('keydown', function(e) { if(lightbox && !lightbox.hasAttribute('hidden') && e.key === 'Escape') closeLightbox(); });
     }
-    if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-    if (backdrop) backdrop.addEventListener('click', closeLightbox);
-    document.addEventListener('keydown', (e) => { if(!lightbox.hasAttribute('hidden') && e.key === 'Escape') closeLightbox(); });
-  }
 
-  document.addEventListener('DOMContentLoaded', initGaleriInteraktif);
-  document.addEventListener('astro:after-swap', initGaleriInteraktif);
+    document.addEventListener('DOMContentLoaded', initGaleriInteraktif);
+    document.addEventListener('astro:after-swap', initGaleriInteraktif);
+  })();
 </script>

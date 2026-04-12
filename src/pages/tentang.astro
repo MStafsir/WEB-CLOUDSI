@@ -214,53 +214,58 @@ const timeline = await getTimeline();
   }
 </style>
 
-<script>
-  async function initTentang() {
-    const animEls = document.querySelectorAll('[data-tentang-anim]');
+<script is:inline>
+  (function() {
+    function initTentang() {
+      var animEls = document.querySelectorAll('[data-tentang-anim]');
 
-    function showAll() {
-      animEls.forEach(el => {
-        (el as HTMLElement).style.opacity = '1';
-        (el as HTMLElement).style.transform = 'none';
-      });
-    }
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) { showAll(); return; }
-
-    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
-    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
-      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
-    }
-
-    try {
-      const { gsap } = await importWithTimeout(() => import('gsap'));
-      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
-      gsap.registerPlugin(ScrollTrigger);
-      
-      gsap.fromTo(animEls,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: 'power2.out', delay: 0.2 }
-      );
-
-      const vmCards = document.querySelectorAll('.visimisi-card');
-      if (vmCards.length > 0) {
-        gsap.fromTo(vmCards,
-          { opacity: 0, scale: 0.95, y: 30 },
-          {
-            opacity: 1, scale: 1, y: 0, stagger: 0.1, ease: 'power2.out',
-            scrollTrigger: {
-              trigger: '.visimisi-grid',
-              start: 'top 95%',
-              end: 'bottom 80%',
-              scrub: 1
-            }
-          }
-        );
+      function showAll() {
+        animEls.forEach(function(el) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+        });
       }
-    } catch(err) { showAll(); }
-  }
 
-  document.addEventListener('DOMContentLoaded', initTentang);
-  document.addEventListener('astro:after-swap', initTentang);
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) { showAll(); return; }
+
+      function importWithTimeout(fn, ms) {
+        ms = ms || 5000;
+        return Promise.race([fn(), new Promise(function(_, r) { setTimeout(function() { r(new Error('Import timeout')); }, ms); })]);
+      }
+
+      Promise.all([
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
+      ]).then(function(modules) {
+        var gsap = modules[0].gsap || modules[0].default;
+        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.fromTo(animEls,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: 'power2.out', delay: 0.2 }
+        );
+
+        var vmCards = document.querySelectorAll('.visimisi-card');
+        if (vmCards.length > 0) {
+          gsap.fromTo(vmCards,
+            { opacity: 0, scale: 0.95, y: 30 },
+            {
+              opacity: 1, scale: 1, y: 0, stagger: 0.1, ease: 'power2.out',
+              scrollTrigger: {
+                trigger: '.visimisi-grid',
+                start: 'top 95%',
+                end: 'bottom 80%',
+                scrub: 1
+              }
+            }
+          );
+        }
+      }).catch(function(err) { showAll(); });
+    }
+
+    document.addEventListener('DOMContentLoaded', initTentang);
+    document.addEventListener('astro:after-swap', initTentang);
+  })();
 </script>

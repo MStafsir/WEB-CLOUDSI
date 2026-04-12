@@ -285,56 +285,55 @@ const { members } = Astro.props;
   }
 </style>
 
-<script>
-  // NOT is:inline — Astro bundles this, so import('gsap') works
-  async function initMemberPreview() {
-    const cards = document.querySelectorAll('.member-preview-card');
-    
-    function showAll() {
-      cards.forEach(card => {
-        (card as HTMLElement).style.opacity = '1';
-        (card as HTMLElement).style.transform = 'none';
-      });
-    }
+<script is:inline>
+  (function() {
+    function initMemberPreview() {
+      var cards = document.querySelectorAll('.member-preview-card');
+      
+      function showAll() {
+        cards.forEach(function(card) {
+          card.style.opacity = '1';
+          card.style.transform = 'none';
+        });
+      }
 
-    if (cards.length === 0) return;
+      if (cards.length === 0) return;
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      showAll();
-      return;
-    }
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) { showAll(); return; }
 
-    // Timeout wrapper: mencegah Vite 504 dari memblokir animasi selamanya
-    function importWithTimeout<T>(fn: () => Promise<T>, ms = 5000): Promise<T> {
-      return Promise.race([fn(), new Promise<never>((_, r) => setTimeout(() => r(new Error('Import timeout')), ms))]);
-    }
+      function importWithTimeout(fn, ms) {
+        ms = ms || 5000;
+        return Promise.race([fn(), new Promise(function(_, r) { setTimeout(function() { r(new Error('Import timeout')); }, ms); })]);
+      }
 
-    try {
-      const { gsap } = await importWithTimeout(() => import('gsap'));
-      const { ScrollTrigger } = await importWithTimeout(() => import('gsap/ScrollTrigger'));
-      gsap.registerPlugin(ScrollTrigger);
+      Promise.all([
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
+        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
+      ]).then(function(modules) {
+        var gsap = modules[0].gsap || modules[0].default;
+        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+        gsap.registerPlugin(ScrollTrigger);
 
-      gsap.fromTo(cards, 
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.15,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".member-grid",
-            start: "top 90%",
-            end: "bottom 60%",
-            scrub: 1
+        gsap.fromTo(cards, 
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.15,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".member-grid",
+              start: "top 90%",
+              end: "bottom 60%",
+              scrub: 1
+            }
           }
-        }
-      );
-    } catch(err) {
-      showAll();
+        );
+      }).catch(function(err) { showAll(); });
     }
-  }
 
-  document.addEventListener('DOMContentLoaded', initMemberPreview);
-  document.addEventListener('astro:after-swap', initMemberPreview);
+    document.addEventListener('DOMContentLoaded', initMemberPreview);
+    document.addEventListener('astro:after-swap', initMemberPreview);
+  })();
 </script>
