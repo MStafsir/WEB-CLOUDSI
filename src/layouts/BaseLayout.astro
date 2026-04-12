@@ -18,14 +18,14 @@ interface Props {
 }
 
 const {
-  title = "NAMA_WEB_KITA", 
-  description = "TULIS_DESKRIPSI_ANGKATAN_DI_SINI_AGAR_MUNCUL_DI_GOOGLE",
+  title = "Cloudsi | Sistem Informasi Untan", 
+  description = "Dalam satu ruang kami adalah keluarga besar Sistem Informasi Universitas Tanjungpura, penggerak teknologi masa depan.",
   ogImage = "/logo-angkatan-25.png",
   keywords = "Cloudsi, Angkatan SI, Website Angkatan, Profil Mahasiswa",
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? 'https://cloudsi.vercel.app');
-const fullTitle = `${title} | Cloudsi Connect`;
+const fullTitle = title;
 ---
 
 <!DOCTYPE html>
@@ -55,7 +55,7 @@ const fullTitle = `${title} | Cloudsi Connect`;
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(ogImage, Astro.site ?? 'https://cloudsi.vercel.app')} />
     <meta property="og:url" content={canonicalUrl.href} />
-    <meta property="og:site_name" content="Cloudsi Connect" />
+    <meta property="og:site_name" content="Cloudsi" />
     <meta property="og:locale" content="id_ID" />
 
     <!-- Twitter Card -->
