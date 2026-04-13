@@ -75,7 +75,7 @@
         let rtPrevious = createRT();
         let rtOutput = createRT();
 
-        const videoEl = document.getElementById('bg-hero-video');
+        const videoEl = document.getElementById('bg-hero-video') || document.getElementById('cloud-canvas');
         let videoTex = null;
         if (videoEl) {
           // [FIX] Jangan load video secara buta kalau state-nya masih 0 (bisa bikin WebGL Crash)
@@ -250,23 +250,29 @@
         function animate(t) {
           rAFId = requestAnimationFrame(animate);
 
-          // Cek kalau video sudah murni terestrak dan siap dinikmati (readyState 2+)
-          if (videoTex && videoEl && videoEl.readyState >= 2) {
-             // Timpa texture dummy 1x1 tadi dengan video aslinya!
-             if (videoTex.image instanceof Uint8Array) {
-               videoTex.image = videoEl;
+          // Cek kesiapan sumber background
+          if (videoTex && videoEl) {
+             const isVideo = videoEl.tagName.toLowerCase() === 'video';
+             const isReady = isVideo ? videoEl.readyState >= 2 : true;
+
+             if (isReady) {
+               // Update texture ke elemen sumber jika masih array
+               if (videoTex.image instanceof Uint8Array || !isVideo) {
+                 videoTex.image = videoEl;
+               }
+               // Canvas perlu diupdate terus menerus, video juga!
+               videoTex.needsUpdate = true;
+               
+               // Kalkulasi Object-Cover Matematika Akurat
+               const cW = window.innerWidth;
+               const cH = window.innerHeight;
+               const vW = isVideo ? (videoEl.videoWidth || 1920) : (videoEl.width || window.innerWidth);
+               const vH = isVideo ? (videoEl.videoHeight || 1080) : (videoEl.height || window.innerHeight);
+               const scale = Math.max(cW / vW, cH / vH);
+               const rW = vW * scale;
+               const rH = vH * scale;
+               renderProgram.uniforms.uVideoScale.value = [cW / rW, cH / rH];
              }
-             videoTex.needsUpdate = true;
-             
-             // Kalkulasi Object-Cover Matematika Akurat
-             const cW = window.innerWidth;
-             const cH = window.innerHeight;
-             const vW = videoEl.videoWidth || 1920;
-             const vH = videoEl.videoHeight || 1080;
-             const scale = Math.max(cW / vW, cH / vH);
-             const rW = vW * scale;
-             const rH = vH * scale;
-             renderProgram.uniforms.uVideoScale.value = [cW / rW, cH / rH];
           }
 
           simProgram.uniforms.uCurrent.value = rtCurrent.texture;
@@ -305,7 +311,14 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', initWaterRipple);
-    document.addEventListener('astro:after-swap', initWaterRipple);
+        function scheduleWater() {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(initWaterRipple, { timeout: 1000 });
+          } else {
+            setTimeout(initWaterRipple, 300);
+          }
+        }
+    document.addEventListener('DOMContentLoaded', scheduleWater);
+    document.addEventListener('astro:after-swap', scheduleWater);
   })();
 </script>

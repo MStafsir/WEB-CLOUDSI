@@ -52,7 +52,7 @@ const stackData = [
             <!-- FOTO 1: Besar 2x2 (R1C1, R1C2, R2C1, R2C2) -->
             <div class="photo-frame item-large masonry-item" data-rot="-13deg" data-rot-end="-1.5deg" style="--rot:-13deg; --rot-end:-1.5deg; transition-delay:0ms;">
               <div class="photo-inner ph-1">
-                <img src="/galeri/1.jpg" alt="Foto 1" loading="eager" class="masonry-img">
+                <img src="/galeri/1.webp" alt="Foto 1" width="800" height="600" loading="eager" fetchpriority="high" class="masonry-img">
                 <span class="caption overlay-text">SINTA 2025</span>
               </div>
             </div>
@@ -60,7 +60,7 @@ const stackData = [
             <!-- FOTO 2: Normal (R1C3) -->
             <div class="photo-frame masonry-item" data-rot="10deg" data-rot-end="1deg" style="--rot:10deg; --rot-end:1deg; transition-delay:80ms;">
               <div class="photo-inner ph-2">
-                <img src="/galeri/2.jpg" alt="Foto 2" loading="eager" class="masonry-img">
+                <img src="/galeri/2.webp" alt="Foto 2" width="800" height="600" loading="eager" fetchpriority="high" class="masonry-img">
                 <span class="caption overlay-text">CIS</span>
               </div>
             </div>
@@ -68,7 +68,7 @@ const stackData = [
             <!-- FOTO 3: Tinggi 1x2 -> R2C3, R3C3 -->
             <div class="photo-frame item-tall masonry-item" data-rot="-7deg" data-rot-end="1.5deg" style="--rot:-7deg; --rot-end:1.5deg; transition-delay:120ms;">
               <div class="photo-inner ph-3">
-                <img src="/galeri/3.jpg" alt="Foto 3" loading="lazy" class="masonry-img">
+                <img src="/galeri/3.webp" alt="Foto 3" width="800" height="600" loading="lazy" class="masonry-img">
                 <span class="caption overlay-text">OSI Badminton</span>
               </div>
             </div>
@@ -76,7 +76,7 @@ const stackData = [
             <!-- FOTO 4: Lebar 2x1 -> R3C1, R3C2 -->
             <div class="photo-frame item-wide masonry-item" data-rot="9deg" data-rot-end="-1deg" style="--rot:9deg; --rot-end:-1deg; transition-delay:160ms;">
               <div class="photo-inner ph-4">
-                <img src="/galeri/4.jpg" alt="Foto 4" loading="lazy" class="masonry-img">
+                <img src="/galeri/4.webp" alt="Foto 4" width="800" height="600" loading="lazy" class="masonry-img">
                 <span class="caption overlay-text">OSI Badminton (Mahasiswi)</span>
               </div>
             </div>
@@ -84,7 +84,7 @@ const stackData = [
             <!-- FOTO 5: Lebar 2x1 -> R4C1, R4C2 -->
             <div class="photo-frame item-wide masonry-item" data-rot="-5deg" data-rot-end="0.5deg" style="--rot:-5deg; --rot-end:0.5deg; transition-delay:200ms;">
               <div class="photo-inner ph-5">
-                <img src="/galeri/5.jpg" alt="Foto 5" loading="lazy" class="masonry-img">
+                <img src="/galeri/5.webp" alt="Foto 5" width="800" height="600" loading="lazy" class="masonry-img">
                 <span class="caption overlay-text">Foto Angkatan Pertama</span>
               </div>
             </div>
@@ -92,7 +92,7 @@ const stackData = [
             <!-- FOTO 6: Normal 1x1 -> R4C3 -->
             <div class="photo-frame masonry-item" data-rot="14deg" data-rot-end="-2deg" style="--rot:14deg; --rot-end:-2deg; transition-delay:240ms;">
               <div class="photo-inner ph-6">
-                <img src="/galeri/6.jpg" alt="Foto 6" loading="lazy" class="masonry-img">
+                <img src="/galeri/6.webp" alt="Foto 6" width="800" height="600" loading="lazy" class="masonry-img">
                 <span class="caption overlay-text">OSI Badminton</span>
               </div>
             </div>
@@ -100,7 +100,7 @@ const stackData = [
             <!-- FOTO 7: Full 3x1 -> R5C1, R5C2, R5C3 -->
             <div class="photo-frame item-full masonry-item" data-rot="-6deg" data-rot-end="2deg" style="--rot:-6deg; --rot-end:2deg; transition-delay:280ms;">
               <div class="photo-inner ph-7" style="background-color: #081a30;">  
-                <img src="/galeri/7.jpg" alt="Foto 7" loading="lazy" class="masonry-img">
+                <img src="/galeri/7.webp" alt="Foto 7" width="800" height="600" loading="lazy" class="masonry-img">
                 <span class="caption overlay-text">Bukber CloudSI</span>
               </div>
             </div>
@@ -122,7 +122,7 @@ const stackData = [
               <div class="stack-card glass" style={`--card-index: ${i};`}>
                 <div class="stack-card-inner">
                   <div class="stack-img-col">
-                    <img src={`/galeri/${card.id}.jpg`} alt={card.title} loading="lazy" />
+                    <img src={`/galeri/${card.id}.webp`} alt={card.title} width="800" height="600" loading="lazy" />
                   </div>
                   <div class="stack-txt-col">
                     <div class="stack-badge">{card.badge}</div>

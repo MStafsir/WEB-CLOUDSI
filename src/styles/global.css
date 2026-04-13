@@ -10,11 +10,7 @@
    ============================================ */
 @import './tokens.css';
 
-/* ============================================
-   GOOGLE FONTS — Cormorant Garamond + Plus Jakarta Sans
-   font-display: swap untuk performa loading optimal
-   ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+/* Google Fonts sudah dihandle secara asynchronous via preload di BaseLayout.astro untuk performa terbaik */
 
 /* ============================================
    TAILWIND DIRECTIVES
