@@ -443,38 +443,7 @@ const sortedMembers = members;
         }
       });
 
-      // GSAP Scroll animation
-      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!prefersReduced) {
-        Promise.all([
-          import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'),
-          import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm')
-        ]).then(function(modules) {
-          var gsap = modules[0].gsap || modules[0].default;
-          var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
-          gsap.registerPlugin(ScrollTrigger);
-          memberItems.forEach(function(item) {
-            gsap.fromTo(item, 
-              { opacity: 0, y: 40, scale: 0.95 },
-              {
-                opacity: 1, y: 0, scale: 1,
-                duration: 0.8,
-                ease: 'power2.out',
-                scrollTrigger: {
-                  trigger: item,
-                  start: 'top 92%',
-                  once: true
-                }
-              }
-            );
-          });
 
-          // Cleanup on View Transition
-          document.addEventListener('astro:before-swap', function() {
-            ScrollTrigger.getAll().forEach(function(t) { t.kill(); });
-          }, { once: true });
-        }).catch(function(err) { console.warn('GSAP scrub fallback'); });
-      }
     }
 
     document.addEventListener('DOMContentLoaded', initAnggotaDirectory);

@@ -299,43 +299,7 @@ const { members } = Astro.props;
 
       if (cards.length === 0) return;
 
-      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) { showAll(); return; }
 
-      function importWithTimeout(fn, ms) {
-        ms = ms || 5000;
-        return Promise.race([fn(), new Promise(function(_, r) { setTimeout(function() { r(new Error('Import timeout')); }, ms); })]);
-      }
-
-      Promise.all([
-        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
-        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
-      ]).then(function(modules) {
-        var gsap = modules[0].gsap || modules[0].default;
-        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
-        gsap.registerPlugin(ScrollTrigger);
-
-        gsap.fromTo(cards, 
-          { opacity: 0, y: 50 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: ".member-grid",
-              start: "top 90%",
-              once: true
-            }
-          }
-        );
-
-        // Cleanup on View Transition
-        document.addEventListener('astro:before-swap', function() {
-          ScrollTrigger.getAll().forEach(function(t) { t.kill(); });
-        }, { once: true });
-      }).catch(function(err) { showAll(); });
     }
 
     document.addEventListener('DOMContentLoaded', initMemberPreview);
