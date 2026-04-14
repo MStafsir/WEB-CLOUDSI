@@ -303,24 +303,31 @@
         // ===== INTERACTION-GATED rAF =====
         var isAnimating = false;
         var isVisible = true;
-        var idleTimer = null;
-        var IDLE_TIMEOUT = 200; // ms after last interaction to stop
+        var autoDropTimer = null;
         
         function startLoop() {
           if (isAnimating || !isVisible) return;
           isAnimating = true;
           rAFId = requestAnimationFrame(animate);
+          
+          // Auto drops to keep animation alive continuously
+          if (!autoDropTimer) {
+             autoDropTimer = setInterval(function() {
+                var rx = (0.2 + Math.random() * 0.6) * window.innerWidth;
+                var ry = (0.2 + Math.random() * 0.6) * window.innerHeight;
+                addDrop(rx, ry);
+             }, 3500); 
+          }
         }
         
         function stopLoop() {
           if (!isAnimating) return;
           isAnimating = false;
           cancelAnimationFrame(rAFId);
-        }
-        
-        function resetIdleTimer() {
-          if (idleTimer) clearTimeout(idleTimer);
-          idleTimer = setTimeout(stopLoop, IDLE_TIMEOUT);
+          if (autoDropTimer) {
+             clearInterval(autoDropTimer);
+             autoDropTimer = null;
+          }
         }
         
         var handleDragMove = function(e) {
@@ -330,20 +337,21 @@
              addDrop(cx, cy);
              lastMove = performance.now();
              startLoop();
-             resetIdleTimer();
           }
         };
 
         window.addEventListener('mousemove', handleDragMove);
         window.addEventListener('touchmove', handleDragMove, {passive: true});
         
-        // IntersectionObserver: pause when canvas out of view
+        // IntersectionObserver: pause when canvas out of view, resume when back
         var waterCanvas = document.getElementById('water-canvas');
         if (waterCanvas) {
           var visObserver = new IntersectionObserver(function(entries) {
             isVisible = entries[0].isIntersecting;
             if (!isVisible) {
               stopLoop();
+            } else {
+              startLoop(); // Resume instantly if visible
             }
           }, { threshold: 0 });
           visObserver.observe(waterCanvas);
@@ -397,17 +405,14 @@
           rtOutput = tmp;
         }
 
-        // Initial drop: short burst of frames then stop
+        // Initial drop: starts the endless loop
         setTimeout(function() {
           addDrop(window.innerWidth/2, window.innerHeight/2);
           startLoop();
-          // Run for 1s to show initial ripple, then stop
-          setTimeout(stopLoop, 1000);
         }, 500);
 
         document.addEventListener('astro:before-swap', function() {
           stopLoop();
-          if (idleTimer) clearTimeout(idleTimer);
           window.removeEventListener('mousemove', handleDragMove);
           window.removeEventListener('touchmove', handleDragMove);
           window.removeEventListener('resize', onResize);
