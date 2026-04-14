@@ -273,21 +273,7 @@
         window.addEventListener('resize', resize);
         resize();
 
-        var targetScroll = 0;
-        var currentScroll = 0;
-
-        function updateScroll() {
-            var h = document.documentElement;
-            var maxScroll = Math.max(0, h.scrollHeight - window.innerHeight);
-            if (maxScroll > 0) {
-                targetScroll = window.scrollY / maxScroll;
-                targetScroll = Math.max(0, Math.min(1, targetScroll));
-            } else {
-                targetScroll = 0;
-            }
-        }
-        window.addEventListener('scroll', updateScroll, {passive: true});
-        updateScroll();
+        // Scroll listener removed for performance: locked to night sky (0.0)
 
         var startTime = Date.now();
         var rafId;
@@ -295,8 +281,8 @@
             var elapsedTime = (Date.now() - startTime) / 1000.0;
             gl.uniform1f(timeUnif, elapsedTime);
 
-            currentScroll += (targetScroll - currentScroll) * 0.03;
-            gl.uniform1f(scrollUnif, currentScroll);
+            // Locked to night sky (0.0)
+            gl.uniform1f(scrollUnif, 0.0);
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
             rafId = requestAnimationFrame(animate);
@@ -307,7 +293,6 @@
         document.addEventListener('astro:before-swap', function() {
             cancelAnimationFrame(rafId);
             window.removeEventListener('resize', resize);
-            window.removeEventListener('scroll', updateScroll);
             try {
               gl.getExtension('WEBGL_lose_context').loseContext();
             } catch(e) {}
