@@ -7,7 +7,7 @@
 
 /** Anggota angkatan — profil dengan role dan sosial media */
 export interface Member {
-  id: string;
+  id: number;
   full_name: string;
   nickname?: string;
   role: 'Ketua' | 'Wakil Ketua' | 'Sekretaris' | 'Bendahara' | 'Anggota' | 'DEV';
