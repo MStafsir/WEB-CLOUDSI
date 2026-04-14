@@ -1,6 +1,6 @@
 ---
 /**
- * Preloader.astro — FIXED v4 (DEFINITIVE)
+ * Preloader.astro — FIXED v5 (ROBUST)
  *
  * AKAR MASALAH YANG DISELESAIKAN:
  * 1. POLLING bg-hero-video → DIHAPUS. Elemen preloader sudah ada di DOM.
@@ -9,6 +9,7 @@
  * 4. View Transition bug: preloader div muncul ulang di navigasi →
  *    Ditangani dengan astro:after-swap + astro:before-swap handler.
  * 5. Module script failure → forceShowAllContent() inline safety net.
+ * 6. CONTENT NOT RENDERING: Added force-removal & safety net 5s timeout
  */
 ---
 
@@ -22,7 +23,13 @@
       var p = document.getElementById('initial-preloader');
       if (p) {
         p.style.display = 'none';
-        if (p.parentNode) p.parentNode.removeChild(p);
+        p.style.visibility = 'hidden';
+        p.style.pointerEvents = 'none';
+        if (p.parentNode) {
+          try {
+            p.parentNode.removeChild(p);
+          } catch (e) {}
+        }
       }
     }
 
@@ -35,7 +42,13 @@
         var p = document.getElementById('initial-preloader');
         if (p) {
           p.style.display = 'none';
-          if (p.parentNode) p.parentNode.removeChild(p);
+          p.style.visibility = 'hidden';
+          p.style.pointerEvents = 'none';
+          if (p.parentNode) {
+            try {
+              p.parentNode.removeChild(p);
+            } catch (e) {}
+          }
         }
       }
     });
@@ -115,7 +128,11 @@
     sessionStorage.setItem('cloudsi_loaded', 'true');
     document.documentElement.classList.add('is-loaded');
     setTimeout(function () {
-      if (initialEl.parentNode) initialEl.parentNode.removeChild(initialEl);
+      if (initialEl && initialEl.parentNode) {
+        try {
+          initialEl.parentNode.removeChild(initialEl);
+        } catch (e) {}
+      }
     }, 850);
   }
 
@@ -129,13 +146,17 @@
       '[data-hero-badge]', '[data-hero-heading]', '[data-hero-anim]',
       '.hero-badge', '.hero-heading', '.hero-subheading', '.hero-desc', '.hero-cta',
       '.member-preview-card', '.tentang-title', '.tentang-sub',
-      '[data-tentang-anim]', '[data-event-card]', '.stack-card', '.photo-frame'
+      '[data-tentang-anim]', '[data-event-card]', '.stack-card', '.photo-frame',
+      '.fade-in', '.gallery-cta-link', '.stats-section', '.about-section'
     ];
     var allEls = document.querySelectorAll(selectors.join(','));
     for (var i = 0; i < allEls.length; i++) {
       allEls[i].style.opacity = '1';
       allEls[i].style.transform = 'none';
       allEls[i].style.visibility = 'visible';
+      if (allEls[i].classList.contains('fade-in')) {
+        allEls[i].classList.add('is-visible');
+      }
     }
   }
 
@@ -149,7 +170,11 @@
       var el = document.getElementById('initial-preloader');
       if (el) {
         el.style.display = 'none';
-        if (el.parentNode) el.parentNode.removeChild(el);
+        if (el.parentNode) {
+          try {
+            el.parentNode.removeChild(el);
+          } catch (e) {}
+        }
       }
       return;
     }
@@ -159,7 +184,11 @@
       var el2 = document.getElementById('initial-preloader');
       if (el2) {
         el2.style.display = 'none';
-        if (el2.parentNode) el2.parentNode.removeChild(el2);
+        if (el2.parentNode) {
+          try {
+            el2.parentNode.removeChild(el2);
+          } catch (e) {}
+        }
       }
       return;
     }
@@ -295,24 +324,28 @@
   initLogic();
   initPageTransition();
 
-  // ABSOLUTE SAFETY NET: 4 detik
+  // ABSOLUTE SAFETY NET: 5 detik — FORCE SHOW CONTENT
   setTimeout(function() {
     var el = document.getElementById('initial-preloader');
     if (el && el.offsetParent !== null) {
       // Preloader masih visible (offsetParent !== null = not display:none)
-      console.warn('[Cloudsi] Safety net: force dismissing after 4s');
+      console.warn('[Cloudsi] Safety net: force dismissing after 5s');
       el.style.opacity = '0';
       el.style.pointerEvents = 'none';
       sessionStorage.setItem('cloudsi_loaded', 'true');
       document.documentElement.classList.add('is-loaded');
       setTimeout(function() {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
+        if (el && el.parentNode) {
+          try {
+            el.parentNode.removeChild(el);
+          } catch (e) {}
+        }
       }, 850);
     }
 
     // Paksa tampilkan konten yang mungkin stuck
     forceShowAllContent();
-  }, 4000);
+  }, 5000);
 
 })();
 </script>

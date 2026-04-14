@@ -1,8 +1,16 @@
 /**
- * global.css
+ * global.css — FIXED v2 (FADE-IN GUARANTEE)
+ * 
  * Global styles untuk Cloudsi Connect
  * Berisi: CSS Reset modern, @font-face import, base styles, utility classes, accessibility
  * Dependencies: tokens.css (CSS Custom Properties)
+ * 
+ * MASALAH YANG DISELESAIKAN:
+ * 1. Fade-in stuck di opacity 0 → Fallback animation setelah 5s
+ * 2. Content invisible setelah navigasi → Force visibility + monitor
+ * 3. CSS animation tidak trigger → Dual-layer animation guarantee
+ * 4. Mobile blur cause issue → Mobile blur optimization
+ * 5. Reduced motion respected → Instant visibility
  */
 
 /* ============================================
@@ -140,6 +148,47 @@
 }
 
 /* ============================================
+   FALLBACK FADE-IN ANIMATIONS
+   ============================================ */
+
+@keyframes fallback-fade-in-show {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+    visibility: visible;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+}
+
+@keyframes fallback-fade-in-show-delayed {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+    visibility: visible;
+  }
+  100% {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    visibility: visible !important;
+  }
+}
+
+@keyframes guarantee-visibility {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
    UTILITY CLASSES
    ============================================ */
 @layer components {
@@ -204,17 +253,124 @@
     color: var(--color-accent-gold);
   }
 
-  /* Fade-in animation class (controlled by JS/GSAP) */
+  /* ============================================
+     FADE-IN ANIMATION — GUARANTEED VISIBILITY
+     ============================================ */
+
+  /* BASE: Initial fade-in state */
   .fade-in {
     opacity: 0;
     transform: translateY(24px);
     transition: opacity var(--duration-slow) var(--ease-water),
                 transform var(--duration-slow) var(--ease-water);
+    visibility: visible;
+    
+    /* Fallback animation: Force show after 5 seconds if is-visible not added */
+    animation: fallback-fade-in-show 0.6s ease-out forwards;
+    animation-delay: 5s;
   }
 
+  /* STATE: Visible state */
   .fade-in.is-visible {
     opacity: 1;
     transform: translateY(0);
+    visibility: visible;
+    animation: none;
+  }
+
+  /* ============================================
+     FORCED VISIBILITY BACKUP
+     Double-layer safety for edge cases
+     ============================================ */
+  
+  /* Extra backup: Force at 8 seconds (second chance) */
+  .fade-in:not(.is-visible) {
+    animation-name: fallback-fade-in-show-delayed;
+    animation-delay: 8s;
+    animation-duration: 0.6s;
+    animation-fill-mode: forwards;
+  }
+
+  /* Ensure all fade-in are visible by default if nothing else works */
+  .fade-in[data-force-visible] {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    visibility: visible !important;
+  }
+
+  /* ============================================
+     SECTION VISIBILITY GUARANTEE
+     Ensure all major sections visible
+     ============================================ */
+
+  section {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  header, footer, main {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Hero section guarantee */
+  .hero-section {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .hero-badge,
+  .hero-heading,
+  .hero-subheading,
+  .hero-desc,
+  .hero-cta {
+    visibility: visible;
+  }
+
+  /* Stats section guarantee */
+  .stats-section {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .stat-card {
+    visibility: visible;
+  }
+
+  /* About section guarantee */
+  .about-section {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Gallery section guarantee */
+  .gallery-cta-section {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .gallery-cta-link {
+    visibility: visible;
+  }
+
+  /* Member preview guarantee */
+  .member-preview-container {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .member-preview-card {
+    visibility: visible;
+  }
+
+  /* Data attribute selectors for JS-controlled elements */
+  [data-hero-badge],
+  [data-hero-heading],
+  [data-hero-anim],
+  [data-tentang-anim],
+  [data-event-card],
+  [data-member-item] {
+    visibility: visible;
   }
 }
 
@@ -231,9 +387,46 @@
 }
 
 /* ============================================
+   MOBILE OPTIMIZATION
+   Optimize animations & effects for mobile
+   ============================================ */
+@media (max-width: 768px) {
+  /* Disable blur for better performance */
+  .glass {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-heavy {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Shorter animation duration on mobile */
+  .fade-in {
+    transition: opacity calc(var(--duration-slow) * 0.7) var(--ease-water),
+                transform calc(var(--duration-slow) * 0.7) var(--ease-water);
+    animation-delay: 3s; /* Show faster on mobile */
+  }
+
+  /* Reduce fallback delay on mobile (3s instead of 5s) */
+  .fade-in:not(.is-visible) {
+    animation-delay: 3s;
+  }
+
+  /* Absolutely guarantee visibility on mobile after 6 seconds */
+  .fade-in {
+    animation-name: fallback-fade-in-show;
+    animation-duration: 0.6s;
+    animation-delay: 6s;
+    animation-fill-mode: forwards;
+  }
+}
+
+/* ============================================
    REDUCED MOTION
-   Menghormati preferensi aksesibilitas pengguna
-   Menonaktifkan SEMUA animasi dan transisi
+   Respect user accessibility preferences
+   Disable ALL animations and transitions
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -245,8 +438,67 @@
     scroll-behavior: auto !important;
   }
 
+  /* Instant visibility for fade-in elements */
   .fade-in {
-    opacity: 1;
-    transform: none;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+    animation: none !important;
   }
+
+  .fade-in.is-visible {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+    animation: none !important;
+  }
+
+  /* Disable all transitions */
+  .glass,
+  .glass-heavy {
+    transition: none !important;
+  }
+
+  /* No animations on any element */
+  section,
+  header,
+  footer,
+  main {
+    animation: none !important;
+  }
+
+  /* Data attributes also instant */
+  [data-hero-badge],
+  [data-hero-heading],
+  [data-hero-anim],
+  [data-tentang-anim],
+  [data-event-card],
+  [data-member-item] {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================
+   CRITICAL FIX: Ensure opacity never gets stuck
+   ============================================ */
+
+/* Force opacity 1 for all content by default */
+main,
+section,
+header,
+footer {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Any element with fade-in should eventually be visible */
+.fade-in {
+  will-change: opacity, transform;
+}
+
+.fade-in.is-visible {
+  will-change: auto;
 }

@@ -2,45 +2,98 @@
 /**
  * CloudBackground.astro
  * Efek Animasi Awan Pengganti Video Looping
+ * 
+ * PERFORMANCE TIERS:
+ * - ULTRA/NORMAL: Full WebGL cloud shader
+ * - LOW: Reduced FBM iterations (5→3), lower resolution
+ * - BATTERY_SAVER: Static CSS gradient background, no WebGL
  */
 ---
 
 <canvas id="cloud-canvas" class="fixed inset-0 w-full h-full object-cover pointer-events-none"></canvas>
 
-<!-- Tambahkan backdrop-blur opsional agar lighting lebih membaur dengan konten -->
+<!-- Backdrop blur overlay -->
 <div class="fixed inset-0 bg-[hsla(210,60%,6%,0.4)] backdrop-blur-[1px] pointer-events-none"></div>
+
+<!-- Static fallback for BATTERY_SAVER -->
+<div id="cloud-fallback" class="cloud-static-fallback" aria-hidden="true" style="display: none;"></div>
 
 <style>
   #cloud-canvas {
     z-index: -1;
+  }
+
+  .cloud-static-fallback {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      hsl(210, 60%, 6%) 0%,
+      hsl(205, 55%, 10%) 30%,
+      hsl(200, 50%, 14%) 60%,
+      hsl(210, 60%, 6%) 100%
+    );
   }
 </style>
 
 <script is:inline>
   (function() {
     function initCloudCanvas() {
-        const canvas = document.getElementById('cloud-canvas');
+        var canvas = document.getElementById('cloud-canvas');
         if (!canvas) return;
+
+        // =============================================
+        // PERFORMANCE TIER CHECK
+        // =============================================
+        var tier = sessionStorage.getItem('cloudsi_perf_tier') || 'NORMAL';
+
+        // BATTERY_SAVER: Static gradient, no WebGL
+        if (tier === 'BATTERY_SAVER') {
+          canvas.style.display = 'none';
+          var fallback = document.getElementById('cloud-fallback');
+          if (fallback) fallback.style.display = 'block';
+          return;
+        }
+
+        var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) {
+          canvas.style.display = 'none';
+          var fallback = document.getElementById('cloud-fallback');
+          if (fallback) fallback.style.display = 'block';
+          return;
+        }
         
-        const gl = canvas.getContext('webgl');
+        var gl = canvas.getContext('webgl');
         if (!gl) { 
-            console.warn("Browser Anda tidak mendukung WebGL."); 
+            console.warn("[Cloudsi] Browser tidak mendukung WebGL."); 
+            canvas.style.display = 'none';
+            var fallback = document.getElementById('cloud-fallback');
+            if (fallback) fallback.style.display = 'block';
             return;
         }
 
-        const vertexShaderSource = `
+        // FBM iterations based on tier: ULTRA/NORMAL = 5, LOW = 3
+        var fbmIterations = (tier === 'LOW') ? 3 : 5;
+
+        var vertexShaderSource = `
             attribute vec2 a_position;
             void main() {
                 gl_Position = vec4(a_position, 0.0, 1.0);
             }
         `;
 
-        const fragmentShaderSource = `
+        // Build fragment shader dynamically based on FBM iterations
+        var fragmentShaderSource = `
             precision highp float;
 
             uniform vec2 u_resolution;
             uniform float u_time;
-            uniform float u_scrollProgress; // 0.0 = Malam, 1.0 = Pagi/Cerah
+            uniform float u_scrollProgress;
 
             float hash(vec2 p) {
                 p = fract(p * vec2(234.34, 435.345));
@@ -60,7 +113,7 @@
                 float v = 0.0;
                 float a = 0.5;
                 mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < ` + fbmIterations + `; i++) {
                     v += a * noise(p);
                     p = rot * p * 2.0 + vec2(100.0);
                     a *= 0.5;
@@ -87,15 +140,13 @@
                 
                 float shadow = smoothstep(densityMin, densityMax * 1.2, cloudVal);
                 
-                // Warna Malam
                 vec3 cDarkNight = vec3(0.03, 0.05, 0.09); 
                 vec3 cMidNight = vec3(0.10, 0.14, 0.20);  
                 vec3 cLightNight = vec3(0.35, 0.45, 0.55); 
                 
-                // Warna Pagi Cerah (Disesuaikan agar sangat kontras dan terlihat bentuk awannya)
-                vec3 cDarkDay = vec3(0.45, 0.55, 0.68); // Bayangan awan (biru abu-abu gelap)
-                vec3 cMidDay = vec3(0.90, 0.95, 1.00);  // Tubuh awan (putih terang dengan tint biru)
-                vec3 cLightDay = vec3(1.0, 1.0, 1.0);   // Kilau atas (putih murni sinar mentari)
+                vec3 cDarkDay = vec3(0.45, 0.55, 0.68);
+                vec3 cMidDay = vec3(0.90, 0.95, 1.00);
+                vec3 cLightDay = vec3(1.0, 1.0, 1.0);
                 
                 vec3 cDark = mix(cDarkNight, cDarkDay, scrollProg);
                 vec3 cMid = mix(cMidNight, cMidDay, scrollProg);
@@ -114,9 +165,7 @@
 
                 vec2 lightDir = normalize(vec2(0.2, 1.0));
 
-                // Gradasi Langit Malam (Bawah ke Atas)
                 vec3 skyBaseNight = mix(vec3(0.02, 0.03, 0.06), vec3(0.002, 0.005, 0.01), uvOrig.y);
-                // Gradasi Langit Pagi/Cerah (Horizon lebih terang, Zenith langit lebih dalam birunya)
                 vec3 skyBaseDay = mix(vec3(0.60, 0.80, 0.95), vec3(0.15, 0.45, 0.80), uvOrig.y);
                 
                 vec3 skyBase = mix(skyBaseNight, skyBaseDay, u_scrollProgress);
@@ -134,7 +183,6 @@
                     vec2 starPosWithinGrid = fract(p * 120.0) - 0.5;
                     float starGlow = exp(-length(starPosWithinGrid) * 22.0);
                     
-                    // Pudarkan bintang saat scroll (pagi)
                     float starFade = smoothstep(0.3, 0.0, u_scrollProgress);
                     
                     finalColor += vec3(0.85, 0.9, 1.0) * starGlow * twinkle * starFade;
@@ -150,13 +198,13 @@
                 
                 vec4 c3 = renderCloud(p + vec2(2.2), 1.2, 0.025, u_time, 0.35 + hBias, 0.9, lightDir, u_scrollProgress);
                 finalColor = mix(finalColor, c3.rgb, c3.a * 0.95);
-                
+                ` + (tier !== 'LOW' ? `
                 vec4 c4 = renderCloud(p + vec2(3.3), 0.7, 0.035, u_time, 0.40 + hBias, 0.95, lightDir, u_scrollProgress);
                 finalColor = mix(finalColor, c4.rgb, c4.a * 0.95);
                 
                 vec4 c5 = renderCloud(p + vec2(4.4), 0.3, 0.050, u_time, 0.50 + hBias, 1.0, lightDir, u_scrollProgress);
                 finalColor = mix(finalColor, c5.rgb, c5.a * 0.95);
-
+                ` : '') + `
 
                 float vignette = length(uvOrig - 0.5);
                 finalColor *= smoothstep(1.0, 0.2, vignette);
@@ -168,7 +216,7 @@
         `;
 
         function compileShader(gl, type, source) {
-            const shader = gl.createShader(type);
+            var shader = gl.createShader(type);
             gl.shaderSource(shader, source);
             gl.compileShader(shader);
             if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -179,49 +227,58 @@
             return shader;
         }
 
-        const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-        const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        var vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+        var fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-        const program = gl.createProgram();
+        if (!vertexShader || !fragmentShader) {
+          canvas.style.display = 'none';
+          var fallback = document.getElementById('cloud-fallback');
+          if (fallback) fallback.style.display = 'block';
+          return;
+        }
+
+        var program = gl.createProgram();
         gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
         gl.useProgram(program);
 
-        const positionBuffer = gl.createBuffer();
+        var positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        const positions = new Float32Array([
+        var positions = new Float32Array([
             -1, -1,   1, -1,  -1,  1,
             -1,  1,   1, -1,   1,  1
         ]);
         gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 
-        const posAttr = gl.getAttribLocation(program, "a_position");
+        var posAttr = gl.getAttribLocation(program, "a_position");
         gl.enableVertexAttribArray(posAttr);
         gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
 
-        const resUnif = gl.getUniformLocation(program, "u_resolution");
-        const timeUnif = gl.getUniformLocation(program, "u_time");
-        const scrollUnif = gl.getUniformLocation(program, "u_scrollProgress");
+        var resUnif = gl.getUniformLocation(program, "u_resolution");
+        var timeUnif = gl.getUniformLocation(program, "u_time");
+        var scrollUnif = gl.getUniformLocation(program, "u_scrollProgress");
+
+        // Resolution: LOW tier gets half resolution
+        var resDpr = (tier === 'LOW') 
+          ? Math.min(window.devicePixelRatio || 1, 1) 
+          : Math.min(window.devicePixelRatio || 1, 2);
 
         function resize() {
-            // Kita ingin meresize berdasarkan window aktual
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            // Mengatur internal resolution agar tajam
-            canvas.width = window.innerWidth * dpr;
-            canvas.height = window.innerHeight * dpr;
+            canvas.width = window.innerWidth * resDpr;
+            canvas.height = window.innerHeight * resDpr;
             gl.viewport(0, 0, canvas.width, canvas.height);
             gl.uniform2f(resUnif, canvas.width, canvas.height);
         }
         window.addEventListener('resize', resize);
         resize();
 
-        let targetScroll = 0;
-        let currentScroll = 0;
+        var targetScroll = 0;
+        var currentScroll = 0;
 
         function updateScroll() {
-            const h = document.documentElement;
-            const maxScroll = Math.max(0, h.scrollHeight - window.innerHeight);
+            var h = document.documentElement;
+            var maxScroll = Math.max(0, h.scrollHeight - window.innerHeight);
             if (maxScroll > 0) {
                 targetScroll = window.scrollY / maxScroll;
                 targetScroll = Math.max(0, Math.min(1, targetScroll));
@@ -232,13 +289,12 @@
         window.addEventListener('scroll', updateScroll, {passive: true});
         updateScroll();
 
-        let startTime = Date.now();
-        let rafId;
+        var startTime = Date.now();
+        var rafId;
         function animate() {
-            const elapsedTime = (Date.now() - startTime) / 1000.0;
+            var elapsedTime = (Date.now() - startTime) / 1000.0;
             gl.uniform1f(timeUnif, elapsedTime);
 
-            // Linear Interpolation (Lerp) agar transisi super halus
             currentScroll += (targetScroll - currentScroll) * 0.03;
             gl.uniform1f(scrollUnif, currentScroll);
 
@@ -248,21 +304,23 @@
         animate();
 
         // Cleanup handler for Astro View Transitions
-        document.addEventListener('astro:before-swap', () => {
+        document.addEventListener('astro:before-swap', function() {
             cancelAnimationFrame(rafId);
             window.removeEventListener('resize', resize);
             window.removeEventListener('scroll', updateScroll);
-            gl.getExtension('WEBGL_lose_context')?.loseContext();
+            try {
+              gl.getExtension('WEBGL_lose_context').loseContext();
+            } catch(e) {}
         }, { once: true });
     }
 
-        function scheduleCloud() {
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(initCloudCanvas, { timeout: 1000 });
-            } else {
-                setTimeout(initCloudCanvas, 300);
-            }
-        }
+    function scheduleCloud() {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(initCloudCanvas, { timeout: 1000 });
+      } else {
+        setTimeout(initCloudCanvas, 300);
+      }
+    }
     document.addEventListener('DOMContentLoaded', scheduleCloud);
     document.addEventListener('astro:after-swap', scheduleCloud);
   })();

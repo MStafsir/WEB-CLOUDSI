@@ -13,6 +13,7 @@ import StatsSection from '../components/sections/StatsSection.astro';
 import MemberPreview from '../components/sections/MemberPreview.astro';
 import { getMembers } from '../lib/supabase';
 import { MEMBERS_DATA } from '../data/members-data';
+import type { Member } from '../types/index';
 
 const supabaseMembers = await getMembers();
 const members = supabaseMembers.length > 0 ? supabaseMembers : MEMBERS_DATA;
@@ -20,7 +21,7 @@ const members = supabaseMembers.length > 0 ? supabaseMembers : MEMBERS_DATA;
 // Feature 6 anggota (1 Ketua + 5 pertama yang bukan ketua)
 const ketua = members.find(m => m.role === 'Ketua');
 const rest = members.filter(m => m.role !== 'Ketua').slice(0, 5);
-const featuredMembers = [ketua, ...rest].filter(Boolean);
+const featuredMembers = [ketua, ...rest].filter((m): m is Member => Boolean(m));
 ---
 
 <BaseLayout title="Cloudsi | Sistem Informasi Untan" description="Dalam satu ruang kami adalah keluarga besar Sistem Informasi Universitas Tanjungpura, penggerak teknologi masa depan.">
@@ -71,6 +72,9 @@ const featuredMembers = [ketua, ...rest].filter(Boolean);
     padding-bottom: 6px;
     border-bottom: 1px solid rgba(100, 200, 255, 0.4);
     transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
   }
 
   .gallery-cta-link:hover {
@@ -82,42 +86,253 @@ const featuredMembers = [ketua, ...rest].filter(Boolean);
 
 <script is:inline>
   (function() {
+    'use strict';
+
+    // =============================================
+    // STATE TRACKING
+    // =============================================
+    var gsapReady = false;
+    var scrollTriggerReady = false;
+    var animationStarted = false;
+    var moduleLoadTimeout = null;
+    var safetyNetTimeout = null;
+    var animationKilled = false;
+
+    // =============================================
+    // CORE FUNCTION: Initialize Gallery CTA
+    // =============================================
     function initGalleryCta() {
       var cta = document.querySelector('.gallery-cta-link');
       if (!cta) return;
 
-      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) return;
+      // Reset state
+      gsapReady = false;
+      scrollTriggerReady = false;
+      animationStarted = false;
+      animationKilled = false;
 
-      function importWithTimeout(fn, ms) {
-        ms = ms || 5000;
-        return Promise.race([fn(), new Promise(function(_, r) { setTimeout(function() { r(new Error('Import timeout')); }, ms); })]);
+      // =============================================
+      // CHECK 1: Prefers Reduced Motion
+      // =============================================
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) {
+        cta.style.opacity = '1';
+        cta.style.transform = 'translateY(0)';
+        cta.style.visibility = 'visible';
+        return;
       }
 
-      Promise.all([
-        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
-        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
-      ]).then(function(modules) {
-        var gsap = modules[0].gsap || modules[0].default;
-        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
-        gsap.registerPlugin(ScrollTrigger);
+      // =============================================
+      // CHECK 2: Performance Tier — Skip animation on LOW/BATTERY_SAVER
+      // =============================================
+      var tier = sessionStorage.getItem('cloudsi_perf_tier') || 'NORMAL';
+      if (tier === 'BATTERY_SAVER') {
+        cta.style.opacity = '1';
+        cta.style.transform = 'translateY(0)';
+        cta.style.visibility = 'visible';
+        return;
+      }
 
-        gsap.fromTo(cta,
-          { opacity: 0, y: 50 },
-          {
-            opacity: 1, y: 0,
-            scrollTrigger: {
-              trigger: ".gallery-cta-section",
-              start: "top 95%",
-              end: "bottom 85%",
-              scrub: 1
+      // =============================================
+      // CHECK 3: Set Immediate Fallback Styles
+      // =============================================
+      cta.style.opacity = '1';
+      cta.style.transform = 'translateY(0)';
+      cta.style.visibility = 'visible';
+
+      // =============================================
+      // LOW tier: fade-in only, no scroll-linked
+      // =============================================
+      if (tier === 'LOW') {
+        return; // Already visible, no GSAP animation
+      }
+
+      // =============================================
+      // HELPER: Import with Timeout
+      // =============================================
+      function importWithTimeout(fn, ms, label) {
+        ms = ms || 5000;
+        label = label || 'Module';
+        return Promise.race([
+          fn(),
+          new Promise(function(_, reject) {
+            setTimeout(function() {
+              reject(new Error('Import timeout: ' + label + ' exceeded ' + ms + 'ms'));
+            }, ms);
+          })
+        ]);
+      }
+
+      // =============================================
+      // MAIN: Load GSAP & ScrollTrigger
+      // =============================================
+      Promise.all([
+        importWithTimeout(
+          function() {
+            return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm');
+          },
+          5000,
+          'GSAP'
+        ),
+        importWithTimeout(
+          function() {
+            return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm');
+          },
+          5000,
+          'ScrollTrigger'
+        )
+      ]).then(function(modules) {
+        try {
+          // Extract GSAP
+          var gsap = modules[0].gsap || modules[0].default;
+          if (!gsap) throw new Error('GSAP module not found');
+          gsapReady = true;
+
+          // Extract ScrollTrigger
+          var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+          if (!ScrollTrigger) throw new Error('ScrollTrigger module not found');
+
+          // Register plugin
+          gsap.registerPlugin(ScrollTrigger);
+          scrollTriggerReady = true;
+
+          // Get trigger element
+          var triggerEl = document.querySelector('.gallery-cta-section');
+          if (!triggerEl) return;
+
+          // =============================================
+          // CREATE ANIMATION
+          // =============================================
+          animationStarted = true;
+
+          // NORMAL tier: disable parallax, reduce stagger
+          var scrubValue = tier === 'NORMAL' ? false : 1;
+
+          gsap.fromTo(
+            cta,
+            { 
+              opacity: 0, 
+              y: 50 
+            },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.8,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: triggerEl,
+                start: 'top 95%',
+                end: 'bottom 85%',
+                scrub: scrubValue,
+                markers: false,
+                onEnter: function() {
+                  // Ensure visible when entering
+                  cta.style.visibility = 'visible';
+                }
+              }
             }
-          }
-        );
-      }).catch(function(err) {});
+          );
+        } catch (err) {
+          console.warn('[Cloudsi Gallery] Module setup error:', err);
+          // Fallback already set above
+        }
+      }).catch(function(err) {
+        console.warn('[Cloudsi Gallery] Module import failed:', err.message);
+        // Network/import error: fallback already set above
+      });
+
+      // =============================================
+      // SAFETY NET 1: Module Load Timeout (6 seconds)
+      // =============================================
+      moduleLoadTimeout = setTimeout(function() {
+        if (!animationStarted || !gsapReady) {
+          cta.style.opacity = '1';
+          cta.style.transform = 'translateY(0)';
+          cta.style.visibility = 'visible';
+        }
+      }, 6000);
+
+      // =============================================
+      // SAFETY NET 2: Animation Monitor (3 seconds, check every 100ms)
+      // =============================================
+      var monitorInterval = setInterval(function() {
+        if (animationKilled) {
+          clearInterval(monitorInterval);
+          return;
+        }
+
+        var computed = window.getComputedStyle(cta);
+        var opacity = parseFloat(computed.opacity);
+
+        // Jika stuck invisible  
+        if (opacity < 0.1 && animationStarted) {
+          cta.style.opacity = '1';
+          cta.style.transform = 'translateY(0)';
+          cta.style.visibility = 'visible';
+          clearInterval(monitorInterval);
+          animationKilled = true;
+        }
+      }, 100);
+
+      // Stop monitoring setelah 3 detik
+      setTimeout(function() {
+        clearInterval(monitorInterval);
+        animationKilled = true;
+      }, 3000);
+
+      // =============================================
+      // SAFETY NET 3: Absolute Final Guarantee (8 seconds)
+      // =============================================
+      safetyNetTimeout = setTimeout(function() {
+        cta.style.opacity = '1';
+        cta.style.transform = 'translateY(0)';
+        cta.style.visibility = 'visible';
+      }, 8000);
     }
 
-    document.addEventListener('DOMContentLoaded', initGalleryCta);
-    document.addEventListener('astro:after-swap', initGalleryCta);
+    // =============================================
+    // CLEANUP: Kill all timeouts & animations
+    // =============================================
+    function cleanup() {
+      if (moduleLoadTimeout) clearTimeout(moduleLoadTimeout);
+      if (safetyNetTimeout) clearTimeout(safetyNetTimeout);
+    }
+
+    // =============================================
+    // EVENT LISTENERS
+    // =============================================
+
+    // On DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        initGalleryCta();
+      });
+    } else {
+      initGalleryCta();
+    }
+
+    // On Astro page transition (View Transitions)
+    document.addEventListener('astro:after-swap', function() {
+      cleanup();
+      setTimeout(function() {
+        initGalleryCta();
+      }, 100);
+    });
+
+    // Fallback for older Astro
+    document.addEventListener('astro:page-load', function() {
+      cleanup();
+      setTimeout(function() {
+        initGalleryCta();
+      }, 100);
+    });
+
+    // =============================================
+    // WINDOW UNLOAD: Cleanup on page leave
+    // =============================================
+    window.addEventListener('beforeunload', function() {
+      cleanup();
+    });
+
   })();
 </script>
