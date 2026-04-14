@@ -300,19 +300,57 @@
         // Throttle: ULTRA 20ms, NORMAL 40ms
         var moveThrottle = (tier === 'ULTRA') ? 20 : 40;
         
+        // ===== INTERACTION-GATED rAF =====
+        var isAnimating = false;
+        var isVisible = true;
+        var idleTimer = null;
+        var IDLE_TIMEOUT = 200; // ms after last interaction to stop
+        
+        function startLoop() {
+          if (isAnimating || !isVisible) return;
+          isAnimating = true;
+          rAFId = requestAnimationFrame(animate);
+        }
+        
+        function stopLoop() {
+          if (!isAnimating) return;
+          isAnimating = false;
+          cancelAnimationFrame(rAFId);
+        }
+        
+        function resetIdleTimer() {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(stopLoop, IDLE_TIMEOUT);
+        }
+        
         var handleDragMove = function(e) {
           if (performance.now() - lastMove > moveThrottle) {
              var cx = e.touches ? e.touches[0].clientX : e.clientX;
              var cy = e.touches ? e.touches[0].clientY : e.clientY;
              addDrop(cx, cy);
              lastMove = performance.now();
+             startLoop();
+             resetIdleTimer();
           }
         };
 
         window.addEventListener('mousemove', handleDragMove);
         window.addEventListener('touchmove', handleDragMove, {passive: true});
         
+        // IntersectionObserver: pause when canvas out of view
+        var waterCanvas = document.getElementById('water-canvas');
+        if (waterCanvas) {
+          var visObserver = new IntersectionObserver(function(entries) {
+            isVisible = entries[0].isIntersecting;
+            if (!isVisible) {
+              stopLoop();
+            }
+          }, { threshold: 0 });
+          visObserver.observe(waterCanvas);
+        }
+        
         function animate(t) {
+          if (!isAnimating) return;
           rAFId = requestAnimationFrame(animate);
 
           // Cek kesiapan sumber background
@@ -359,15 +397,21 @@
           rtOutput = tmp;
         }
 
-        setTimeout(function() { addDrop(window.innerWidth/2, window.innerHeight/2); }, 500);
-
-        rAFId = requestAnimationFrame(animate);
+        // Initial drop: short burst of frames then stop
+        setTimeout(function() {
+          addDrop(window.innerWidth/2, window.innerHeight/2);
+          startLoop();
+          // Run for 1s to show initial ripple, then stop
+          setTimeout(stopLoop, 1000);
+        }, 500);
 
         document.addEventListener('astro:before-swap', function() {
-          cancelAnimationFrame(rAFId);
+          stopLoop();
+          if (idleTimer) clearTimeout(idleTimer);
           window.removeEventListener('mousemove', handleDragMove);
           window.removeEventListener('touchmove', handleDragMove);
           window.removeEventListener('resize', onResize);
+          if (visObserver) visObserver.disconnect();
           try {
             gl.getExtension('WEBGL_lose_context').loseContext();
           } catch(e) {}

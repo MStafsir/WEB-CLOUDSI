@@ -176,6 +176,7 @@ import Button from '../ui/Button.astro';
     transition: opacity 0.3s ease;
     will-change: transform;
     animation: bounce 2s infinite ease-in-out;
+    animation-play-state: paused; /* Activated via IO when visible */
     z-index: 2; /* Pastikan di atas overlay video */
   }
 
@@ -266,15 +267,41 @@ import Button from '../ui/Button.astro';
           1.0
         );
 
-        gsap.to(heading, {
-          yPercent: 30, ease: "none",
-          scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
-        });
-
-        gsap.to(badge, {
-          yPercent: 50, ease: "none",
-          scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
-        });
+        // Type B: Lazy-init parallax scrubs via IntersectionObserver
+        var heroSection = document.querySelector('.hero-section');
+        var parallaxCreated = false;
+        var parallaxTriggers = [];
+        
+        if (heroSection) {
+          var lazyParallax = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting && !parallaxCreated) {
+              parallaxCreated = true;
+              
+              var st1 = gsap.to(heading, {
+                yPercent: 30, ease: "none",
+                scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
+              });
+              
+              var st2 = gsap.to(badge, {
+                yPercent: 50, ease: "none",
+                scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
+              });
+              
+              if (st1.scrollTrigger) parallaxTriggers.push(st1.scrollTrigger);
+              if (st2.scrollTrigger) parallaxTriggers.push(st2.scrollTrigger);
+              
+              lazyParallax.disconnect();
+            }
+          }, { threshold: 0.1 });
+          lazyParallax.observe(heroSection);
+          
+          // Cleanup on View Transition
+          document.addEventListener('astro:before-swap', function() {
+            lazyParallax.disconnect();
+            parallaxTriggers.forEach(function(st) { st.kill(); });
+            parallaxTriggers = [];
+          }, { once: true });
+        }
       }).catch(function(err) {
         console.warn('[Cloudsi] GSAP load gagal:', err);
         showAll();
@@ -287,8 +314,10 @@ import Button from '../ui/Button.astro';
           var observer = new IntersectionObserver(function(entries) {
             if(entries[0].intersectionRatio < 0.9) {
               indicator.classList.add('fade-out');
+              indicator.style.animationPlayState = 'paused';
             } else {
               indicator.classList.remove('fade-out');
+              indicator.style.animationPlayState = 'running';
             }
           }, { threshold: [0.9] });
           observer.observe(heroSection);

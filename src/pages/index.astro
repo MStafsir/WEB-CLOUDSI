@@ -222,9 +222,7 @@ const featuredMembers = [ketua, ...rest].filter((m): m is Member => Boolean(m));
               scrollTrigger: {
                 trigger: triggerEl,
                 start: 'top 95%',
-                end: 'bottom 85%',
-                scrub: scrubValue,
-                markers: false,
+                once: true,
                 onEnter: function() {
                   // Ensure visible when entering
                   cta.style.visibility = 'visible';
@@ -252,33 +250,9 @@ const featuredMembers = [ketua, ...rest].filter((m): m is Member => Boolean(m));
         }
       }, 6000);
 
-      // =============================================
-      // SAFETY NET 2: Animation Monitor (3 seconds, check every 100ms)
-      // =============================================
-      var monitorInterval = setInterval(function() {
-        if (animationKilled) {
-          clearInterval(monitorInterval);
-          return;
-        }
-
-        var computed = window.getComputedStyle(cta);
-        var opacity = parseFloat(computed.opacity);
-
-        // Jika stuck invisible  
-        if (opacity < 0.1 && animationStarted) {
-          cta.style.opacity = '1';
-          cta.style.transform = 'translateY(0)';
-          cta.style.visibility = 'visible';
-          clearInterval(monitorInterval);
-          animationKilled = true;
-        }
-      }, 100);
-
-      // Stop monitoring setelah 3 detik
-      setTimeout(function() {
-        clearInterval(monitorInterval);
-        animationKilled = true;
-      }, 3000);
+      // SAFETY NET 2: Removed — CTA already set to visible above.
+      // The old 100ms setInterval caused forced synchronous reflow
+      // by calling getComputedStyle() every 100ms.
 
       // =============================================
       // SAFETY NET 3: Absolute Final Guarantee (8 seconds)
@@ -296,6 +270,13 @@ const featuredMembers = [ketua, ...rest].filter((m): m is Member => Boolean(m));
     function cleanup() {
       if (moduleLoadTimeout) clearTimeout(moduleLoadTimeout);
       if (safetyNetTimeout) clearTimeout(safetyNetTimeout);
+      // Kill all ScrollTriggers to prevent memory leak on navigation
+      try {
+        import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm').then(function(mod) {
+          var ST = mod.ScrollTrigger || mod.default;
+          if (ST) ST.getAll().forEach(function(t) { t.kill(); });
+        });
+      } catch(e) {}
     }
 
     // =============================================

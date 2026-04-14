@@ -348,7 +348,7 @@ import Button from '../ui/Button.astro';
 
   // GSAP Scrub Animations
   async function initContactAnim() {
-    const fadeEls = document.querySelectorAll('.fade-in');
+    const fadeEls = document.querySelectorAll('#contact-section .fade-in');
     
     function showAll() {
       fadeEls.forEach(el => {
@@ -362,8 +362,12 @@ import Button from '../ui/Button.astro';
     if (prefersReduced) { showAll(); return; }
 
     try {
-      const { gsap } = await import('gsap');
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const [gsapMod, stMod] = await Promise.all([
+        import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'),
+        import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm')
+      ]);
+      const gsap = gsapMod.gsap || gsapMod.default;
+      const ScrollTrigger = stMod.ScrollTrigger || stMod.default;
       gsap.registerPlugin(ScrollTrigger);
 
       fadeEls.forEach(el => {
@@ -371,16 +375,21 @@ import Button from '../ui/Button.astro';
           { opacity: 0, y: 40 },
           {
             opacity: 1, y: 0,
+            duration: 0.8,
             ease: 'power2.out',
             scrollTrigger: {
               trigger: el,
               start: 'top 90%',
-              end: 'top 60%',
-              scrub: 1
+              once: true
             }
           }
         );
       });
+
+      // Cleanup on View Transition
+      document.addEventListener('astro:before-swap', function() {
+        ScrollTrigger.getAll().forEach(function(t) { t.kill(); });
+      }, { once: true });
     } catch (e) {
       showAll();
     }

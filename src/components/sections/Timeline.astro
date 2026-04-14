@@ -120,14 +120,29 @@ function formatDate(dateStr: string): string {
     will-change: transform;
   }
 
-  .timeline-dot.visible {
-    transform: translateX(-50%) scale(1);
-    animation: dotPulse 2.5s ease-in-out infinite;
+  /* Pulse ring — composite-only (transform + opacity) */
+  .timeline-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid hsla(190, 65%, 55%, 0.3);
+    opacity: 0;
+    transform: scale(1);
+    pointer-events: none;
   }
 
-  @keyframes dotPulse {
-    0%, 100% { box-shadow: 0 0 0 4px hsla(190, 65%, 55%, 0.2); }
-    50% { box-shadow: 0 0 0 8px hsla(190, 65%, 55%, 0.08); }
+  .timeline-dot.visible {
+    transform: translateX(-50%) scale(1);
+  }
+
+  .timeline-dot.visible::after {
+    animation: dotPulseComposite 2.5s ease-in-out infinite;
+  }
+
+  @keyframes dotPulseComposite {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(2); opacity: 0; }
   }
 
   /* Card */
@@ -232,7 +247,7 @@ function formatDate(dateStr: string): string {
         return;
       }
 
-      // Garis: animate scaleY via GSAP
+      // Garis: animate scaleY via GSAP — Type B lazy-init
       if (line) {
         Promise.all([
           import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'),
@@ -242,18 +257,42 @@ function formatDate(dateStr: string): string {
           var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
           gsap.registerPlugin(ScrollTrigger);
 
-          gsap.fromTo(line,
-            { scaleY: 0 },
-            {
-              scaleY: 1, ease: 'none',
-              scrollTrigger: {
-                trigger: '#timeline-component',
-                start: 'top 80%',
-                end: 'bottom 60%',
-                scrub: 1,
-              },
-            }
-          );
+          // Lazy-init: only create scrub when timeline enters viewport
+          var timelineEl = document.getElementById('timeline-component');
+          var scrubCreated = false;
+          var lineTrigger = null;
+
+          if (timelineEl) {
+            var lazyLine = new IntersectionObserver(function(entries) {
+              if (entries[0].isIntersecting && !scrubCreated) {
+                scrubCreated = true;
+
+                var tween = gsap.fromTo(line,
+                  { scaleY: 0 },
+                  {
+                    scaleY: 1, ease: 'none',
+                    scrollTrigger: {
+                      trigger: '#timeline-component',
+                      start: 'top 80%',
+                      end: 'bottom 60%',
+                      scrub: 1,
+                    },
+                  }
+                );
+                if (tween.scrollTrigger) lineTrigger = tween.scrollTrigger;
+
+                lazyLine.disconnect();
+              }
+            }, { threshold: 0.05 });
+            lazyLine.observe(timelineEl);
+
+            // Cleanup on View Transition
+            document.addEventListener('astro:before-swap', function() {
+              lazyLine.disconnect();
+              if (lineTrigger) lineTrigger.kill();
+              ScrollTrigger.getAll().forEach(function(t) { t.kill(); });
+            }, { once: true });
+          }
         }).catch(function(err) {});
       }
 

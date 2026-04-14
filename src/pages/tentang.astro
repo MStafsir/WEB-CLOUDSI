@@ -252,16 +252,20 @@ const timeline = await getTimeline();
           gsap.fromTo(vmCards,
             { opacity: 0, scale: 0.95, y: 30 },
             {
-              opacity: 1, scale: 1, y: 0, stagger: 0.1, ease: 'power2.out',
+              opacity: 1, scale: 1, y: 0, duration: 0.8, stagger: 0.1, ease: 'power2.out',
               scrollTrigger: {
                 trigger: '.visimisi-grid',
-                start: 'top 95%',
-                end: 'bottom 80%',
-                scrub: 1
+                start: 'top 90%',
+                once: true
               }
             }
           );
         }
+
+        // Cleanup on View Transition
+        document.addEventListener('astro:before-swap', function() {
+          ScrollTrigger.getAll().forEach(function(t) { t.kill(); });
+        }, { once: true });
       }).catch(function(err) { showAll(); });
     }
 

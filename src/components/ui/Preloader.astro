@@ -165,6 +165,10 @@
   // =============================================
 
   function initLogic() {
+    // NAVIGATION GUARD: Prevent re-init on View Transition
+    if (window.__preloaderInitialized) return;
+    window.__preloaderInitialized = true;
+
     // Jika sudah pernah load, JANGAN tampilkan preloader
     if (sessionStorage.getItem('cloudsi_loaded')) {
       var el = document.getElementById('initial-preloader');
@@ -215,19 +219,20 @@
     // --- BANGUN DAFTAR ASET KRITIS ---
     var criticalAssets = [];
 
-    // Asset 1: Logo
-    var img = new Image();
-    img.src = '/logo-angkatan-25.png';
-    criticalAssets.push(
-      withTimeout(
-        new Promise(function (resolve) {
-          if (img.complete) return resolve();
-          img.onload = resolve;
-          img.onerror = resolve;
-        }),
-        2000
-      )
-    );
+    // Asset 1: Logo — use existing DOM <img> instead of new Image() to avoid duplicate request
+    var img = initialEl.querySelector('img[src*="logo-angkatan"]');
+    if (img) {
+      criticalAssets.push(
+        withTimeout(
+          new Promise(function (resolve) {
+            if (img.complete && img.naturalWidth > 0) return resolve();
+            img.onload = resolve;
+            img.onerror = resolve;
+          }),
+          2000
+        )
+      );
+    }
 
     // Asset 2: Font
     if (document.fonts && typeof document.fonts.load === 'function') {

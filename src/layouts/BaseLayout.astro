@@ -202,6 +202,11 @@ const fullTitle = title;
     <!-- Video tidak di-preload karena browser tidak support preload as=video -->
 
     <!-- ============================================
+         LOGO PRELOAD — Single authoritative request, browser dedup
+         ============================================ -->
+    <link rel="preload" as="image" href="/logo-angkatan-25.png" />
+
+    <!-- ============================================
          FAVICON
          ============================================ -->
     <link rel="icon" type="image/png" href="/logo-angkatan-25.png" />
@@ -280,10 +285,36 @@ const fullTitle = title;
             });
 
             lenis.on('scroll', ScrollTrigger.update);
-            gsap.ticker.add(function(time) { lenis.raf(time * 1000); });
+            
+            // ===== IDLE PAUSE/RESUME =====
+            // Only run lenis.raf when user is actively scrolling
+            var lenisActive = false;
+            var lenisIdleTimer = null;
+            var LENIS_IDLE_MS = 150;
+            
+            function onLenisScroll() {
+              lenisActive = true;
+              if (lenisIdleTimer) clearTimeout(lenisIdleTimer);
+              lenisIdleTimer = setTimeout(function() {
+                lenisActive = false;
+              }, LENIS_IDLE_MS);
+            }
+            
+            lenis.on('scroll', onLenisScroll);
+            // Activate on first user interaction
+            window.addEventListener('scroll', function() { onLenisScroll(); }, { passive: true, once: true });
+            window.addEventListener('wheel', function() { onLenisScroll(); }, { passive: true });
+            window.addEventListener('touchstart', function() { onLenisScroll(); }, { passive: true });
+            
+            gsap.ticker.add(function(time) {
+              if (lenisActive) {
+                lenis.raf(time * 1000);
+              }
+            });
             gsap.ticker.lagSmoothing(0);
 
             var cleanup = function() {
+              if (lenisIdleTimer) clearTimeout(lenisIdleTimer);
               lenis.destroy();
               ScrollTrigger.getAll().forEach(function(t) { t.kill(); });
               document.removeEventListener('astro:before-swap', cleanup);
@@ -390,20 +421,24 @@ const fullTitle = title;
         ];
 
         var allEls = document.querySelectorAll(selectors.join(','));
-        var fixed = 0;
+        // TWO-PASS: Read all, then write all (avoid forced sync reflow)
+        var toFix = [];
         for (var i = 0; i < allEls.length; i++) {
           var el = allEls[i];
-          var computed = window.getComputedStyle(el);
-          if (computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) {
-            el.style.opacity = '1';
-            el.style.transform = 'none';
-            el.style.visibility = 'visible';
-            if (el.classList.contains('fade-in')) el.classList.add('is-visible');
-            fixed++;
+          var op = window.getComputedStyle(el).opacity;
+          if (op === '0' || parseFloat(op) < 0.1) {
+            toFix.push(el);
           }
         }
-        if (fixed > 0) {
-          console.warn('[Cloudsi] Safety net: showed ' + fixed + ' hidden elements after 3s');
+        // Write pass
+        for (var j = 0; j < toFix.length; j++) {
+          toFix[j].style.opacity = '1';
+          toFix[j].style.transform = 'none';
+          toFix[j].style.visibility = 'visible';
+          if (toFix[j].classList.contains('fade-in')) toFix[j].classList.add('is-visible');
+        }
+        if (toFix.length > 0) {
+          console.warn('[Cloudsi] Safety net: showed ' + toFix.length + ' hidden elements after 3s');
         }
       }, 3000);
     </script>
@@ -424,20 +459,24 @@ const fullTitle = title;
               '.photo-frame', '[data-stat-target]'
             ];
             var allEls = document.querySelectorAll(selectors.join(','));
-            var fixed = 0;
+            // TWO-PASS: Read all, then write all (avoid forced sync reflow)
+            var toFix = [];
             for (var i = 0; i < allEls.length; i++) {
               var el = allEls[i];
-              var computed = window.getComputedStyle(el);
-              if (computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) {
-                el.style.opacity = '1';
-                el.style.transform = 'none';
-                el.style.visibility = 'visible';
-                if (el.classList.contains('fade-in')) el.classList.add('is-visible');
-                fixed++;
+              var op = window.getComputedStyle(el).opacity;
+              if (op === '0' || parseFloat(op) < 0.1) {
+                toFix.push(el);
               }
             }
-            if (fixed > 0) {
-              console.warn('[Cloudsi] Navigation safety net: showed ' + fixed + ' hidden elements');
+            // Write pass
+            for (var j = 0; j < toFix.length; j++) {
+              toFix[j].style.opacity = '1';
+              toFix[j].style.transform = 'none';
+              toFix[j].style.visibility = 'visible';
+              if (toFix[j].classList.contains('fade-in')) toFix[j].classList.add('is-visible');
+            }
+            if (toFix.length > 0) {
+              console.warn('[Cloudsi] Navigation safety net: showed ' + toFix.length + ' hidden elements');
             }
           }, 1500);
         });

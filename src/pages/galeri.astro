@@ -165,8 +165,8 @@ const stackData = [
      ===================================================== */
   
   .water-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
-  .orb-1 { width: 50vw; height: 50vw; top: -10%; left: -15%; background: radial-gradient(circle, rgba(0,80,160,0.12) 0%, transparent 70%); animation: drift1 12s ease-in-out infinite; }
-  .orb-2 { width: 40vw; height: 40vw; bottom: 5%; right: -10%; background: radial-gradient(circle, rgba(0,160,180,0.08) 0%, transparent 70%); animation: drift2 15s ease-in-out infinite 2s; }
+  .orb-1 { width: 50vw; height: 50vw; top: -10%; left: -15%; background: radial-gradient(circle, rgba(0,80,160,0.12) 0%, transparent 70%); animation: drift1 12s ease-in-out infinite; animation-play-state: paused; }
+  .orb-2 { width: 40vw; height: 40vw; bottom: 5%; right: -10%; background: radial-gradient(circle, rgba(0,160,180,0.08) 0%, transparent 70%); animation: drift2 15s ease-in-out infinite 2s; animation-play-state: paused; }
   @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-20px)} }
   @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,15px)} }
 
@@ -374,26 +374,38 @@ const stackData = [
           var scrollY = window.scrollY;
           var viewHeight = window.innerHeight;
           
+          // ===== READ PASS =====
+          var cardData = [];
           stackCards.forEach(function(card) {
-            if (!card.classList.contains('in-view')) return;
+            if (!card.classList.contains('in-view')) {
+              cardData.push(null);
+              return;
+            }
             var stickyTopBase = 80;
             var index = parseInt(card.style.getPropertyValue('--card-index'));
             var stickyTopPos = stickyTopBase + (index * 20);
             var rect = card.getBoundingClientRect();
+            cardData.push({ card: card, rect: rect, stickyTopPos: stickyTopPos });
+          });
+
+          // ===== WRITE PASS =====
+          for (var i = 0; i < cardData.length; i++) {
+            var data = cardData[i];
+            if (!data) continue;
             
-            if (rect.top <= stickyTopPos + 2) {
-              var distToTop = Math.abs(rect.top - stickyTopPos);
+            if (data.rect.top <= data.stickyTopPos + 2) {
+              var distToTop = Math.abs(data.rect.top - data.stickyTopPos);
               var scrollProgress = Math.max(0, distToTop) / (viewHeight * 0.6);
               var scale = Math.max(0.95, 1 - (scrollProgress * 0.05));
               var blurAmt = Math.min(4, scrollProgress * 10);
               
-              card.style.transform = 'scale(' + scale + ')';
-              card.style.filter = 'brightness(' + (1 - scrollProgress * 0.2) + ') blur(' + blurAmt + 'px)';
+              data.card.style.transform = 'scale(' + scale + ')';
+              data.card.style.filter = 'brightness(' + (1 - scrollProgress * 0.2) + ') blur(' + blurAmt + 'px)';
             } else {
-              card.style.transform = 'translateY(0) scale(1)';
-              card.style.filter = 'brightness(1) blur(0px)';
+              data.card.style.transform = 'translateY(0) scale(1)';
+              data.card.style.filter = 'brightness(1) blur(0px)';
             }
-          });
+          }
         }
       }
 
@@ -469,5 +481,19 @@ const stackData = [
 
     document.addEventListener('DOMContentLoaded', initGaleriInteraktif);
     document.addEventListener('astro:after-swap', initGaleriInteraktif);
+
+    // IO pause/resume for orb drift animations
+    function initOrbIO() {
+      var orbs = document.querySelectorAll('.water-orb');
+      if (!orbs.length) return;
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          e.target.style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
+        });
+      }, { threshold: 0 });
+      orbs.forEach(function(el) { obs.observe(el); });
+    }
+    document.addEventListener('DOMContentLoaded', initOrbIO);
+    document.addEventListener('astro:after-swap', initOrbIO);
   })();
 </script>

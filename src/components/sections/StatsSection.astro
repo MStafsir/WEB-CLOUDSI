@@ -106,21 +106,45 @@
         var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
         gsap.registerPlugin(ScrollTrigger);
 
-        nums.forEach(function(num) {
-          var target = parseInt(num.getAttribute('data-stat-target') || '0', 10);
-          
-          ScrollTrigger.create({
-            trigger: ".stats-container",
-            start: "top 95%",
-            end: "bottom 30%",
-            scrub: 1, 
-            onUpdate: function(self) {
-              var easeOut = self.progress * (2 - self.progress);
-              var currentVal = Math.round(target * easeOut);
-              num.innerText = String(currentVal);
+        // Type B: Lazy-init scrub via IntersectionObserver
+        var statsContainer = document.querySelector('.stats-container');
+        var scrubCreated = false;
+        var scrubTriggers = [];
+
+        if (statsContainer) {
+          var lazyStats = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting && !scrubCreated) {
+              scrubCreated = true;
+
+              nums.forEach(function(num) {
+                var target = parseInt(num.getAttribute('data-stat-target') || '0', 10);
+                
+                var st = ScrollTrigger.create({
+                  trigger: ".stats-container",
+                  start: "top 95%",
+                  end: "bottom 30%",
+                  scrub: 1, 
+                  onUpdate: function(self) {
+                    var easeOut = self.progress * (2 - self.progress);
+                    var currentVal = Math.round(target * easeOut);
+                    num.innerText = String(currentVal);
+                  }
+                });
+                scrubTriggers.push(st);
+              });
+
+              lazyStats.disconnect();
             }
-          });
-        });
+          }, { threshold: 0.1 });
+          lazyStats.observe(statsContainer);
+
+          // Cleanup on View Transition
+          document.addEventListener('astro:before-swap', function() {
+            lazyStats.disconnect();
+            scrubTriggers.forEach(function(st) { st.kill(); });
+            scrubTriggers = [];
+          }, { once: true });
+        }
       }).catch(function(err) { showAll(); });
     }
 

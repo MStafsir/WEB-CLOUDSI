@@ -517,8 +517,22 @@ const TIMELINE_DATA = [
       var vh = window.innerHeight;
       var viewCenter = vh / 2;
 
+      // ===== READ PASS: Read all layout values first =====
+      var trackRect = null;
       if (track && fillLine) {
-        var trackRect = track.getBoundingClientRect();
+        trackRect = track.getBoundingClientRect();
+      }
+
+      var parallaxData = [];
+      if (!disableParallax) {
+        activeParallaxQueue.forEach(function(wrap) {
+          var rect = wrap.getBoundingClientRect();
+          parallaxData.push({ wrap: wrap, rect: rect });
+        });
+      }
+
+      // ===== WRITE PASS: Apply all styles =====
+      if (trackRect) {
         var triggerPoint = vh * 0.7;
         var trackHeight = trackRect.height;
         var distance = triggerPoint - trackRect.top;
@@ -527,28 +541,27 @@ const TIMELINE_DATA = [
         fillLine.style.transform = 'scaleY(' + ratio + ')';
       }
 
-      if (!disableParallax) {
-        activeParallaxQueue.forEach(function(wrap) {
-          var rect = wrap.getBoundingClientRect();
-          var objCenter = rect.top + rect.height / 2;
-          var dist = objCenter - viewCenter;
-          
-          var depthY = (dist / viewCenter) * 20;
-          depthY = Math.max(-20, Math.min(20, depthY));
-          
-          var outScale = 1;
-          var outOpacity = 1;
+      for (var i = 0; i < parallaxData.length; i++) {
+        var data = parallaxData[i];
+        var rect = data.rect;
+        var objCenter = rect.top + rect.height / 2;
+        var dist = objCenter - viewCenter;
+        
+        var depthY = (dist / viewCenter) * 20;
+        depthY = Math.max(-20, Math.min(20, depthY));
+        
+        var outScale = 1;
+        var outOpacity = 1;
 
-          if (dist < -viewCenter * 0.15) {
-            var progress = Math.abs(dist + (viewCenter * 0.15)) / (viewCenter * 0.85);
-            progress = Math.max(0, Math.min(1, progress));
-            outScale = 1 - (0.04 * progress);
-            outOpacity = 1 - (0.6 * progress);
-          }
+        if (dist < -viewCenter * 0.15) {
+          var progress = Math.abs(dist + (viewCenter * 0.15)) / (viewCenter * 0.85);
+          progress = Math.max(0, Math.min(1, progress));
+          outScale = 1 - (0.04 * progress);
+          outOpacity = 1 - (0.6 * progress);
+        }
 
-          wrap.style.transform = 'translateY(' + depthY.toFixed(2) + 'px) scale(' + outScale.toFixed(3) + ')';
-          wrap.style.opacity = outOpacity.toFixed(3);
-        });
+        data.wrap.style.transform = 'translateY(' + depthY.toFixed(2) + 'px) scale(' + outScale.toFixed(3) + ')';
+        data.wrap.style.opacity = outOpacity.toFixed(3);
       }
 
       ticking = false;
