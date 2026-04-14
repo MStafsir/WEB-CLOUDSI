@@ -21,7 +21,7 @@ export interface Member {
 
 /** Acara/kegiatan angkatan */
 export interface Event {
-  id: string;
+  id: number;
   title: string;
   date: string;
   description?: string;
@@ -31,7 +31,7 @@ export interface Event {
 
 /** Entry timeline — milestone kronologis angkatan */
 export interface TimelineEntry {
-  id: string;
+  id: number;
   date: string;
   title: string;
   description?: string;
@@ -40,7 +40,7 @@ export interface TimelineEntry {
 
 /** Gambar galeri — terkait dengan event tertentu */
 export interface GalleryImage {
-  id: string;
-  event_id: string;
+  id: number;
+  event_id: number;
   image_url: string;
 }
