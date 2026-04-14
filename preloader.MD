@@ -29,7 +29,7 @@
 <div id="initial-preloader" class="fixed inset-0 z-[100000] flex flex-col items-center justify-center bg-[hsl(210,60%,6%)]" style="transition: opacity 800ms ease-in-out;">
   <div class="text-center flex flex-col items-center gap-2">
     <div class="relative mb-2">
-      <img src="/logo-angkatan-25.png" alt="Cloudsi" width="60" height="60"
+      <img src="/logo-angkatan-25.webp" alt="Cloudsi" width="60" height="60"
         class="animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
     </div>
     <h2 class="font-serif text-3xl font-light tracking-[0.45em] text-white/90 m-0">CLOUDSI</h2>
@@ -118,7 +118,7 @@
 
     // Asset 1: Logo (paling cepat, biasanya < 200ms)
     var img = new Image();
-    img.src = '/logo-angkatan-25.png';
+    img.src = '/logo-angkatan-25.webp';
     criticalAssets.push(
       withTimeout(
         new Promise(function (resolve) {

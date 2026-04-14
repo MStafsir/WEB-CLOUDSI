@@ -95,7 +95,7 @@ export async function getTimeline(): Promise<TimelineEntry[]> {
 /**
  * Ambil gambar galeri berdasarkan event_id
  */
-export async function getGallery(eventId: string): Promise<GalleryImage[]> {
+export async function getGallery(eventId: number): Promise<GalleryImage[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from('gallery')
