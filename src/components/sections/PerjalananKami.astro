@@ -477,108 +477,23 @@ const TIMELINE_DATA = [
   document.addEventListener('astro:after-swap', initAwwwardsTimeline);
 
   function initAwwwardsTimeline() {
-    var isMobile = window.innerWidth < 640;
-    var isTablet = window.innerWidth < 1024;
-    var isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var disableParallax = isMobile || isTablet || isReduced;
-
     var items = document.querySelectorAll('[data-pk-item]');
     if (items.length === 0) return;
 
-    var track = document.getElementById('pk-track');
-    var fillLine = document.getElementById('pk-global-fill');
-
-    var viewportOffset = '100% 0px -15% 0px'; 
-    var activeParallaxQueue = new Set();
-
+    var viewportOffset = '0px 0px -15% 0px'; 
     var itemObserver = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
-        var item = entry.target;
-        var wrap = item.querySelector('.pk-parallax-wrap');
-        
         if (entry.isIntersecting) {
-          item.classList.add('is-visible');
-          if (wrap && !disableParallax) activeParallaxQueue.add(wrap);
+          entry.target.classList.add('is-visible');
         } else {
-          item.classList.remove('is-visible');
-          if (wrap && !disableParallax) {
-            activeParallaxQueue.delete(wrap);
-            wrap.style.transform = '';
-            wrap.style.opacity = '';
-          }
+          entry.target.classList.remove('is-visible');
         }
       });
     }, { threshold: 0.1, rootMargin: viewportOffset });
 
     items.forEach(function(item) { itemObserver.observe(item); });
 
-    var ticking = false;
-    var rAfAnimLoop = function() {
-      var vh = window.innerHeight;
-      var viewCenter = vh / 2;
-
-      // ===== READ PASS: Read all layout values first =====
-      var trackRect = null;
-      if (track && fillLine) {
-        trackRect = track.getBoundingClientRect();
-      }
-
-      var parallaxData = [];
-      if (!disableParallax) {
-        activeParallaxQueue.forEach(function(wrap) {
-          var rect = wrap.getBoundingClientRect();
-          parallaxData.push({ wrap: wrap, rect: rect });
-        });
-      }
-
-      // ===== WRITE PASS: Apply all styles =====
-      if (trackRect) {
-        var triggerPoint = vh * 0.7;
-        var trackHeight = trackRect.height;
-        var distance = triggerPoint - trackRect.top;
-        var ratio = distance / trackHeight;
-        ratio = Math.max(0, Math.min(1, ratio));
-        fillLine.style.transform = 'scaleY(' + ratio + ')';
-      }
-
-      for (var i = 0; i < parallaxData.length; i++) {
-        var data = parallaxData[i];
-        var rect = data.rect;
-        var objCenter = rect.top + rect.height / 2;
-        var dist = objCenter - viewCenter;
-        
-        var depthY = (dist / viewCenter) * 20;
-        depthY = Math.max(-20, Math.min(20, depthY));
-        
-        var outScale = 1;
-        var outOpacity = 1;
-
-        if (dist < -viewCenter * 0.15) {
-          var progress = Math.abs(dist + (viewCenter * 0.15)) / (viewCenter * 0.85);
-          progress = Math.max(0, Math.min(1, progress));
-          outScale = 1 - (0.04 * progress);
-          outOpacity = 1 - (0.6 * progress);
-        }
-
-        data.wrap.style.transform = 'translateY(' + depthY.toFixed(2) + 'px) scale(' + outScale.toFixed(3) + ')';
-        data.wrap.style.opacity = outOpacity.toFixed(3);
-      }
-
-      ticking = false;
-    };
-
-    var handleScroll = function() {
-      if (!ticking) {
-        window.requestAnimationFrame(rAfAnimLoop);
-        ticking = true;
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.requestAnimationFrame(rAfAnimLoop);
-
     var cleanup = function() {
-      window.removeEventListener('scroll', handleScroll);
       itemObserver.disconnect();
       document.removeEventListener('astro:before-swap', cleanup);
     };
