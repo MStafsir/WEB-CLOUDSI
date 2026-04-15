@@ -238,54 +238,59 @@ const navLinks = [
     .line-2 { top: 19px; }
     .line-3 { top: 26px; }
 
-    /* Mobile Backdrop */
+    /* MOBILE BACKDROP - PENGGELAP LAYAR */
     .mobile-backdrop {
       display: block;
       position: fixed;
       inset: 0;
-      z-index: 90;
-      background: rgba(0, 5, 10, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      opacity: 0; 
-      pointer-events: none; 
-      transition: opacity 0.4s ease;
-    }
-
-    .mobile-backdrop.is-open { 
-      opacity: 1; 
-      pointer-events: auto; 
-    }
-
-    /* Morphing Mobile Drawer */
-    .mobile-drawer {
-      display: flex; 
-      flex-direction: column;
-      position: fixed; 
-      top: 0; 
-      right: 0; 
-      bottom: 0;
-      width: 70vw; 
-      max-width: 350px; 
-      z-index: 100;
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur-glass-heavy);
-      -webkit-backdrop-filter: var(--blur-glass-heavy);
-      border-left: 1px solid var(--glass-border);
-      box-shadow: -15px 0 40px rgba(0,0,0,0.6);
-      padding: 1.5rem;
-      box-sizing: border-box;
-      
-      /* The Morphing Initial State */
-      transform: translateX(120%) scale(0.5);
-      border-radius: 100% 0 0 100%;
+      z-index: 90 !important;
+      background-color: rgba(0, 0, 0, 0.75) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
       opacity: 0;
       pointer-events: none;
-      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.6s ease, opacity 0.4s ease;
+      transition: opacity 0.4s ease;
+    }
+    
+    .mobile-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
     }
 
+    /* MOBILE DRAWER - MENU UTAMA (MORPHING OVAL KE KOTAK) */
+    .mobile-drawer {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 70vw;
+      max-width: 350px; /* FIX: Syntax Error diperbaiki */
+      z-index: 100 !important;
+      
+      /* BACKGROUND ABSOLUT (Sangat Gelap & Blur Ekstrim) */
+      background-color: rgba(6, 15, 26, 0.95) !important; 
+      backdrop-filter: blur(40px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
+      
+      border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: -15px 0 50px rgba(0, 0, 0, 0.7) !important;
+      padding: 1.5rem;
+      box-sizing: border-box;
+
+      /* ANIMASI MORPHING STATE (TERTUTUP) */
+      transform: translateX(120%) scale(0.8);
+      border-radius: 50% 0 0 50%;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                  border-radius 0.6s ease, 
+                  opacity 0.4s ease;
+    }
+
+    /* ANIMASI MORPHING STATE (TERBUKA) */
     .mobile-drawer.is-open {
-      /* The Morphing Final State */
       transform: translateX(0) scale(1);
       border-radius: 0px;
       opacity: 1;
