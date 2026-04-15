@@ -424,23 +424,13 @@
    ============================================ */
 @media (max-width: 768px) {
 
-  /* Matikan filter background di mobile untuk semau elemen karena sangat berat
-     dan menyebabkan lag (drop FPS) saat scroll layar */
-  *,
-  *::before,
-  *::after {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+
+
+  :root {
+    --blur-glass: blur(4px) !important;
+    --blur-glass-heavy: blur(6px) !important;
   }
 
-  /* Fallback solid background untuk class glass di mobile */
-  .glass {
-    background: hsla(200, 50%, 12%, 0.95);
-  }
-
-  .glass-heavy {
-    background: hsla(200, 55%, 10%, 0.98);
-  }
 
   /* Shorter animation duration on mobile */
   .fade-in {

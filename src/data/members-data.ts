@@ -17,7 +17,7 @@ export const MEMBERS_DATA: Member[] = [
   { id: "1006", full_name: "Andini Putri Malaya", nickname: "Andini", role: "Bendahara", quote: "", photo_url: "/members/1006.webp", social_ig: "https://www.instagram.com/layaaya__?igsh=ajlrMm5zcXJiNzdv", social_in: "andini-putri-malaya", is_visible: true },
 
   // === DEV — Posisi 7 (Baris 2 Kolom 3) ===
-  { id: "1024", full_name: "MUHAMAD SHOLICHIN TAFSIR SRILINTANG", nickname: "SRILINTANG", role: "DEV", quote: "", photo_url: "/members/1024.webp", social_ig: "https://www.instagram.com/srilintang_/", social_in: "https://www.linkedin.com/in/muhamad-sholichin-tafsir-srilintang-b89867379/?skipRedirect=true&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3BpCER9gozQuK0wfkqOfftKA%3D%3D", social_gh: "https://github.com/MStafsir", is_visible: true },
+  { id: "1024", full_name: "Muhammad Sholichin Tafsir Srilintang", nickname: "Srilintang", role: "DEV", quote: "", photo_url: "/members/1024.webp", social_ig: "https://www.instagram.com/srilintang_/", social_in: "https://www.linkedin.com/in/muhamad-sholichin-tafsir-srilintang-b89867379/?skipRedirect=true&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3BpCER9gozQuK0wfkqOfftKA%3D%3D", social_gh: "https://github.com/MStafsir", is_visible: true },
 
   // === ANGGOTA — Diurutkan berdasarkan NIM terkecil ke terbesar ===
   // NIM: H1101251002
@@ -37,11 +37,11 @@ export const MEMBERS_DATA: Member[] = [
   // NIM: H1101251010
   { id: "1016", full_name: "Nasywa Akmalia Hanif", nickname: "Nasywa", role: "Anggota", quote: "", photo_url: "/members/1016.webp", social_ig: "https://www.instagram.com/nnassh._?igsh=NmgxeG12aWhrNXNm", social_in: "nasywa-akmalia-hanif", is_visible: true },
   // NIM: H1101251011
-  { id: "1030", full_name: "Gendis Setyawan", nickname: "Gendis", role: "Anggota", quote: "", photo_url: "/members/1030.webp", social_ig: "https://www.instagram.com/genndisn/", social_in: "gendis-setyawan", is_visible: true },
+  { id: "1030", full_name: "Gendis Setyawan Putri", nickname: "Gendis", role: "Anggota", quote: "", photo_url: "/members/1030.webp", social_ig: "https://www.instagram.com/genndisn/", social_in: "gendis-setyawan", is_visible: true },
   // NIM: H1101251012
   { id: "1031", full_name: "Charles Wong", nickname: "Charles", role: "Anggota", quote: "", photo_url: "/members/1031.webp", social_ig: "https://www.instagram.com/chrleswg?igsh=MXVlM25sanY4NzY3dw==", social_in: "charles-wong", social_gh: "https://github.com/charlesswg", is_visible: true },
   // NIM: H1101251015
-  { id: "1032", full_name: "Ahmad Rahman", nickname: "Ahmad", role: "Anggota", quote: "", photo_url: "/members/1032.webp", social_ig: "https://www.instagram.com/rahmnsye?igsh=MXd0dTA0N2o3bGN1ag%3D%3D&utm_source=qr", social_in: "ahmad-rahman", is_visible: true },
+  { id: "1032", full_name: "Ahmad Rahman N.S.", nickname: "Ahmad", role: "Anggota", quote: "", photo_url: "/members/1032.webp", social_ig: "https://www.instagram.com/rahmnsye?igsh=MXd0dTA0N2o3bGN1ag%3D%3D&utm_source=qr", social_in: "ahmad-rahman", is_visible: true },
   // NIM: H1101251017
   { id: "1033", full_name: "M. Hizbullah Pohan", nickname: "Hizbullah", role: "Anggota", quote: "", photo_url: "/members/1033.webp", social_ig: "", social_in: "hizbullah-pohan", social_gh: "https://github.com/Nasa-kun17", is_visible: true },
   // NIM: H1101251018
@@ -75,11 +75,11 @@ export const MEMBERS_DATA: Member[] = [
   // NIM: H1101251034
   { id: "1043", full_name: "Chelsea Zalianti", nickname: "Chelsea", role: "Anggota", quote: "", photo_url: "/members/1043.webp", social_ig: "https://www.instagram.com/cseazln?igsh=bDY5YzRiOWV0ancz&utm_source=qr", social_in: "chelsea-zalianti", is_visible: true },
   // NIM: H1101251035
-  { id: "1044", full_name: "M. Farras Haidar Revanezka", nickname: "Farras", role: "Anggota", quote: "", photo_url: "/members/1044.webp", social_ig: "https://www.instagram.com/prazz.sh/", social_in: "https://www.linkedin.com/in/mfrsha/", social_gh: "https://github.com/aerthaze", is_visible: true },
+  { id: "1044", full_name: "Muhammad Farras Haidar Revanezka", nickname: "Farras", role: "DEV", quote: "", photo_url: "/members/1044.webp", social_ig: "https://www.instagram.com/prazz.sh/", social_in: "https://www.linkedin.com/in/mfrsha/", social_gh: "https://github.com/aerthaze", is_visible: true },
   // NIM: H1101251036
   { id: "1045", full_name: "Deslo Aldo Anggoro", nickname: "Deslo", role: "Anggota", quote: "", photo_url: "/members/1045.webp", social_ig: "https://www.instagram.com/desloal?igsh=MXkxcXFoMzZiaXhvNw==", social_in: "deslo-aldo-anggoro", social_gh: "https://github.com/DesloAl", is_visible: true },
   // NIM: H1101251038
-  { id: "1046", full_name: "Mercello Januarius Erick", nickname: "Mercello", role: "Anggota", quote: "", photo_url: "/members/1046.webp", social_ig: "https://www.instagram.com/marcjrk?igsh=MWhzbmRsM2s4dDZ6cA==", social_in: "mercello-januarius-erick", is_visible: true },
+  { id: "1046", full_name: "Marcello Januarius Erick", nickname: "Marcello", role: "Anggota", quote: "", photo_url: "/members/1046.webp", social_ig: "https://www.instagram.com/marcjrk?igsh=MWhzbmRsM2s4dDZ6cA==", social_in: "mercello-januarius-erick", is_visible: true },
   // NIM: H1101251039
   { id: "1011", full_name: "Nikoleta Febrina Listya Priyono", nickname: "Nikoleta", role: "Anggota", quote: "", photo_url: "/members/1011.webp", social_ig: "https://www.instagram.com/feat.listy?igsh=OHl4cTFtcnVvZTR1", social_in: "nikoleta-febrina-listy", is_visible: true },
   // NIM: H1101251040
@@ -101,7 +101,7 @@ export const MEMBERS_DATA: Member[] = [
   // NIM: H1101251048
   { id: "1052", full_name: "Hubert Melville Prince M.", nickname: "Hubert", role: "Anggota", quote: "", photo_url: "/members/1052.webp", social_ig: "https://www.instagram.com/melvlls?igsh=MTRhdWh1aW1mZmZ2Zg==", social_in: "hubert-melville-prince", is_visible: true },
   // NIM: H1101251049
-  { id: "1053", full_name: "Raihan Ikram M.", nickname: "Raihan", role: "Anggota", quote: "", photo_url: "/members/1053.webp", social_ig: "https://www.instagram.com/raihanikram_?igsh=MTQyOHl1MTVlNm04dQ%3D%3D&utm_source=qr", social_in: "raihan-ikram", is_visible: true },
+  { id: "1053", full_name: "Raihan Ikram Maulana", nickname: "Raihan", role: "Anggota", quote: "", photo_url: "/members/1053.webp", social_ig: "https://www.instagram.com/raihanikram_?igsh=MTQyOHl1MTVlNm04dQ%3D%3D&utm_source=qr", social_in: "https://www.linkedin.com/in/raihan-ikram-maulana-28621a34a/", social_gh: "https://github.com/RaihanIkram", is_visible: true },
   // NIM: H1101251050
   { id: "1054", full_name: "Wilham Dhani Prasetyo", nickname: "Wilham", role: "Anggota", quote: "", photo_url: "/members/1054.webp", social_ig: "https://www.instagram.com/wilham.wdp?igsh=MXc1cmdheThjdzBtNQ==", social_in: "wilham-dhani-prasetyo", social_gh: "https://github.com/LoliFE-Studio", is_visible: true },
   // NIM: H1101251051
@@ -116,6 +116,8 @@ export const MEMBERS_DATA: Member[] = [
   { id: "1008", full_name: "Chayara Alima", nickname: "Chayara", role: "Anggota", quote: "", photo_url: "/members/1008.webp", social_ig: "https://www.instagram.com/chaaayyr?igsh=YWtyYnV4anhidzN4", social_in: "chayara-alima", is_visible: true },
   // NIM: H1101251057
   { id: "1012", full_name: "Khairunisa Ansyari Ramadhan", nickname: "Khairunisa", role: "Anggota", quote: "", photo_url: "/members/1012.webp", social_ig: "https://www.instagram.com/khacikaa?igsh=MTM1amw1bGc0NTdnbQ%3D%3D&utm_source=qr", social_in: "khairunisa-ansyari", is_visible: true },
+  // NIM: H1101251058
+  { id: "1077", full_name: "Novi Aulia", nickname: "Novi", role: "Anggota", quote: "", photo_url: "/members/1077.webp", social_ig: "https://www.instagram.com/_nvauliaaa?igsh=MWxzc3RkdjNsaDc0dQ==", social_in: "khairunisa-ansyari", is_visible: true },
   // NIM: H1101251058
   { id: "1058", full_name: "Salsabilla Fitri Nur R.", nickname: "Salsabilla", role: "Anggota", quote: "", photo_url: "/members/1058.webp", social_ig: "", social_in: "salsabilla-fitri-nur", is_visible: true },
   // NIM: H1101251059

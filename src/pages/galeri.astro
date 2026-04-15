@@ -5,38 +5,82 @@
  * Animasi interaktif: parallax + 3D tilt + Sticky Scroll-Driven Animations
  * Dependencies: BaseLayout, Header, Footer, PageTransition
  */
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Footer from '../components/layout/Footer.astro';
-import PageTransition from '../components/layout/PageTransition.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Footer from "../components/layout/Footer.astro";
+import PageTransition from "../components/layout/PageTransition.astro";
 
 // Data Stacking Cards sesuai urutan galeri
 const stackData = [
-  { id: 1, title: 'SINTA 2025', year: '2025', desc: '(System Information Academic Training) kegiatan pelatihan akademik untuk mahasiswa Sistem Informasi FMIPA UNTAN. Acara ini bertujuan memperkenalkan ilmu SI lebih dalam berupa Kuliah umum atau workshop.', badge: 'Awal Perjalanan' },
-  { id: 2, title: 'CIS', year: '2025', desc: 'Celebration of Information System Merupakan bentuk Transoformasi DNS/Dies Natalis Sistem Informasi untuk memperingatkan terbentuknya jurusan Sistem Informasi FMIPA UNTAN yang dimana kami disini sedang mensupport angkatan kami yang sedang bertanding di CIS.', badge: 'Pengabdian' },
-  { id: 3, title: 'OSI Badminton', year: '2025', desc: 'OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi', badge: 'Wawasan' },
-  { id: 4, title: 'OSI Badminton (Mahasiswi)', year: '2025 ', desc: 'OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami yang dimana ini adalah sesi foto para Mahasiswi Cloudsi di kegiatan OSI Badminton', badge: 'Puncak Harapan' },
-  { id: 5, title: 'Foto Angkatan Pertama', year: '2025', desc: 'FOTO ANGKATAN Pertama setelah pengurusan berkas dan Ospek Fakultas, kami berinisiasi untuk melakukan Foto bersama Angkatan Sistem Informasi untuk pertama kalinya dan disini tempat kami berkenalan kepada para keluarga Cloudsi kami', badge: 'Keakraban' },
-  { id: 6, title: 'OSI Badminton', year: '2025', desc: 'OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi', badge: 'Prestasi' },
-  { id: 7, title: 'Bukber Pertama', year: '2026', desc: 'BUKBER yang dimana ini merupakan BUKBER pertama angkatan Cloudsi dan kami berharap dari adanya inisiatif kegiatan seperti ini kami menjadi lebih akrab dan memperkuat keharmonisan yang dihadiri Lintas Agama di Cloudsi', badge: 'Selamanya' }
+  {
+    id: 1,
+    title: "SINTA 2025",
+    year: "2025",
+    desc: "(System Information Academic Training) kegiatan pelatihan akademik untuk mahasiswa Sistem Informasi FMIPA UNTAN. Acara ini bertujuan memperkenalkan ilmu SI lebih dalam berupa Kuliah umum atau workshop.",
+    badge: "Awal Perjalanan",
+  },
+  {
+    id: 2,
+    title: "CIS",
+    year: "2025",
+    desc: "Celebration of Information System Merupakan bentuk Transoformasi DNS/Dies Natalis Sistem Informasi untuk memperingatkan terbentuknya jurusan Sistem Informasi FMIPA UNTAN yang dimana kami disini sedang mensupport angkatan kami yang sedang bertanding di CIS.",
+    badge: "Pengabdian",
+  },
+  {
+    id: 3,
+    title: "OSI Badminton",
+    year: "2025",
+    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi",
+    badge: "Wawasan",
+  },
+  {
+    id: 4,
+    title: "OSI Badminton (Mahasiswi)",
+    year: "2025 ",
+    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami yang dimana ini adalah sesi foto para Mahasiswi Cloudsi di kegiatan OSI Badminton",
+    badge: "Puncak Harapan",
+  },
+  {
+    id: 5,
+    title: "Pertandingan Voli",
+    year: "2025",
+    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi",
+    badge: "Prestasi",
+  },
+  {
+    id: 6,
+    title: "Foto Angkatan Pertama",
+    year: "2025",
+    desc: "FOTO ANGKATAN Pertama setelah pengurusan berkas dan Ospek Fakultas, kami berinisiasi untuk melakukan Foto bersama Angkatan Sistem Informasi untuk pertama kalinya dan disini tempat kami berkenalan kepada para keluarga Cloudsi kami",
+    badge: "Keakraban",
+  },
+  {
+    id: 7,
+    title: "Bukber Pertama",
+    year: "2026",
+    desc: "BUKBER yang dimana ini merupakan BUKBER pertama angkatan Cloudsi dan kami berharap dari adanya inisiatif kegiatan seperti ini kami menjadi lebih akrab dan memperkuat keharmonisan yang dihadiri Lintas Agama di Cloudsi",
+    badge: "Selamanya",
+  },
 ];
-
 ---
 
-<BaseLayout title="Galeri | Cloudsi | Sistem Informasi Untan" description="Dalam satu ruang kami adalah keluarga besar Sistem Informasi Universitas Tanjungpura, penggerak teknologi masa depan.">
-  
+<BaseLayout
+  title="Galeri | Cloudsi | Sistem Informasi Untan"
+  description="Dalam satu ruang kami adalah keluarga besar Sistem Informasi Universitas Tanjungpura, penggerak teknologi masa depan."
+>
   <!-- Efek Ambience Water Orbs -->
   <div class="water-orb orb-1"></div>
   <div class="water-orb orb-2"></div>
-  
+
   <PageTransition>
     <main id="main-content">
-
       <!-- Hero mini -->
       <section class="galeri-hero">
         <div class="container-main galeri-hero-inner">
           <p class="eyebrow">CloudSI · 2025</p>
           <h1 class="galeri-title">Album <em>Kenangan</em></h1>
-          <p class="galeri-sub">Tujuh bingkai sejarah yang mengukir cerita kita bersama.</p>
+          <p class="galeri-sub">
+            Tujuh bingkai sejarah yang mengukir cerita kita bersama.
+          </p>
           <div class="water-line"></div>
         </div>
       </section>
@@ -44,13 +88,18 @@ const stackData = [
       <!-- Bento Grid Interaktif (7 Fotos Tanpa Spasi Kosong) -->
       <section class="galeri-grid-section section-pad">
         <div class="container-main bento-container">
-          
           <div class="gallery-grid" id="galleryGrid">
-            
             <!-- FOTO 1: Besar 2x2 (R1C1, R1C2, R2C1, R2C2) -->
             <div class="photo-frame item-large" style="transition-delay:0ms;">
               <div class="photo-inner ph-1">
-                <img src="/galeri/1.webp" alt="Foto 1" width="800" height="600" loading="eager" fetchpriority="high">
+                <img
+                  src="/galeri/1.webp"
+                  alt="Foto 1"
+                  width="800"
+                  height="600"
+                  loading="eager"
+                  fetchpriority="high"
+                />
                 <span class="caption overlay-text">SINTA 2025</span>
               </div>
             </div>
@@ -58,7 +107,14 @@ const stackData = [
             <!-- FOTO 2: Normal (R1C3) -->
             <div class="photo-frame" style="transition-delay:80ms;">
               <div class="photo-inner ph-2">
-                <img src="/galeri/2.webp" alt="Foto 2" width="800" height="600" loading="eager" fetchpriority="high">
+                <img
+                  src="/galeri/2.webp"
+                  alt="Foto 2"
+                  width="800"
+                  height="600"
+                  loading="eager"
+                  fetchpriority="high"
+                />
                 <span class="caption overlay-text">CIS</span>
               </div>
             </div>
@@ -66,7 +122,13 @@ const stackData = [
             <!-- FOTO 3: Tinggi 1x2 -> R2C3, R3C3 -->
             <div class="photo-frame item-tall" style="transition-delay:120ms;">
               <div class="photo-inner ph-3">
-                <img src="/galeri/3.webp" alt="Foto 3" width="800" height="600" loading="lazy">
+                <img
+                  src="/galeri/3.webp"
+                  alt="Foto 3"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                />
                 <span class="caption overlay-text">OSI Badminton</span>
               </div>
             </div>
@@ -74,31 +136,57 @@ const stackData = [
             <!-- FOTO 4: Lebar 2x1 -> R3C1, R3C2 -->
             <div class="photo-frame item-wide" style="transition-delay:160ms;">
               <div class="photo-inner ph-4">
-                <img src="/galeri/4.webp" alt="Foto 4" width="800" height="600" loading="lazy">
-                <span class="caption overlay-text">OSI Badminton (Mahasiswi)</span>
+                <img
+                  src="/galeri/4.webp"
+                  alt="Foto 4"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                />
+                <span class="caption overlay-text"
+                  >OSI Badminton (Mahasiswi)</span
+                >
               </div>
             </div>
 
             <!-- FOTO 5: Lebar 2x1 -> R4C1, R4C2 -->
             <div class="photo-frame item-wide" style="transition-delay:200ms;">
               <div class="photo-inner ph-5">
-                <img src="/galeri/5.webp" alt="Foto 5" width="800" height="600" loading="lazy">
-                <span class="caption overlay-text">Foto Angkatan Pertama</span>
+                <img
+                  src="/galeri/5.webp"
+                  alt="Foto 5"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                />
+                <span class="caption overlay-text">Pertandingan Voli</span>
               </div>
             </div>
 
             <!-- FOTO 6: Normal 1x1 -> R4C3 -->
             <div class="photo-frame" style="transition-delay:240ms;">
               <div class="photo-inner ph-6">
-                <img src="/galeri/6.webp" alt="Foto 6" width="800" height="600" loading="lazy">
-                <span class="caption overlay-text">OSI Badminton</span>
+                <img
+                  src="/galeri/6.webp"
+                  alt="Foto 6"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                />
+                <span class="caption overlay-text">Foto Angkatan Pertama</span>
               </div>
             </div>
 
             <!-- FOTO 7: Full 3x1 -> R5C1, R5C2, R5C3 -->
             <div class="photo-frame item-full" style="transition-delay:280ms;">
-              <div class="photo-inner ph-7" style="background-color: #081a30;">  
-                <img src="/galeri/7.webp" alt="Foto 7" width="800" height="600" loading="lazy">
+              <div class="photo-inner ph-7" style="background-color: #081a30;">
+                <img
+                  src="/galeri/7.webp"
+                  alt="Foto 7"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                />
                 <span class="caption overlay-text">Bukber CloudSI</span>
               </div>
             </div>
@@ -109,41 +197,94 @@ const stackData = [
       <!-- Sticky Stacking Cards Section -->
       <section class="stick-stack-section">
         <div class="container-main">
-          
           <div class="stack-header">
-            <h2 class="galeri-title" style="font-size: clamp(2rem, 5vw, 3.5rem);">Kisah di Balik <em>Lensa</em></h2>
-            <p class="galeri-sub">Lebih dekat dengan memori yang menyatukan kita.</p>
+            <h2
+              class="galeri-title"
+              style="font-size: clamp(2rem, 5vw, 3.5rem);"
+            >
+              Kisah di Balik <em>Lensa</em>
+            </h2>
+            <p class="galeri-sub">
+              Lebih dekat dengan memori yang menyatukan kita.
+            </p>
           </div>
 
           <div class="stacking-container" id="stacking-container">
-            {stackData.map((card, i) => (
-              <div class="stack-card glass" style={`--card-index: ${i};`}>
-                <div class="stack-card-inner">
-                  <div class="stack-img-col">
-                    <img src={`/galeri/${card.id}.webp`} alt={card.title} width="800" height="600" loading="lazy" />
-                  </div>
-                  <div class="stack-txt-col">
-                    <div class="stack-badge">{card.badge}</div>
-                    <h3 class="stack-title">{card.title}</h3>
-                    <div class="stack-year">{card.year}</div>
-                    <p class="stack-desc">{card.desc}</p>
+            {
+              stackData.map((card, i) => (
+                <div class="stack-card glass" style={`--card-index: ${i};`}>
+                  <div class="stack-card-inner">
+                    <div class="stack-img-col">
+                      <img
+                        src={`/galeri/${card.id}.webp`}
+                        alt={card.title}
+                        width="800"
+                        height="600"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="stack-txt-col">
+                      <div class="stack-badge">{card.badge}</div>
+                      <h3 class="stack-title">{card.title}</h3>
+                      <div class="stack-year">{card.year}</div>
+                      <p class="stack-desc">{card.desc}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            }
           </div>
         </div>
       </section>
 
       <!-- Lightbox (Tetap Dipertahankan untuk Bento Grid) -->
-      <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Lihat foto" hidden>
+      <div
+        class="lightbox"
+        id="lightbox"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Lihat foto"
+        hidden
+      >
         <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
-        <button class="lightbox-close" id="lightbox-close" aria-label="Tutup lightbox">&times;</button>
-        <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Foto sebelumnya" style="display:none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12L15 6"/></svg>
+        <button
+          class="lightbox-close"
+          id="lightbox-close"
+          aria-label="Tutup lightbox">&times;</button
+        >
+        <button
+          class="lightbox-nav lightbox-prev"
+          id="lightbox-prev"
+          aria-label="Foto sebelumnya"
+          style="display:none;"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"><path d="M15 18L9 12L15 6"></path></svg
+          >
         </button>
-        <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Foto selanjutnya" style="display:none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18L15 12L9 6"/></svg>
+        <button
+          class="lightbox-nav lightbox-next"
+          id="lightbox-next"
+          aria-label="Foto selanjutnya"
+          style="display:none;"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"><path d="M9 18L15 12L9 6"></path></svg
+          >
         </button>
         <div class="lightbox-content">
           <div id="lightbox-placeholder-text"></div>
@@ -151,7 +292,6 @@ const stackData = [
           <p class="lightbox-caption" id="lightbox-caption"></p>
         </div>
       </div>
-
     </main>
   </PageTransition>
   <Footer />
@@ -161,21 +301,97 @@ const stackData = [
   /* =====================================================
      ALBUM KENANGAN — UI Bento & Orbs
      ===================================================== */
-  
-  .water-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
-  .orb-1 { width: 50vw; height: 50vw; top: -10%; left: -15%; background: radial-gradient(circle, rgba(0,80,160,0.12) 0%, transparent 70%); }
-  .orb-2 { width: 40vw; height: 40vw; bottom: 5%; right: -10%; background: radial-gradient(circle, rgba(0,160,180,0.08) 0%, transparent 70%); }
+
+  .water-orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 {
+    width: 50vw;
+    height: 50vw;
+    top: -10%;
+    left: -15%;
+    background: radial-gradient(
+      circle,
+      rgba(0, 80, 160, 0.12) 0%,
+      transparent 70%
+    );
+  }
+  .orb-2 {
+    width: 40vw;
+    height: 40vw;
+    bottom: 5%;
+    right: -10%;
+    background: radial-gradient(
+      circle,
+      rgba(0, 160, 180, 0.08) 0%,
+      transparent 70%
+    );
+  }
 
   /* Hero Section */
-  .galeri-hero { position: relative; padding-top: 8rem; padding-bottom: 2rem; display: flex; align-items: center; justify-content: center; z-index: 10; text-align: center; }
-  .galeri-hero-inner { display: flex; flex-direction: column; align-items: center; }
-  .eyebrow { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(100, 200, 255, 0.45); margin-bottom: 14px; font-family: var(--font-body); }
-  .galeri-title { font-family: var(--font-display); font-size: clamp(2.6rem, 6vw, 4.8rem); color: white; font-weight: 400; line-height: 1.1; margin: 0; }
-  .galeri-title em { font-style: italic; color: rgba(120, 210, 255, 0.9); }
-  .galeri-sub { color: rgba(255,255,255,0.3); margin-top: 18px; font-size: 15px; font-weight: 300; font-family: var(--font-body); }
-  .water-line { height: 1px; width: 150px; margin-top: 44px; background: linear-gradient(90deg, transparent, rgba(100,200,255,0.3), transparent); }
+  .galeri-hero {
+    position: relative;
+    padding-top: 8rem;
+    padding-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    text-align: center;
+  }
+  .galeri-hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(100, 200, 255, 0.45);
+    margin-bottom: 14px;
+    font-family: var(--font-body);
+  }
+  .galeri-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 6vw, 4.8rem);
+    color: white;
+    font-weight: 400;
+    line-height: 1.1;
+    margin: 0;
+  }
+  .galeri-title em {
+    font-style: italic;
+    color: rgba(120, 210, 255, 0.9);
+  }
+  .galeri-sub {
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 18px;
+    font-size: 15px;
+    font-weight: 300;
+    font-family: var(--font-body);
+  }
+  .water-line {
+    height: 1px;
+    width: 150px;
+    margin-top: 44px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(100, 200, 255, 0.3),
+      transparent
+    );
+  }
 
-  .bento-container { max-width: 960px; margin: 0 auto; position: relative; z-index: 10; }
+  .bento-container {
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+  }
 
   /* Bento Grid Layout - Exactly matching 3x4 design then expanding */
   .gallery-grid {
@@ -184,38 +400,131 @@ const stackData = [
     grid-auto-rows: 200px;
     gap: 12px;
   }
-  .item-large { grid-column: span 2; grid-row: span 2; }
-  .item-tall  { grid-row: span 2; }
-  .item-wide  { grid-column: span 2; }
-  .item-full  { grid-column: span 3; }
+  .item-large {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .item-tall {
+    grid-row: span 2;
+  }
+  .item-wide {
+    grid-column: span 2;
+  }
+  .item-full {
+    grid-column: span 3;
+  }
 
   @media (max-width: 768px) {
-    .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
-    .item-large   { grid-column: span 2; grid-row: span 2; }
-    .item-wide    { grid-column: span 2; }
-    .item-tall    { grid-row: span 2; }
-    .item-full    { grid-column: span 2; }
+    .gallery-grid {
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 180px;
+    }
+    .item-large {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .item-wide {
+      grid-column: span 2;
+    }
+    .item-tall {
+      grid-row: span 2;
+    }
+    .item-full {
+      grid-column: span 2;
+    }
   }
 
   /* Photo Frame Interaktif */
-  .photo-frame { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06); cursor: pointer; position: relative; opacity: 0; transform: translateY(100px) scale(0.85); transition: opacity 0.65s ease, transform 0.95s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease; }
-  .photo-frame.is-visible { opacity: 1; transform: translateY(0) scale(1); }
-  .photo-frame.is-visible:hover { transform: translateY(-5px) scale(1.02); border-color: rgba(100, 200, 255, 0.35) !important; box-shadow: 0 20px 60px rgba(0, 100, 255, 0.22), 0 0 0 1px rgba(100, 200, 255, 0.12) !important; z-index: 20; }
-  
-  .photo-inner { width: 100%; height: 100%; display: flex; align-items: flex-end; padding: 12px; position: relative; box-sizing: border-box; }
-  .photo-inner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%); pointer-events: none; z-index: 1; }
-  .photo-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
-  .caption { position: relative; z-index: 2; font-size: 11px; font-family: var(--font-body); font-weight: 500; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.9); background: rgba(0, 10, 30, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; }
+  .photo-frame {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    position: relative;
+    opacity: 0;
+    transform: translateY(100px) scale(0.85);
+    transition:
+      opacity 0.65s ease,
+      transform 0.95s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.35s ease,
+      border-color 0.35s ease;
+  }
+  .photo-frame.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .photo-frame.is-visible:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(100, 200, 255, 0.35) !important;
+    box-shadow:
+      0 20px 60px rgba(0, 100, 255, 0.22),
+      0 0 0 1px rgba(100, 200, 255, 0.12) !important;
+    z-index: 20;
+  }
+
+  .photo-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+    position: relative;
+    box-sizing: border-box;
+  }
+  .photo-inner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.65) 0%,
+      transparent 50%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+  .photo-inner img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .caption {
+    position: relative;
+    z-index: 2;
+    font-size: 11px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 10, 30, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+  }
 
   /* Gallery Shimmer Effect */
   .photo-frame::before,
   .stack-card::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, hsla(200, 80%, 90%, 0.08), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsla(200, 80%, 90%, 0.08),
+      transparent
+    );
     transform: translateX(-100%);
     transition: transform 0.8s var(--ease-water);
     pointer-events: none;
@@ -230,9 +539,23 @@ const stackData = [
   /* =====================================================
      STICKY STACKING CARDS SECTION
      ===================================================== */
-  .stick-stack-section { padding: 4rem 0 10rem; position: relative; z-index: 10; }
-  .stack-header { text-align: center; margin-bottom: 5rem; }
-  .stacking-container { display: flex; flex-direction: column; position: relative; padding-bottom: 5rem; max-width: var(--container-max); margin: 0 auto; }
+  .stick-stack-section {
+    padding: 4rem 0 10rem;
+    position: relative;
+    z-index: 10;
+  }
+  .stack-header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+  .stacking-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-bottom: 5rem;
+    max-width: var(--container-max);
+    margin: 0 auto;
+  }
 
   /* Mekanisme Tumpukan */
   .stack-card {
@@ -241,27 +564,29 @@ const stackData = [
     z-index: calc(10 + var(--card-index));
     height: 70vh;
     width: 100%;
-    margin-bottom: 60vh; 
+    margin-bottom: 60vh;
     border-radius: 24px;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow:
+      0 -10px 40px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
     overflow: hidden;
     transform-origin: top center;
-    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+    transition:
+      transform 0.4s ease-out,
+      opacity 0.4s ease-out;
     /* Mulai dari bawah untuk fallback & animasi awal */
     transform: translateY(100px);
     opacity: 0;
   }
-  
+
   .stack-card.in-view {
     transform: translateY(0);
     opacity: 1;
   }
-
-  .stack-card:last-child { margin-bottom: 0; }
 
   /* CSS Scroll-Driven Animations */
   @supports (animation-timeline: view()) {
@@ -269,14 +594,14 @@ const stackData = [
       /* Reset state dari IntersectionObserver fallback */
       transform: none;
       opacity: 1;
-      
+
       /* Scale Down animasi saat didorong ke belakang oleh kartu berikutnya */
       animation: stackScaleDown linear both;
       animation-timeline: view();
       /* Mulai animasi saat kartu ini melewati posisi `exit` (saat scroller utamanya melewatinya) */
       animation-range: exit 0% exit 100%;
     }
-    
+
     /* Animasi masuknya juga via view(), sehingga tidak perlu JS */
     .stack-card-inner {
       animation: stackEnterFromBottom linear both;
@@ -285,108 +610,297 @@ const stackData = [
     }
   }
 
-  @keyframes stackEnterFromBottom { 0% { transform: translateY(100px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-  @keyframes stackScaleDown { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.97); opacity: 0.6; } }
-
-  /* Layout Konten Kartu (Kiri: Foto Besar, Kanan: Teks) */
-  .stack-card-inner { display: flex; height: 100%; width: 100%; }
-  .stack-img-col { flex: 1.3; height: 100%; padding: 24px; box-sizing: border-box; }
-  .stack-img-col img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-  .stack-txt-col { flex: 1; padding: 4rem; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
-  
-  .stack-badge { align-self: flex-start; padding: 6px 14px; background: rgba(100, 200, 255, 0.1); border: 1px solid rgba(100, 200, 255, 0.3); border-radius: 20px; color: var(--color-water-light); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem; }
-  .stack-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 400; color: white; margin: 0; line-height: 1.1; }
-  .stack-year { font-family: var(--font-body); font-size: 1.5rem; color: rgba(255, 255, 255, 0.3); margin-bottom: 2rem; font-style: italic; }
-  .stack-desc { font-family: var(--font-body); font-size: 1.15rem; line-height: 1.7; color: rgba(255, 255, 255, 0.85); font-weight: 300; }
-
-  @media (max-width: 900px) {
-    .stack-card { height: auto; min-height: 80vh; }
-    .stack-card-inner { flex-direction: column; }
-    .stack-img-col { flex: 1; height: auto; padding: 16px; }
-    .stack-img-col img { height: auto; aspect-ratio: 4 / 3; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-    .stack-txt-col { flex: none; padding: 2rem 1.5rem; text-align: center; justify-content: flex-start; }
-    .stack-badge { align-self: center; margin-bottom: 1.5rem; }
-    .stack-title { font-size: 2.2rem; }
-    .stack-desc { font-size: 1rem; }
+  @keyframes stackEnterFromBottom {
+    0% {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes stackScaleDown {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.97);
+      opacity: 0.6;
+    }
   }
 
+  /* Layout Konten Kartu (Kiri: Foto Besar, Kanan: Teks) */
+  .stack-card-inner {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
+  .stack-img-col {
+    flex: 1.3;
+    height: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  .stack-img-col img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  }
+  .stack-txt-col {
+    flex: 1;
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .stack-badge {
+    align-self: flex-start;
+    padding: 6px 14px;
+    background: rgba(100, 200, 255, 0.1);
+    border: 1px solid rgba(100, 200, 255, 0.3);
+    border-radius: 20px;
+    color: var(--color-water-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+  }
+  .stack-title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 400;
+    color: white;
+    margin: 0;
+    line-height: 1.1;
+  }
+  .stack-year {
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.3);
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+  .stack-desc {
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 300;
+  }
+
+  @media (max-width: 900px) {
+    .stack-card {
+      height: auto;
+      min-height: 80vh;
+    }
+    .stack-card-inner {
+      flex-direction: column;
+    }
+    .stack-img-col {
+      flex: 1;
+      height: auto;
+      padding: 16px;
+    }
+    .stack-img-col img {
+      height: auto;
+      aspect-ratio: 4 / 3;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+    .stack-txt-col {
+      flex: none;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      justify-content: flex-start;
+    }
+    .stack-badge {
+      align-self: center;
+      margin-bottom: 1.5rem;
+    }
+    .stack-title {
+      font-size: 2.2rem;
+    }
+    .stack-desc {
+      font-size: 1rem;
+    }
+  }
 
   /* ========== LIGHTBOX ======================= */
-  .lightbox { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-  .lightbox[hidden] { display: none; }
-  .lightbox-backdrop { position: absolute; inset: 0; background: hsla(210, 60%, 6%, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-  .lightbox-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 90vw; max-height: 85vh; }
-  #lightbox-placeholder-text { display: none; font-size: 3rem; color: rgba(100,180,255,0.5); font-family: monospace; margin-bottom: 2rem; }
-  .lightbox-img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 8px; transform: scale(0.8); opacity: 0; transition: transform 300ms var(--ease-water), opacity 300ms var(--ease-water); }
-  .lightbox.open .lightbox-img { transform: scale(1); opacity: 1; }
-  .lightbox-caption { margin-top: 1rem; font-family: var(--font-body); font-size: 0.85rem; color: hsla(0, 0%, 100%, 0.6); text-align: center; }
-  .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 2; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; transition: opacity var(--duration-fast); opacity: 0.7; }
-  .lightbox-close:hover { opacity: 1; }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox[hidden] {
+    display: none;
+  }
+  .lightbox-backdrop {
+    position: absolute;
+    inset: 0;
+    background: hsla(210, 60%, 6%, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .lightbox-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 90vw;
+    max-height: 85vh;
+  }
+  #lightbox-placeholder-text {
+    display: none;
+    font-size: 3rem;
+    color: rgba(100, 180, 255, 0.5);
+    font-family: monospace;
+    margin-bottom: 2rem;
+  }
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    transform: scale(0.8);
+    opacity: 0;
+    transition:
+      transform 300ms var(--ease-water),
+      opacity 300ms var(--ease-water);
+  }
+  .lightbox.open .lightbox-img {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .lightbox-caption {
+    margin-top: 1rem;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: hsla(0, 0%, 100%, 0.6);
+    text-align: center;
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 2;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--duration-fast);
+    opacity: 0.7;
+  }
+  .lightbox-close:hover {
+    opacity: 1;
+  }
 </style>
 
 <script is:inline>
-  (function() {
+  (function () {
     function initGaleriInteraktif() {
-      var bentoFrames = document.querySelectorAll('#galleryGrid .photo-frame');
-      var stackCards = document.querySelectorAll('.stack-card');
+      var bentoFrames = document.querySelectorAll("#galleryGrid .photo-frame");
+      var stackCards = document.querySelectorAll(".stack-card");
 
       // 1. BENTO: INTERSECTION OBSERVER
-      if(bentoFrames.length > 0) {
-        var observer = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if (entry.isIntersecting) entry.target.classList.add('is-visible');
-          });
-        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-        bentoFrames.forEach(function(f) { observer.observe(f); });
+      if (bentoFrames.length > 0) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting)
+                entry.target.classList.add("is-visible");
+            });
+          },
+          { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
+        );
+        bentoFrames.forEach(function (f) {
+          observer.observe(f);
+        });
       }
-
 
       // 3. STACKING CARDS: JS FALLBACK
       var stackObserver;
-      if (stackCards.length > 0 && !CSS.supports('animation-timeline: view()')) {
-        stackObserver = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if(entry.isIntersecting) entry.target.classList.add('in-view');
-          });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        stackCards.forEach(function(c) { stackObserver.observe(c); });
+      if (
+        stackCards.length > 0 &&
+        !CSS.supports("animation-timeline: view()")
+      ) {
+        stackObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) entry.target.classList.add("in-view");
+            });
+          },
+          { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
+        );
+        stackCards.forEach(function (c) {
+          stackObserver.observe(c);
+        });
       }
 
       function onScrollStack() {
-        if (!CSS.supports('animation-timeline: view()') && stackCards.length > 0) {
+        if (
+          !CSS.supports("animation-timeline: view()") &&
+          stackCards.length > 0
+        ) {
           var scrollY = window.scrollY;
           var viewHeight = window.innerHeight;
-          
+
           // ===== READ PASS =====
           var cardData = [];
-          stackCards.forEach(function(card) {
-            if (!card.classList.contains('in-view')) {
+          stackCards.forEach(function (card) {
+            if (!card.classList.contains("in-view")) {
               cardData.push(null);
               return;
             }
             var stickyTopBase = 80;
-            var index = parseInt(card.style.getPropertyValue('--card-index'));
-            var stickyTopPos = stickyTopBase + (index * 20);
+            var index = parseInt(card.style.getPropertyValue("--card-index"));
+            var stickyTopPos = stickyTopBase + index * 20;
             var rect = card.getBoundingClientRect();
-            cardData.push({ card: card, rect: rect, stickyTopPos: stickyTopPos });
+            cardData.push({
+              card: card,
+              rect: rect,
+              stickyTopPos: stickyTopPos,
+            });
           });
 
           // ===== WRITE PASS =====
           for (var i = 0; i < cardData.length; i++) {
             var data = cardData[i];
             if (!data) continue;
-            
+
             if (data.rect.top <= data.stickyTopPos + 2) {
               var distToTop = Math.abs(data.rect.top - data.stickyTopPos);
               var scrollProgress = Math.max(0, distToTop) / (viewHeight * 0.6);
-              var scale = Math.max(0.95, 1 - (scrollProgress * 0.05));
+              var scale = Math.max(0.95, 1 - scrollProgress * 0.05);
               var blurAmt = Math.min(4, scrollProgress * 10);
-              
-              data.card.style.transform = 'scale(' + scale + ')';
-              data.card.style.filter = 'brightness(' + (1 - scrollProgress * 0.2) + ') blur(' + blurAmt + 'px)';
+
+              data.card.style.transform = "scale(" + scale + ")";
+              data.card.style.filter =
+                "brightness(" +
+                (1 - scrollProgress * 0.2) +
+                ") blur(" +
+                blurAmt +
+                "px)";
             } else {
-              data.card.style.transform = 'translateY(0) scale(1)';
-              data.card.style.filter = 'brightness(1) blur(0px)';
+              data.card.style.transform = "translateY(0) scale(1)";
+              data.card.style.filter = "brightness(1) blur(0px)";
             }
           }
         }
@@ -395,76 +909,90 @@ const stackData = [
       var isTicking = false;
       function onScrollMaster() {
         if (!isTicking) {
-          window.requestAnimationFrame(function() {
+          window.requestAnimationFrame(function () {
             onScrollStack();
             isTicking = false;
           });
           isTicking = true;
         }
       }
-      window.addEventListener('scroll', onScrollMaster, { passive: true });
+      window.addEventListener("scroll", onScrollMaster, { passive: true });
 
-      var cleanup = function() {
-        window.removeEventListener('scroll', onScrollMaster);
+      var cleanup = function () {
+        window.removeEventListener("scroll", onScrollMaster);
         if (observer) observer.disconnect();
         if (stackObserver) stackObserver.disconnect();
-        document.removeEventListener('astro:before-swap', cleanup);
+        document.removeEventListener("astro:before-swap", cleanup);
       };
-      document.addEventListener('astro:before-swap', cleanup);
-
+      document.addEventListener("astro:before-swap", cleanup);
 
       // 5. LIGHTBOX
-      var lightbox = document.getElementById('lightbox');
-      var lightboxImg = document.getElementById('lightbox-img');
-      var lightboxCaption = document.getElementById('lightbox-caption');
-      var closeBtn = document.getElementById('lightbox-close');
-      var backdrop = document.getElementById('lightbox-backdrop');
-      
-      bentoFrames.forEach(function(item) {
-        item.addEventListener('click', function() {
-          var imgEl = item.querySelector('img');
-          var captionEl = item.querySelector('.overlay-text');
-          if(imgEl && lightboxImg) {
+      var lightbox = document.getElementById("lightbox");
+      var lightboxImg = document.getElementById("lightbox-img");
+      var lightboxCaption = document.getElementById("lightbox-caption");
+      var closeBtn = document.getElementById("lightbox-close");
+      var backdrop = document.getElementById("lightbox-backdrop");
+
+      bentoFrames.forEach(function (item) {
+        item.addEventListener("click", function () {
+          var imgEl = item.querySelector("img");
+          var captionEl = item.querySelector(".overlay-text");
+          if (imgEl && lightboxImg) {
             lightboxImg.src = imgEl.src;
             lightboxImg.alt = imgEl.alt;
           }
-          if(lightboxCaption) lightboxCaption.textContent = captionEl ? captionEl.textContent : '';
-          if(lightbox) {
-            lightbox.removeAttribute('hidden');
-            document.body.style.overflow = 'hidden';
-            requestAnimationFrame(function() { lightbox.classList.add('open'); });
+          if (lightboxCaption)
+            lightboxCaption.textContent = captionEl
+              ? captionEl.textContent
+              : "";
+          if (lightbox) {
+            lightbox.removeAttribute("hidden");
+            document.body.style.overflow = "hidden";
+            requestAnimationFrame(function () {
+              lightbox.classList.add("open");
+            });
           }
         });
       });
 
       function closeLightbox() {
-        if(!lightbox) return;
-        lightbox.classList.remove('open');
-        setTimeout(function() {
-          lightbox.setAttribute('hidden', '');
-          document.body.style.overflow = '';
+        if (!lightbox) return;
+        lightbox.classList.remove("open");
+        setTimeout(function () {
+          lightbox.setAttribute("hidden", "");
+          document.body.style.overflow = "";
         }, 300);
       }
-      if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-      if (backdrop) backdrop.addEventListener('click', closeLightbox);
-      document.addEventListener('keydown', function(e) { if(lightbox && !lightbox.hasAttribute('hidden') && e.key === 'Escape') closeLightbox(); });
+      if (closeBtn) closeBtn.addEventListener("click", closeLightbox);
+      if (backdrop) backdrop.addEventListener("click", closeLightbox);
+      document.addEventListener("keydown", function (e) {
+        if (lightbox && !lightbox.hasAttribute("hidden") && e.key === "Escape")
+          closeLightbox();
+      });
     }
 
-    document.addEventListener('DOMContentLoaded', initGaleriInteraktif);
-    document.addEventListener('astro:after-swap', initGaleriInteraktif);
+    document.addEventListener("DOMContentLoaded", initGaleriInteraktif);
+    document.addEventListener("astro:after-swap", initGaleriInteraktif);
 
     // IO pause/resume for orb drift animations
     function initOrbIO() {
-      var orbs = document.querySelectorAll('.water-orb');
+      var orbs = document.querySelectorAll(".water-orb");
       if (!orbs.length) return;
-      var obs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) {
-          e.target.style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
-        });
-      }, { threshold: 0 });
-      orbs.forEach(function(el) { obs.observe(el); });
+      var obs = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            e.target.style.animationPlayState = e.isIntersecting
+              ? "running"
+              : "paused";
+          });
+        },
+        { threshold: 0 },
+      );
+      orbs.forEach(function (el) {
+        obs.observe(el);
+      });
     }
-    document.addEventListener('DOMContentLoaded', initOrbIO);
-    document.addEventListener('astro:after-swap', initOrbIO);
+    document.addEventListener("DOMContentLoaded", initOrbIO);
+    document.addEventListener("astro:after-swap", initOrbIO);
   })();
 </script>
