@@ -32,6 +32,7 @@
    Pendekatan modern — tanpa Normalize.css
    ============================================ */
 @layer base {
+
   /* Box sizing universal */
   *,
   *::before,
@@ -70,25 +71,42 @@
   }
 
   /* Heading styles */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     line-height: 1.15;
     text-wrap: balance;
     overflow-wrap: break-word;
   }
 
-  h1 { font-size: var(--font-size-h1); }
-  h2 { font-size: var(--font-size-h2); }
+  h1 {
+    font-size: var(--font-size-h1);
+  }
+
+  h2 {
+    font-size: var(--font-size-h2);
+  }
 
   /* Media reset */
-  img, picture, video, canvas, svg {
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
     display: block;
     max-width: 100%;
     height: auto;
   }
 
   /* Form reset */
-  input, button, textarea, select {
+  input,
+  button,
+  textarea,
+  select {
     font: inherit;
     color: inherit;
   }
@@ -100,7 +118,8 @@
   }
 
   /* List reset */
-  ul, ol {
+  ul,
+  ol {
     list-style: none;
   }
 
@@ -170,6 +189,7 @@
     transform: translateY(24px);
     visibility: visible;
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -183,6 +203,7 @@
     transform: translateY(24px);
     visibility: visible;
   }
+
   100% {
     opacity: 1 !important;
     transform: translateY(0) !important;
@@ -195,6 +216,7 @@
     opacity: 0;
     transform: translateY(24px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -205,6 +227,7 @@
    UTILITY CLASSES
    ============================================ */
 @layer components {
+
   /* Glass Card — liquid glassmorphism utama */
   .glass {
     background: var(--glass-bg);
@@ -220,7 +243,7 @@
   .glass:hover {
     background: var(--glass-bg-hover);
     border-color: hsla(190, 65%, 55%, 0.25);
-    box-shadow: 
+    box-shadow:
       var(--shadow-glass-hover),
       0 0 20px hsla(190, 65%, 55%, 0.08);
   }
@@ -250,12 +273,10 @@
 
   /* Text gradient — water shimmer */
   .text-gradient-water {
-    background: linear-gradient(
-      135deg,
-      var(--color-water-light) 0%,
-      var(--color-water-surface) 50%,
-      var(--color-accent-gold) 100%
-    );
+    background: linear-gradient(135deg,
+        var(--color-water-light) 0%,
+        var(--color-water-surface) 50%,
+        var(--color-accent-gold) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -274,7 +295,7 @@
   .fade-in {
     /* Prevent initial hidden state on fast navigations */
     transition: opacity var(--duration-slow) var(--ease-water),
-                transform var(--duration-slow) var(--ease-water);
+      transform var(--duration-slow) var(--ease-water);
     visibility: visible;
   }
 
@@ -290,7 +311,7 @@
      FORCED VISIBILITY BACKUP
      Double-layer safety for edge cases
      ============================================ */
-  
+
   /* Extra backup: Force at 8 seconds (second chance) */
   .fade-in:not(.is-visible) {
     animation-name: fallback-fade-in-show-delayed;
@@ -316,7 +337,9 @@
     visibility: visible;
   }
 
-  header, footer, main {
+  header,
+  footer,
+  main {
     opacity: 1;
     visibility: visible;
   }
@@ -388,6 +411,7 @@
    mendapat solid background sebagai pengganti
    ============================================ */
 @supports not (backdrop-filter: blur(1px)) {
+
   .glass,
   .glass-heavy {
     background: hsla(200, 50%, 12%, 0.85);
@@ -399,22 +423,26 @@
    Optimize animations & effects for mobile
    ============================================ */
 @media (max-width: 768px) {
-  /* Disable blur for better performance */
+
+  /* Blur hilang di mobile*/
   .glass {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: hsla(200, 50%, 12%, 0.95);
   }
 
   .glass-heavy {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: hsla(200, 55%, 10%, 0.98);
   }
 
   /* Shorter animation duration on mobile */
   .fade-in {
     transition: opacity calc(var(--duration-slow) * 0.7) var(--ease-water),
-                transform calc(var(--duration-slow) * 0.7) var(--ease-water);
-    animation-delay: 3s; /* Show faster on mobile */
+      transform calc(var(--duration-slow) * 0.7) var(--ease-water);
+    animation-delay: 3s;
+    /* Show faster on mobile */
   }
 
   /* Reduce fallback delay on mobile (3s instead of 5s) */
@@ -431,12 +459,31 @@
   }
 }
 
+/* Optimize laptop kentang */
+html[data-perf-tier="low"] .glass,
+html[data-perf-tier="battery_saver"] .glass,
+html[data-perf-tier="low"] .glass-heavy,
+html[data-perf-tier="battery_saver"] .glass-heavy {
+  box-shadow: none !important;
+  border: 1px solid hsla(190, 65%, 55%, 0.15) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: hsla(200, 50%, 12%, 0.9) !important;
+}
+
+html[data-perf-tier="low"] *:hover,
+html[data-perf-tier="battery_saver"] *:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* ============================================
    REDUCED MOTION
    Respect user accessibility preferences
    Disable ALL animations and transitions
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

@@ -2,13 +2,13 @@
 /**
  * CloudBackground.astro
  * Efek Animasi Awan Pengganti Video Looping
- * 
+ *
  * MEMORY LEAK FIX: Uses Global Singleton Controller pattern.
  * - window.CloudSI_Cloud = { initialized, cleanup }
  * - Explicit VRAM disposal (deleteShader, deleteProgram, deleteBuffer, loseContext)
  * - No { once: true } on astro:before-swap
  * - All rAF tracked and cancelled
- * 
+ *
  * PERFORMANCE TIERS:
  * - ULTRA/NORMAL: Full WebGL cloud shader
  * - LOW: Reduced FBM iterations (5→3), lower resolution
@@ -16,13 +16,24 @@
  */
 ---
 
-<canvas id="cloud-canvas" class="fixed inset-0 w-full h-full object-cover pointer-events-none"></canvas>
+<canvas
+  id="cloud-canvas"
+  class="fixed inset-0 w-full h-full object-cover pointer-events-none"></canvas>
 
 <!-- Backdrop blur overlay -->
-<div class="fixed inset-0 bg-[hsla(210,60%,6%,0.4)] backdrop-blur-[1px] pointer-events-none"></div>
+<div
+  class="fixed inset-0 bg-[hsla(210,60%,6%,0.4)] backdrop-blur-[1px] pointer-events-none"
+>
+</div>
 
 <!-- Static fallback for BATTERY_SAVER -->
-<div id="cloud-fallback" class="cloud-static-fallback" aria-hidden="true" style="display: none;"></div>
+<div
+  id="cloud-fallback"
+  class="cloud-static-fallback"
+  aria-hidden="true"
+  style="display: none;"
+>
+</div>
 
 <style>
   #cloud-canvas {
@@ -48,55 +59,72 @@
 </style>
 
 <script is:inline>
-  (function() {
-    'use strict';
+  (function () {
+    "use strict";
 
     // =============================================
     // GLOBAL SINGLETON CONTROLLER
     // =============================================
-    window.CloudSI_Cloud = window.CloudSI_Cloud || { initialized: false, cleanup: null };
+    window.CloudSI_Cloud = window.CloudSI_Cloud || {
+      initialized: false,
+      cleanup: null,
+    };
 
     function initCloudCanvas() {
       // If already initialized, cleanup first to prevent duplicates
-      if (window.CloudSI_Cloud.initialized && typeof window.CloudSI_Cloud.cleanup === 'function') {
+      if (
+        window.CloudSI_Cloud.initialized &&
+        typeof window.CloudSI_Cloud.cleanup === "function"
+      ) {
         window.CloudSI_Cloud.cleanup();
       }
 
-      var canvas = document.getElementById('cloud-canvas');
+      var canvas = document.getElementById("cloud-canvas");
       if (!canvas) return;
+
+      // Cek if mobile takda animasi
+      var isMobileCheck = window.innerWidth < 768 || "ontouchstart" in window;
+      if (isMobileCheck) {
+        canvas.style.display = "none";
+        var fallback = document.getElementById("cloud-fallback");
+        if (fallback) fallback.style.display = "block";
+        return;
+      }
 
       // =============================================
       // PERFORMANCE TIER CHECK
       // =============================================
-      var tier = sessionStorage.getItem('cloudsi_perf_tier') || 'NORMAL';
+      var tier = sessionStorage.getItem("cloudsi_perf_tier") || "NORMAL";
 
       // BATTERY_SAVER: Static gradient, no WebGL
-      if (tier === 'BATTERY_SAVER') {
-        canvas.style.display = 'none';
-        var fallback = document.getElementById('cloud-fallback');
-        if (fallback) fallback.style.display = 'block';
+      if (tier === "BATTERY_SAVER") {
+        canvas.style.display = "none";
+        var fallback = document.getElementById("cloud-fallback");
+        if (fallback) fallback.style.display = "block";
         return;
       }
 
-      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       if (prefersReduced) {
-        canvas.style.display = 'none';
-        var fallback = document.getElementById('cloud-fallback');
-        if (fallback) fallback.style.display = 'block';
+        canvas.style.display = "none";
+        var fallback = document.getElementById("cloud-fallback");
+        if (fallback) fallback.style.display = "block";
         return;
       }
-      
-      var gl = canvas.getContext('webgl');
-      if (!gl) { 
-        console.warn("[Cloudsi] Browser tidak mendukung WebGL."); 
-        canvas.style.display = 'none';
-        var fallback = document.getElementById('cloud-fallback');
-        if (fallback) fallback.style.display = 'block';
+
+      var gl = canvas.getContext("webgl");
+      if (!gl) {
+        console.warn("[Cloudsi] Browser tidak mendukung WebGL.");
+        canvas.style.display = "none";
+        var fallback = document.getElementById("cloud-fallback");
+        if (fallback) fallback.style.display = "block";
         return;
       }
 
       // FBM iterations based on tier: ULTRA/NORMAL = 5, LOW = 3
-      var fbmIterations = (tier === 'LOW') ? 3 : 5;
+      var fbmIterations = tier === "LOW" ? 3 : 5;
 
       var vertexShaderSource = `
           attribute vec2 a_position;
@@ -106,7 +134,8 @@
       `;
 
       // Build fragment shader dynamically based on FBM iterations
-      var fragmentShaderSource = `
+      var fragmentShaderSource =
+        `
           precision highp float;
 
           uniform vec2 u_resolution;
@@ -131,7 +160,9 @@
               float v = 0.0;
               float a = 0.5;
               mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
-              for (int i = 0; i < ` + fbmIterations + `; i++) {
+              for (int i = 0; i < ` +
+        fbmIterations +
+        `; i++) {
                   v += a * noise(p);
                   p = rot * p * 2.0 + vec2(100.0);
                   a *= 0.5;
@@ -216,13 +247,17 @@
               
               vec4 c3 = renderCloud(p + vec2(2.2), 1.2, 0.025, u_time, 0.35 + hBias, 0.9, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c3.rgb, c3.a * 0.95);
-              ` + (tier !== 'LOW' ? `
+              ` +
+        (tier !== "LOW"
+          ? `
               vec4 c4 = renderCloud(p + vec2(3.3), 0.7, 0.035, u_time, 0.40 + hBias, 0.95, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c4.rgb, c4.a * 0.95);
               
               vec4 c5 = renderCloud(p + vec2(4.4), 0.3, 0.050, u_time, 0.50 + hBias, 1.0, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c5.rgb, c5.a * 0.95);
-              ` : '') + `
+              `
+          : "") +
+        `
 
               float vignette = length(uvOrig - 0.5);
               finalColor *= smoothstep(1.0, 0.2, vignette);
@@ -245,13 +280,21 @@
         return shader;
       }
 
-      var vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-      var fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+      var vertexShader = compileShader(
+        gl,
+        gl.VERTEX_SHADER,
+        vertexShaderSource,
+      );
+      var fragmentShader = compileShader(
+        gl,
+        gl.FRAGMENT_SHADER,
+        fragmentShaderSource,
+      );
 
       if (!vertexShader || !fragmentShader) {
-        canvas.style.display = 'none';
-        var fallback = document.getElementById('cloud-fallback');
-        if (fallback) fallback.style.display = 'block';
+        canvas.style.display = "none";
+        var fallback = document.getElementById("cloud-fallback");
+        if (fallback) fallback.style.display = "block";
         return;
       }
 
@@ -264,8 +307,7 @@
       var positionBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       var positions = new Float32Array([
-          -1, -1,   1, -1,  -1,  1,
-          -1,  1,   1, -1,   1,  1
+        -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,
       ]);
       gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 
@@ -278,9 +320,10 @@
       var scrollUnif = gl.getUniformLocation(program, "u_scrollProgress");
 
       // Resolution: LOW tier gets half resolution
-      var resDpr = (tier === 'LOW') 
-        ? Math.min(window.devicePixelRatio || 1, 1) 
-        : Math.min(window.devicePixelRatio || 1, 2);
+      var resDpr =
+        tier === "LOW"
+          ? Math.min(window.devicePixelRatio || 1, 1)
+          : Math.min(window.devicePixelRatio || 1, 2);
 
       function resize() {
         canvas.width = window.innerWidth * resDpr;
@@ -288,7 +331,7 @@
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.uniform2f(resUnif, canvas.width, canvas.height);
       }
-      window.addEventListener('resize', resize);
+      window.addEventListener("resize", resize);
       resize();
 
       // Scroll listener removed for performance: locked to night sky (0.0)
@@ -317,7 +360,9 @@
         if (isDestroyed) return; // Idempotent guard
         isDestroyed = true;
 
-        console.log('[Cloudsi] CloudBackground: Full cleanup — disposing VRAM.');
+        console.log(
+          "[Cloudsi] CloudBackground: Full cleanup — disposing VRAM.",
+        );
 
         // 1. Stop animation loop
         if (rafId !== null) {
@@ -326,7 +371,7 @@
         }
 
         // 2. Remove event listeners
-        window.removeEventListener('resize', resize);
+        window.removeEventListener("resize", resize);
 
         // 3. Explicit VRAM disposal — delete shaders, programs, buffers
         try {
@@ -350,12 +395,12 @@
             gl.deleteBuffer(positionBuffer);
           }
         } catch (e) {
-          console.warn('[Cloudsi] CloudBackground cleanup (GPU resources):', e);
+          console.warn("[Cloudsi] CloudBackground cleanup (GPU resources):", e);
         }
 
         // 4. Lose WebGL context entirely
         try {
-          var ext = gl.getExtension('WEBGL_lose_context');
+          var ext = gl.getExtension("WEBGL_lose_context");
           if (ext) ext.loseContext();
         } catch (e) {}
 
@@ -372,21 +417,24 @@
       // ASTRO VIEW TRANSITION HANDLER
       // NO { once: true } — persistent listener
       // =============================================
-      document.addEventListener('astro:before-swap', function() {
-        if (window.CloudSI_Cloud && typeof window.CloudSI_Cloud.cleanup === 'function') {
+      document.addEventListener("astro:before-swap", function () {
+        if (
+          window.CloudSI_Cloud &&
+          typeof window.CloudSI_Cloud.cleanup === "function"
+        ) {
           window.CloudSI_Cloud.cleanup();
         }
       });
     }
 
     function scheduleCloud() {
-      if ('requestIdleCallback' in window) {
+      if ("requestIdleCallback" in window) {
         requestIdleCallback(initCloudCanvas, { timeout: 1000 });
       } else {
         setTimeout(initCloudCanvas, 300);
       }
     }
-    document.addEventListener('DOMContentLoaded', scheduleCloud);
-    document.addEventListener('astro:after-swap', scheduleCloud);
+    document.addEventListener("DOMContentLoaded", scheduleCloud);
+    document.addEventListener("astro:after-swap", scheduleCloud);
   })();
 </script>
