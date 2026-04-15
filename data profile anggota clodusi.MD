@@ -445,7 +445,7 @@ export const MEMBERS_DATA_FULL: MemberRaw[] = [
   },
   {
     id: "1044",
-    name: "M. Farras Haidar",
+    name: "M. Farras Haidar Revanezka",
     nim: "H1101251035",
     email: "h1101251035@untan.ac.id",
     photoUrl: "/members/1044.jpg",
