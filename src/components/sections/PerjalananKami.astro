@@ -60,24 +60,19 @@ const TIMELINE_DATA = [
       {TIMELINE_DATA.map((item, index) => {
         const isLeft = index % 2 === 0;
         return (
-          <div class={`pk-item ${isLeft ? 'pk-left' : 'pk-right'}`} data-pk-item data-index={index}>
+          <div class={`pk-item ${isLeft ? 'pk-left' : 'pk-right'} css-fade-up`} data-pk-item data-index={index}>
             
-            <!-- Posisi Dot & Animasi Ripple Magnetic -->
+            <!-- Posisi Dot -->
             <div class="pk-dot-wrap" aria-hidden="true">
-              <div class="pk-ripple"></div>
               <div class="pk-dot"></div>
             </div>
 
-            <!-- Parallax Wrap: Untuk mengontrol parallax/exit depth (digerakkan JS Native) -->
-            <div class="pk-parallax-wrap" data-pk-parallax>
-              <!-- Card: Animasi Masuk Cinematic -->
-              <button class="pk-card" aria-label={`Detail: ${item.judul}`} type="button">
-                <span class="pk-date">{item.tanggal}</span>
-                <h3 class="pk-title">{item.judul}</h3>
-                
-                <span class="pk-hidden-desc" aria-hidden="true" style="display:none;">{item.deskripsi}</span>
-              </button>
-            </div>
+            <!-- Card: Animasi Masuk Cinematic -->
+            <button class="pk-card" aria-label={`Detail: ${item.judul}`} type="button">
+              <span class="pk-date">{item.tanggal}</span>
+              <h3 class="pk-title">{item.judul}</h3>
+              <span class="pk-hidden-desc" aria-hidden="true" style="display:none;">{item.deskripsi}</span>
+            </button>
 
           </div>
         )
@@ -106,12 +101,6 @@ const TIMELINE_DATA = [
 
 <style>
   /* === ROOT SETTINGS === */
-  @property --scale {
-    syntax: '<number>';
-    initial-value: 0.92;
-    inherits: false;
-  }
-
   .pk-section {
     position: relative;
     overflow: hidden; /* Prevent horizontal scroll dari card offset */
@@ -160,11 +149,6 @@ const TIMELINE_DATA = [
     top: 0; left: 0; right: 0; bottom: 0;
     width: 2px;
     background: #38bdf8;
-    transform-origin: top center;
-    transform: scaleY(0);
-    /* Flow liquid mengejar scroll user */
-    transition: transform 350ms cubic-bezier(0.25, 1, 0.5, 1);
-    will-change: transform;
   }
 
   /* === ITEM LAYOUT === */
@@ -202,44 +186,7 @@ const TIMELINE_DATA = [
     height: 16px;
     background: #38bdf8;
     border-radius: 50%;
-    transform: scale(0);
-    transition: transform 300ms ease; /* Keluar */
-    will-change: transform;
-  }
-
-  .pk-ripple {
-    position: absolute;
-    inset: -12px;
-    border: 2px solid rgba(56, 189, 248, 0.3);
-    border-radius: 50%;
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.5);
-    will-change: transform, opacity;
-  }
-
-  @keyframes ripplePing {
-    0%   { transform: scale(0.5); opacity: 1; }
-    100% { transform: scale(1.5); opacity: 0; }
-  }
-
-  .pk-item.is-visible .pk-dot {
-    /* Animasi spring ketika enter didrive murni oleh transition CSS elegan */
     transform: scale(1);
-    transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .pk-item.is-visible .pk-ripple {
-    /* Ripple delay sebentar sampai dot pop out beres */
-    animation: ripplePing 2s cubic-bezier(0, 0, 0.2, 1) infinite 300ms;
-  }
-
-  /* === CINEMATIC REVEAL CARD === */
-  .pk-parallax-wrap {
-    position: relative;
-    width: 100%;
-    /* Mengontrol exit/parallax posisi. Start di origin murni CSS */
-    will-change: transform, opacity;
   }
 
   .pk-card {
@@ -255,52 +202,30 @@ const TIMELINE_DATA = [
     text-align: left;
     outline: none;
     
-    /* Reveal dari bawah dan melipat */
-    opacity: 0;
-    transform: translateY(60px) rotateX(8deg);
-    clip-path: inset(0 0 100% 0);
-    transform-origin: top center;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
     
-    /* Reversible Exit Animation - Lebih cepat tanpa delay */
+    /* Hanya untuk hover effect */
     transition: 
-      transform 400ms ease,
-      opacity   400ms ease,
-      clip-path 400ms ease,
+      transform 200ms ease,
       border-color 200ms ease,
       background 200ms ease;
-    
-    will-change: transform, opacity, clip-path;
   }
 
   /* Spacing */
   .pk-left .pk-card {
     margin-right: 40px;
-    transform-origin: top right;
   }
   .pk-right .pk-card {
     margin-left: 40px;
-    transform-origin: top left;
   }
   
-  /* Trigger Masuk otomatis delay ketika turun */
-  .pk-item.is-visible .pk-card {
-    opacity: 1;
-    transform: translateY(0) rotateX(0);
-    clip-path: inset(0 0 0% 0);
-    transition: 
-      transform 700ms cubic-bezier(0.22, 1, 0.36, 1) 150ms,
-      opacity   700ms cubic-bezier(0.22, 1, 0.36, 1) 150ms,
-      clip-path 700ms cubic-bezier(0.22, 1, 0.36, 1) 150ms,
-      border-color 200ms ease,
-      background 200ms ease;
-  }
-
-  /* Hover effect card yang sudah masuk */
-  .pk-item.is-visible .pk-card:hover {
+  /* Hover effect card */
+  .pk-card:hover {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(56, 189, 248, 0.4);
-    /* Sedikit di float override */
-    transform: translateY(-4px) rotateX(0) scale(1.02);
+    transform: translateY(-4px) scale(1.02);
   }
 
   /* Texts */
@@ -349,7 +274,7 @@ const TIMELINE_DATA = [
     -webkit-backdrop-filter: blur(4px);
   }
 
-  /* 6. @Property spring scale + origin top */
+  /* 6. Base modal glass styling */
   .glass-panel {
     position: relative;
     width: 92%;
@@ -361,9 +286,9 @@ const TIMELINE_DATA = [
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     border-radius: 24px;
     padding: 2.5rem 2.2rem;
-    transform: scale(var(--scale)); /* di set menggunakan CSS variable @property */
+    transform: scale(0.95);
     transform-origin: top center;
-    transition: --scale 400ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease;
+    transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease;
     box-shadow: 0 40px 60px -15px rgba(0, 0, 0, 0.6);
     z-index: 2;
     color: white;
@@ -371,7 +296,7 @@ const TIMELINE_DATA = [
   }
 
   .pk-modal.is-open .glass-panel {
-    --scale: 1;
+    transform: scale(1);
   }
 
   .pk-modal-close {
@@ -420,14 +345,6 @@ const TIMELINE_DATA = [
 
   /* === RESPONSIVE CONSTRAINTS === */
   
-  /* Tablet */
-  @media (max-width: 1023px) {
-    .pk-card {
-      /* Matikan rotateX */
-      transform: translateY(40px) rotateX(0deg);
-    }
-  }
-
   /* Mobile */
   @media (max-width: 768px) {
     .pk-track {
@@ -450,55 +367,11 @@ const TIMELINE_DATA = [
       margin: 0;
     }
   }
-
-  /* Prefers Reduced Motion & Strict Mobile */
-  @media (max-width: 639px), (prefers-reduced-motion: reduce) {
-    .pk-card {
-      /* Fade only */
-      transform: none !important;
-      clip-path: none !important;
-      transition: opacity 300ms ease 100ms !important;
-    }
-    .pk-dot {
-      animation-duration: 300ms !important;
-    }
-    .pk-ripple {
-      animation: none !important;
-      display: none;
-    }
-    #pk-global-fill {
-      transition: stroke-dashoffset 300ms linear 0ms !important;
-    }
-  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', initAwwwardsTimeline);
-  document.addEventListener('astro:after-swap', initAwwwardsTimeline);
-
-  function initAwwwardsTimeline() {
-    var items = document.querySelectorAll('[data-pk-item]');
-    if (items.length === 0) return;
-
-    var viewportOffset = '0px 0px -15% 0px'; 
-    var itemObserver = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        } else {
-          entry.target.classList.remove('is-visible');
-        }
-      });
-    }, { threshold: 0.1, rootMargin: viewportOffset });
-
-    items.forEach(function(item) { itemObserver.observe(item); });
-
-    var cleanup = function() {
-      itemObserver.disconnect();
-      document.removeEventListener('astro:before-swap', cleanup);
-    };
-    document.addEventListener('astro:before-swap', cleanup);
-
+(function() {
+  function initTimelineModal() {
     var cards = document.querySelectorAll('.pk-card');
     var modal = document.getElementById('pk-modal');
     var backdrop = document.getElementById('pk-modal-backdrop');
@@ -530,11 +403,16 @@ const TIMELINE_DATA = [
       }, 300);
     }
 
+    // Bind cards (clone to remove stale listeners left by Astro DOM swapping)
     cards.forEach(function(card) {
-      card.addEventListener('click', function() {
-        var dateEl = card.querySelector('.pk-date');
-        var titleEl = card.querySelector('.pk-title');
-        var descEl = card.querySelector('.pk-hidden-desc');
+      var newCard = card.cloneNode(true);
+      if(card.parentNode) {
+        card.parentNode.replaceChild(newCard, card);
+      }
+      newCard.addEventListener('click', function() {
+        var dateEl = newCard.querySelector('.pk-date');
+        var titleEl = newCard.querySelector('.pk-title');
+        var descEl = newCard.querySelector('.pk-hidden-desc');
         var date = dateEl ? dateEl.textContent : '';
         var title = titleEl ? titleEl.textContent : '';
         var desc = descEl ? descEl.textContent : '';
@@ -542,11 +420,36 @@ const TIMELINE_DATA = [
       });
     });
 
-    if(backdrop) backdrop.addEventListener('click', closeModal);
-    if(btnClose) btnClose.addEventListener('click', closeModal);
+    // Re-bind modal triggers
+    if(backdrop) {
+      var newBackdrop = backdrop.cloneNode(true);
+      if(backdrop.parentNode) backdrop.parentNode.replaceChild(newBackdrop, backdrop);
+      newBackdrop.addEventListener('click', closeModal);
+    }
+    
+    if(btnClose) {
+      var newBtnClose = btnClose.cloneNode(true);
+      if(btnClose.parentNode) btnClose.parentNode.replaceChild(newBtnClose, btnClose);
+      newBtnClose.addEventListener('click', closeModal);
+    }
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) closeModal();
-    });
+    // Wipe escape listener & rebind
+    document.removeEventListener('keydown', window.__pkHandleEscape);
+    window.__pkHandleEscape = function(e) {
+      var activeModal = document.getElementById('pk-modal');
+      if (e.key === 'Escape' && activeModal && activeModal.classList.contains('is-open')) {
+        closeModal();
+      }
+    };
+    document.addEventListener('keydown', window.__pkHandleEscape);
   }
+
+  // Dual initialization for SSR / SPA mode
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTimelineModal);
+  } else {
+    initTimelineModal();
+  }
+  document.addEventListener('astro:after-swap', initTimelineModal);
+})();
 </script>

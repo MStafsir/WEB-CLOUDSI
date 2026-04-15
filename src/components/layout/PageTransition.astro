@@ -14,6 +14,11 @@
 <slot />
 
 <style is:global>
+  /* ANTI-WHITE-FLASH FIX */
+  html, body {
+    background-color: hsl(210, 60%, 6%) !important;
+  }
+
   /* Simple opacity fade — no blur, no scale, no GPU-heavy filters */
   @keyframes pageFadeOut {
     from { opacity: 1; }
@@ -28,6 +33,7 @@
   ::view-transition-group(root) {
     animation-duration: 250ms;
     animation-timing-function: ease;
+    background-color: hsl(210, 60%, 6%);
   }
 
   ::view-transition-old(root) {

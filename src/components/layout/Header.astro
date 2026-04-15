@@ -1,7 +1,7 @@
 ---
 /**
  * Header.astro
- * Navigasi utama Cloudsi Connect — glassmorphism navbar dengan horizontal menu
+ * Navigasi utama Cloudsi Connect — Bifurcated responsive morphing menu
  */
 const currentPath = Astro.url.pathname;
 const navLinks = [
@@ -27,45 +27,65 @@ const navLinks = [
       </div>
     </a>
 
-    <!-- Interactive Nav Wrapper -->
-    <div class="interactive-nav-wrapper">
-      
-      <!-- Horizontal Navigation List (Toggled via Hamburger) -->
-      <nav class="horizontal-nav" id="horizontal-menu" aria-label="Desktop menu">
-        <ul class="nav-list">
-          {navLinks.map((link) => (
-            <li>
-              <a 
-                href={link.href} 
-                class:list={['nav-link', { 'active': link.href === currentPath || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
-              >
-                {link.label}
-                <span class="underline-hover"></span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+    <!-- Desktop Navigation Base -->
+    <nav class="desktop-nav" aria-label="Desktop menu">
+      <ul class="nav-list">
+        {navLinks.map((link) => (
+          <li>
+            <a 
+              href={link.href} 
+              class:list={['nav-link', { 'active': link.href === currentPath || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
+            >
+              {link.label}
+              <span class="underline-hover"></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
 
-      <!-- Hamburger Toggle (All Screens) -->
-      <button id="hamburger-btn" class="hamburger-btn glass-btn" aria-label="Toggle menu" aria-expanded="false">
-        <span class="line line-1"></span>
-        <span class="line line-2"></span>
-        <span class="line line-3"></span>
-      </button>
-
-    </div>
+    <!-- Hamburger Toggle (Mobile/Tablet Only) -->
+    <button id="hamburger-btn" class="hamburger-btn glass-btn" aria-label="Open menu" aria-expanded="false">
+      <span class="line line-1"></span>
+      <span class="line line-2"></span>
+      <span class="line line-3"></span>
+    </button>
   </div>
+
+  <!-- Mobile Morphing Navigation Drawer & Backdrop -->
+  <div class="mobile-backdrop" id="mobile-backdrop" aria-hidden="true"></div>
+  <nav class="mobile-drawer" id="mobile-drawer" aria-label="Mobile menu" aria-hidden="true">
+    <div class="mobile-drawer-header">
+      <button id="close-drawer-btn" class="close-drawer-btn glass-btn" aria-label="Close menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <ul class="mobile-nav-list">
+      {navLinks.map((link) => (
+        <li>
+          <a 
+            href={link.href} 
+            class:list={['mobile-nav-link', { 'active': link.href === currentPath || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
 </header>
 
 <style>
-  /* Header Container Styling */
+  /* === HEADER CONTAINER STYLING === */
   .header-nav {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 100;
+    z-index: 80; /* Lower than drawer backdrop */
     background: var(--glass-bg);
     backdrop-filter: var(--blur-glass-heavy);
     -webkit-backdrop-filter: var(--blur-glass-heavy);
@@ -81,17 +101,15 @@ const navLinks = [
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 60px; /* Mobile height */
+    height: 60px;
     padding: 0 var(--gutter);
   }
 
   @media(min-width: 768px) {
-    .header-container {
-      height: 72px; /* Desktop height */
-    }
+    .header-container { height: 72px; }
   }
 
-  /* Logo */
+  /* === LOGO === */
   .header-logo-group {
     display: flex;
     align-items: center;
@@ -101,75 +119,29 @@ const navLinks = [
     z-index: 105;
   }
 
-  .header-logo-img {
-    height: 36px;
-    width: auto;
-    border-radius: 4px; /* Optional: adjust based on logo shape */
-    object-fit: contain;
-  }
-
-  .header-logo-text-group {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    line-height: 1;
-  }
-  
-  .header-logo-text {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 1.1rem;
-    letter-spacing: 0.2em;
-    color: rgba(255, 255, 255, 0.95);
-    margin: 0;
-    padding: 0;
-  }
+  .header-logo-img { height: 36px; width: auto; border-radius: 4px; object-fit: contain; }
+  .header-logo-text-group { display: flex; flex-direction: column; justify-content: center; line-height: 1; }
+  .header-logo-text { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; letter-spacing: 0.2em; color: rgba(255, 255, 255, 0.95); margin: 0; padding: 0; }
+  .header-logo-sub { font-family: var(--font-body); font-size: 0.65rem; opacity: 0.6; margin-top: 4px; letter-spacing: 0.05em; }
 
   @media(min-width: 768px) {
     .header-logo-text { font-size: 1.3rem; }
     .header-logo-img { height: 42px; }
   }
-
-  .header-logo-sub {
-    font-family: var(--font-body);
-    font-size: 0.65rem;
-    opacity: 0.6;
-    margin-top: 4px;
-    letter-spacing: 0.05em;
+  @media(max-width: 480px) {
+    .header-logo-text-group { display: none; }
   }
 
-  /* Navigation Wrapper */
-  .interactive-nav-wrapper {
+  /* === DESKTOP BASELINE === */
+  .mobile-backdrop, .mobile-drawer, .hamburger-btn { 
+    display: none; 
+  }
+
+  .desktop-nav {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 1.5rem;
-    /* Max width agar tidak menimpa logo di layar kecil, sisanya bisa di scroll kesamping */
-    max-width: calc(100vw - 120px); 
-    justify-content: flex-end;
-  }
-
-  /* Horizontal Navigation List */
-  .horizontal-nav {
-    display: flex;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(30px);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    
-    /* Wajib untuk HP layar kecil agar berjejer menyamping, BUKAN numpuk ke bawah */
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none; /* Firefox */
-  }
-  
-  .horizontal-nav::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-  }
-
-  .horizontal-nav.open {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(0);
+    gap: 2rem;
   }
 
   .nav-list {
@@ -178,14 +150,13 @@ const navLinks = [
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 2rem; /* Jarak standar antar teks menu */
-    flex-wrap: nowrap; /* CRUCIAL: Cegah teks numpuk jadi vertikal vertikal */
+    gap: 2rem;
+    flex-wrap: nowrap;
   }
 
-  /* Nav Links Desktop Style */
   .nav-link {
     font-family: var(--font-display);
-    font-size: 0.95rem; /* Menyamai fitur lama */
+    font-size: 0.95rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
@@ -224,139 +195,231 @@ const navLinks = [
     transform-origin: left;
   }
 
-  /* === HAMBURGER BUTTON GLASSMORPHISM === */
-  .hamburger-btn {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    cursor: pointer;
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    position: relative;
-    z-index: 102; 
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-  }
-
-  /* Glow effect pada hover/touch khusus kotak ornamen */
-  .hamburger-btn:hover, .hamburger-btn:focus-visible {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(56, 189, 248, 0.5);
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4), inset 0 0 10px rgba(56, 189, 248, 0.1);
-    transform: scale(1.05);
-  }
-
-  .line {
-    position: absolute;
-    height: 2px;
-    width: 20px;
-    background: white;
-    border-radius: 2px;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .line-1 { top: 12px; }
-  .line-2 { top: 19px; }
-  .line-3 { top: 26px; }
-
-  /* Hamburger Open State (X) */
-  .hamburger-btn[aria-expanded="true"] {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-  }
-
-  .hamburger-btn[aria-expanded="true"] .line-1 {
-    transform: rotate(45deg);
-    top: 19px;
-  }
-  .hamburger-btn[aria-expanded="true"] .line-2 {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-  .hamburger-btn[aria-expanded="true"] .line-3 {
-    transform: rotate(-45deg);
-    top: 19px;
-  }
-
-  @media(max-width: 768px) {
-    .nav-list {
-      gap: 1.25rem;
-      padding-right: 0.5rem; /* ruang sisa saat di ujung scroll */
+  /* === MOBILE/TABLET OVERRIDE (Bifurcated Structure) === */
+  @media (max-width: 1023px) {
+    .desktop-nav { 
+      display: none; 
     }
-    .nav-link {
-      font-size: 0.85rem;
-    }
-    .header-logo-text { font-size: 1rem; }
-    .interactive-nav-wrapper { gap: 1rem; }
-  }
 
-  @media(max-width: 480px) {
-    .header-logo-text-group { display: none; }
+    /* Hamburger Button */
+    .hamburger-btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      position: relative;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .hamburger-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4), inset 0 0 10px rgba(56, 189, 248, 0.1);
+    }
+
+    .line {
+      position: absolute;
+      height: 2px;
+      width: 20px;
+      background: white;
+      border-radius: 2px;
+    }
+    .line-1 { top: 12px; }
+    .line-2 { top: 19px; }
+    .line-3 { top: 26px; }
+
+    /* Mobile Backdrop */
+    .mobile-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      opacity: 0; 
+      pointer-events: none; 
+      transition: opacity 0.4s ease;
+    }
+
+    .mobile-backdrop.is-open { 
+      opacity: 1; 
+      pointer-events: auto; 
+    }
+
+    /* Morphing Mobile Drawer */
+    .mobile-drawer {
+      display: flex; 
+      flex-direction: column;
+      position: fixed; 
+      top: 0; 
+      right: 0; 
+      bottom: 0;
+      width: 70vw; 
+      max-width: 350px; 
+      z-index: 100;
+      background: hsl(210, 60%, 6%);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      padding: 1.5rem;
+      box-sizing: border-box;
+      
+      /* The Morphing Initial State */
+      transform: translateX(120%) scale(0.5);
+      border-radius: 100% 0 0 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.6s ease, opacity 0.4s ease;
+    }
+
+    .mobile-drawer.is-open {
+      /* The Morphing Final State */
+      transform: translateX(0) scale(1);
+      border-radius: 0px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Drawer Header & Close Button */
+    .mobile-drawer-header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 2.5rem;
+    }
+
+    .close-drawer-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+
+    .close-drawer-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    /* Drawer Links */
+    .mobile-nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .mobile-nav-link {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      display: block;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mobile-nav-link.active, .mobile-nav-link:hover {
+      color: white;
+      font-weight: 600;
+      border-bottom-color: rgba(56, 189, 248, 0.5);
+    }
   }
 </style>
 
 <script is:inline>
-  function setupHeader() {
-    const header = document.getElementById('main-header');
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const horizontalMenu = document.getElementById('horizontal-menu');
+  (function() {
+    function setupHeader() {
+      var header = document.getElementById('main-header');
+      var hamburgerBtn = document.getElementById('hamburger-btn');
+      var backdrop = document.getElementById('mobile-backdrop');
+      var drawer = document.getElementById('mobile-drawer');
+      var closeBtn = document.getElementById('close-drawer-btn');
+      
+      // Basic Scroll Shadow Observer
+      var ticking = false;
+      function handleScroll() {
+        if (!ticking && header) {
+          window.requestAnimationFrame(function() {
+            if (window.scrollY > 20) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      if (header && window.scrollY > 20) header.classList.add('scrolled');
+
+      // Initialize UI Bindings (for devices matching media query <= 1023px)
+      if(!hamburgerBtn || !backdrop || !drawer || !closeBtn) return;
+
+      function openMenu() {
+        backdrop.classList.add('is-open');
+        drawer.classList.add('is-open');
+        backdrop.setAttribute('aria-hidden', 'false');
+        drawer.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMenu() {
+        backdrop.classList.remove('is-open');
+        drawer.classList.remove('is-open');
+        backdrop.setAttribute('aria-hidden', 'true');
+        drawer.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      // 1. Destroy old bindings from Astro's View Transitions to prevent double triggers
+      var newHamburger = hamburgerBtn.cloneNode(true);
+      if(hamburgerBtn.parentNode) hamburgerBtn.parentNode.replaceChild(newHamburger, hamburgerBtn);
+      
+      var newCloseBtn = closeBtn.cloneNode(true);
+      if(closeBtn.parentNode) closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+
+      var newBackdrop = backdrop.cloneNode(true);
+      if(backdrop.parentNode) backdrop.parentNode.replaceChild(newBackdrop, backdrop);
+
+      // 2. Attach clean handlers
+      newHamburger.addEventListener('click', openMenu);
+      newCloseBtn.addEventListener('click', closeMenu);
+      newBackdrop.addEventListener('click', closeMenu);
+
+      // 3. Ensure clicking any nav link explicitly closes the Morphing Menu
+      var navLinks = document.querySelectorAll('.mobile-nav-link');
+      navLinks.forEach(function(link) {
+        // Deep clone links to overwrite old event handlers
+        var newLink = link.cloneNode(true);
+        if(link.parentNode) link.parentNode.replaceChild(newLink, link);
+        newLink.addEventListener('click', closeMenu);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupHeader);
+    } else {
+      setupHeader();
+    }
     
-    if(!header || !hamburgerBtn || !horizontalMenu) return;
-
-    // Persistensi Menu: membaca memori per sesi (agar menu tetap nampil pas ganti halaman)
-    const isMenuPersistedOpen = sessionStorage.getItem('cloudsi_nav_open') === 'true';
-
-    // Set state awal sesuai memory
-    if (isMenuPersistedOpen) {
-      hamburgerBtn.setAttribute('aria-expanded', 'true');
-      horizontalMenu.classList.add('open');
-    }
-
-    // Scroll Observer for shadow
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (window.scrollY > 20) {
-            header.classList.add('scrolled');
-          } else {
-            header.classList.remove('scrolled');
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
-
-    // Initial check
-    if (window.scrollY > 20) header.classList.add('scrolled');
-
-    function toggleMenu() {
-      const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-      if (isExpanded) {
-        hamburgerBtn.setAttribute('aria-expanded', 'false');
-        horizontalMenu.classList.remove('open');
-        sessionStorage.setItem('cloudsi_nav_open', 'false');
-      } else {
-        hamburgerBtn.setAttribute('aria-expanded', 'true');
-        horizontalMenu.classList.add('open');
-        sessionStorage.setItem('cloudsi_nav_open', 'true');
-      }
-    }
-
-    // Hindari pendobelan event listener dengan Astro View Transitions
-    hamburgerBtn.removeEventListener('click', toggleMenu);
-    hamburgerBtn.addEventListener('click', toggleMenu);
-  }
-
-  document.addEventListener('DOMContentLoaded', setupHeader);
-  document.addEventListener('astro:after-swap', setupHeader);
+    // Astro transition support
+    document.addEventListener('astro:after-swap', setupHeader);
+  })();
 </script>

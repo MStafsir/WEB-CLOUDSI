@@ -32,7 +32,7 @@ const sortedMembers = members;
       <!-- 40vh Hero Section -->
       <section class="anggota-hero" aria-label="Hero Anggota">
         <div class="anggota-hero-content fade-in">
-          <h1 class="hero-title">76 Anggota Cloudsi</h1>
+          <h1 class="hero-title">Mahasiswa Cloudsi</h1>
           <p class="hero-counter">Dalam satu Angkatan</p>
         </div>
       </section>
@@ -303,7 +303,16 @@ const sortedMembers = members;
   }
 
   .member-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 300px;
+  }
+
+  .member-item:hover {
     will-change: transform, opacity;
+  }
+
+  .is-hidden {
+    display: none !important;
   }
 
   .empty-state {
@@ -317,18 +326,64 @@ const sortedMembers = members;
 
 <script is:inline>
   (function() {
+    var debounceTimer;
+    var trigger;
+    var list;
+
+    // Mobile specific tap handler
+    function handleMobileTap(e) {
+      var isMobile = window.matchMedia('(hover: none)').matches;
+      if (!isMobile) return;
+
+      var card = e.target.closest('[data-member-card]');
+      var activeCards = document.querySelectorAll('[data-member-card].is-active');
+
+      if (card) {
+        var isActive = card.classList.contains('is-active');
+        activeCards.forEach(function(c) { c.classList.remove('is-active'); });
+        if (!isActive) card.classList.add('is-active');
+      } else {
+        activeCards.forEach(function(c) { c.classList.remove('is-active'); });
+      }
+    }
+
+    // Dropdown clicks outside handler
+    function handleDropdownOutsideClick(e) {
+      if (trigger && list && !trigger.contains(e.target) && !list.contains(e.target)) {
+        trigger.classList.remove('is-open');
+        list.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        list.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    // Teardown logic
+    function cleanup() {
+      document.removeEventListener('click', handleMobileTap);
+      document.removeEventListener('click', handleDropdownOutsideClick);
+      clearTimeout(debounceTimer);
+      document.removeEventListener('astro:before-swap', cleanup);
+    }
+
     function initAnggotaDirectory() {
+      // Members variables
       var searchInput = document.getElementById('member-search');
       var roleSelect = document.getElementById('member-role-filter');
       var memberItems = document.querySelectorAll('.member-item');
       var emptyState = document.getElementById('empty-state');
-      var debounceTimer;
+      
+      // Dropdown variables
+      trigger = document.getElementById('role-dropdown-trigger');
+      list = document.getElementById('role-dropdown-list');
+      var label = document.getElementById('role-dropdown-label');
+      var options = document.querySelectorAll('.dropdown-option');
 
       var pengurusRoles = ['Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara'];
 
+      // Perform filtering without DOM thrashing
       function filterMembers() {
-        var query = searchInput.value.toLowerCase().trim();
-        var roleFilter = roleSelect.value;
+        var query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        var roleFilter = roleSelect ? roleSelect.value : 'Semua';
         var visibleCount = 0;
 
         memberItems.forEach(function(item) {
@@ -346,12 +401,12 @@ const sortedMembers = members;
           }
 
           if (matchesQuery && matchesRole) {
-            item.style.display = 'block';
+            item.classList.remove('is-hidden');
             item.style.opacity = '1';
             item.style.transform = 'scale(1)';
             visibleCount++;
           } else {
-            item.style.display = 'none';
+            item.classList.add('is-hidden');
             item.style.opacity = '0';
             item.style.transform = 'scale(0.95)';
           }
@@ -361,12 +416,6 @@ const sortedMembers = members;
           emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
         }
       }
-
-      // === CUSTOM DROPDOWN LOGIC ===
-      var trigger = document.getElementById('role-dropdown-trigger');
-      var label = document.getElementById('role-dropdown-label');
-      var list = document.getElementById('role-dropdown-list');
-      var options = document.querySelectorAll('.dropdown-option');
 
       function openDropdown() {
         if(!trigger || !list) return;
@@ -384,7 +433,12 @@ const sortedMembers = members;
         list.setAttribute('aria-hidden', 'true');
       }
 
+      // Clone nodes to override any stale closures attached by standard DOM nodes swapping
       if (trigger && list) {
+        var newTrigger = trigger.cloneNode(true);
+        if(trigger.parentNode) trigger.parentNode.replaceChild(newTrigger, trigger);
+        trigger = newTrigger;
+
         trigger.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
@@ -392,30 +446,31 @@ const sortedMembers = members;
         });
 
         options.forEach(function(opt) {
-          opt.addEventListener('click', function(e) {
+          var newOpt = opt.cloneNode(true);
+          if(opt.parentNode) opt.parentNode.replaceChild(newOpt, opt);
+          newOpt.addEventListener('click', function(e) {
             e.stopPropagation();
-            var val = opt.getAttribute('data-value');
-            var text = opt.innerText;
+            var val = newOpt.getAttribute('data-value');
+            var text = newOpt.innerText;
 
             if (roleSelect) roleSelect.value = val;
             if (label) label.innerText = text;
             
-            options.forEach(function(o) { o.classList.remove('is-selected'); });
-            opt.classList.add('is-selected');
+            var currentOptions = document.querySelectorAll('.dropdown-option');
+            currentOptions.forEach(function(o) { o.classList.remove('is-selected'); });
+            newOpt.classList.add('is-selected');
 
             closeDropdown();
             if (roleSelect) roleSelect.dispatchEvent(new Event('change'));
           });
         });
-
-        document.addEventListener('click', function(e) {
-          if (!trigger.contains(e.target) && !list.contains(e.target)) {
-            closeDropdown();
-          }
-        });
       }
 
       if (searchInput) {
+        var newInput = searchInput.cloneNode(true);
+        if(searchInput.parentNode) searchInput.parentNode.replaceChild(newInput, searchInput);
+        searchInput = newInput;
+
         searchInput.addEventListener('input', function() {
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(filterMembers, 300);
@@ -423,30 +478,25 @@ const sortedMembers = members;
       }
 
       if (roleSelect) {
+        var newRoleSelect = roleSelect.cloneNode(true);
+        if(roleSelect.parentNode) roleSelect.parentNode.replaceChild(newRoleSelect, roleSelect);
+        roleSelect = newRoleSelect;
+        
         roleSelect.addEventListener('change', filterMembers);
       }
 
-      // Mobile: Tap to toggle hover panel
-      document.addEventListener('click', function(e) {
-        var isMobile = window.matchMedia('(hover: none)').matches;
-        if (!isMobile) return;
-
-        var card = e.target.closest('[data-member-card]');
-        var activeCards = document.querySelectorAll('[data-member-card].is-active');
-
-        if (card) {
-          var isActive = card.classList.contains('is-active');
-          activeCards.forEach(function(c) { c.classList.remove('is-active'); });
-          if (!isActive) card.classList.add('is-active');
-        } else {
-          activeCards.forEach(function(c) { c.classList.remove('is-active'); });
-        }
-      });
-
-
+      // Register global handlers and wire cleanup
+      document.addEventListener('click', handleDropdownOutsideClick);
+      document.addEventListener('click', handleMobileTap);
+      document.addEventListener('astro:before-swap', cleanup);
     }
 
-    document.addEventListener('DOMContentLoaded', initAnggotaDirectory);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAnggotaDirectory);
+    } else {
+      initAnggotaDirectory();
+    }
+    
     document.addEventListener('astro:after-swap', initAnggotaDirectory);
   })();
 </script>

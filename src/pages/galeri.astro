@@ -50,57 +50,57 @@ const stackData = [
           <div class="gallery-grid" id="galleryGrid">
             
             <!-- FOTO 1: Besar 2x2 (R1C1, R1C2, R2C1, R2C2) -->
-            <div class="photo-frame item-large masonry-item" data-rot="-13deg" data-rot-end="-1.5deg" style="--rot:-13deg; --rot-end:-1.5deg; transition-delay:0ms;">
+            <div class="photo-frame item-large" style="transition-delay:0ms;">
               <div class="photo-inner ph-1">
-                <img src="/galeri/1.webp" alt="Foto 1" width="800" height="600" loading="eager" fetchpriority="high" class="masonry-img">
+                <img src="/galeri/1.webp" alt="Foto 1" width="800" height="600" loading="eager" fetchpriority="high">
                 <span class="caption overlay-text">SINTA 2025</span>
               </div>
             </div>
 
             <!-- FOTO 2: Normal (R1C3) -->
-            <div class="photo-frame masonry-item" data-rot="10deg" data-rot-end="1deg" style="--rot:10deg; --rot-end:1deg; transition-delay:80ms;">
+            <div class="photo-frame" style="transition-delay:80ms;">
               <div class="photo-inner ph-2">
-                <img src="/galeri/2.webp" alt="Foto 2" width="800" height="600" loading="eager" fetchpriority="high" class="masonry-img">
+                <img src="/galeri/2.webp" alt="Foto 2" width="800" height="600" loading="eager" fetchpriority="high">
                 <span class="caption overlay-text">CIS</span>
               </div>
             </div>
 
             <!-- FOTO 3: Tinggi 1x2 -> R2C3, R3C3 -->
-            <div class="photo-frame item-tall masonry-item" data-rot="-7deg" data-rot-end="1.5deg" style="--rot:-7deg; --rot-end:1.5deg; transition-delay:120ms;">
+            <div class="photo-frame item-tall" style="transition-delay:120ms;">
               <div class="photo-inner ph-3">
-                <img src="/galeri/3.webp" alt="Foto 3" width="800" height="600" loading="lazy" class="masonry-img">
+                <img src="/galeri/3.webp" alt="Foto 3" width="800" height="600" loading="lazy">
                 <span class="caption overlay-text">OSI Badminton</span>
               </div>
             </div>
 
             <!-- FOTO 4: Lebar 2x1 -> R3C1, R3C2 -->
-            <div class="photo-frame item-wide masonry-item" data-rot="9deg" data-rot-end="-1deg" style="--rot:9deg; --rot-end:-1deg; transition-delay:160ms;">
+            <div class="photo-frame item-wide" style="transition-delay:160ms;">
               <div class="photo-inner ph-4">
-                <img src="/galeri/4.webp" alt="Foto 4" width="800" height="600" loading="lazy" class="masonry-img">
+                <img src="/galeri/4.webp" alt="Foto 4" width="800" height="600" loading="lazy">
                 <span class="caption overlay-text">OSI Badminton (Mahasiswi)</span>
               </div>
             </div>
 
             <!-- FOTO 5: Lebar 2x1 -> R4C1, R4C2 -->
-            <div class="photo-frame item-wide masonry-item" data-rot="-5deg" data-rot-end="0.5deg" style="--rot:-5deg; --rot-end:0.5deg; transition-delay:200ms;">
+            <div class="photo-frame item-wide" style="transition-delay:200ms;">
               <div class="photo-inner ph-5">
-                <img src="/galeri/5.webp" alt="Foto 5" width="800" height="600" loading="lazy" class="masonry-img">
+                <img src="/galeri/5.webp" alt="Foto 5" width="800" height="600" loading="lazy">
                 <span class="caption overlay-text">Foto Angkatan Pertama</span>
               </div>
             </div>
 
             <!-- FOTO 6: Normal 1x1 -> R4C3 -->
-            <div class="photo-frame masonry-item" data-rot="14deg" data-rot-end="-2deg" style="--rot:14deg; --rot-end:-2deg; transition-delay:240ms;">
+            <div class="photo-frame" style="transition-delay:240ms;">
               <div class="photo-inner ph-6">
-                <img src="/galeri/6.webp" alt="Foto 6" width="800" height="600" loading="lazy" class="masonry-img">
+                <img src="/galeri/6.webp" alt="Foto 6" width="800" height="600" loading="lazy">
                 <span class="caption overlay-text">OSI Badminton</span>
               </div>
             </div>
 
             <!-- FOTO 7: Full 3x1 -> R5C1, R5C2, R5C3 -->
-            <div class="photo-frame item-full masonry-item" data-rot="-6deg" data-rot-end="2deg" style="--rot:-6deg; --rot-end:2deg; transition-delay:280ms;">
+            <div class="photo-frame item-full" style="transition-delay:280ms;">
               <div class="photo-inner ph-7" style="background-color: #081a30;">  
-                <img src="/galeri/7.webp" alt="Foto 7" width="800" height="600" loading="lazy" class="masonry-img">
+                <img src="/galeri/7.webp" alt="Foto 7" width="800" height="600" loading="lazy">
                 <span class="caption overlay-text">Bukber CloudSI</span>
               </div>
             </div>
@@ -200,9 +200,9 @@ const stackData = [
   }
 
   /* Photo Frame Interaktif */
-  .photo-frame { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06); cursor: pointer; position: relative; will-change: transform, opacity; opacity: 0; transform: translateY(100px) rotate(var(--rot, 0deg)) scale(0.85); transition: opacity 0.65s ease, transform 0.95s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease; }
-  .photo-frame.is-visible { opacity: 1; transform: translateY(0) rotate(var(--rot-end, 0deg)) scale(1); }
-  .photo-frame.is-visible:hover { transform: translateY(-5px) rotate(var(--rot-end, 0deg)) scale(1.02); border-color: rgba(100, 200, 255, 0.35) !important; box-shadow: 0 20px 60px rgba(0, 100, 255, 0.22), 0 0 0 1px rgba(100, 200, 255, 0.12) !important; z-index: 20; }
+  .photo-frame { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06); cursor: pointer; position: relative; opacity: 0; transform: translateY(100px) scale(0.85); transition: opacity 0.65s ease, transform 0.95s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease; }
+  .photo-frame.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+  .photo-frame.is-visible:hover { transform: translateY(-5px) scale(1.02); border-color: rgba(100, 200, 255, 0.35) !important; box-shadow: 0 20px 60px rgba(0, 100, 255, 0.22), 0 0 0 1px rgba(100, 200, 255, 0.12) !important; z-index: 20; }
   
   .photo-inner { width: 100%; height: 100%; display: flex; align-items: flex-end; padding: 12px; position: relative; box-sizing: border-box; }
   .photo-inner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%); pointer-events: none; z-index: 1; }
@@ -215,18 +215,18 @@ const stackData = [
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, hsla(200, 80%, 90%, 0.08), transparent);
-    transition: left 0.8s var(--ease-water);
+    transform: translateX(-100%);
+    transition: transform 0.8s var(--ease-water);
     pointer-events: none;
     z-index: 10;
   }
 
   .photo-frame:hover::before,
   .stack-card:hover::before {
-    left: 100%;
+    transform: translateX(100%);
   }
 
   /* =====================================================
@@ -394,8 +394,15 @@ const stackData = [
         }
       }
 
+      var isTicking = false;
       function onScrollMaster() {
-        onScrollStack();
+        if (!isTicking) {
+          window.requestAnimationFrame(function() {
+            onScrollStack();
+            isTicking = false;
+          });
+          isTicking = true;
+        }
       }
       window.addEventListener('scroll', onScrollMaster, { passive: true });
 
@@ -417,7 +424,7 @@ const stackData = [
       
       bentoFrames.forEach(function(item) {
         item.addEventListener('click', function() {
-          var imgEl = item.querySelector('.masonry-img');
+          var imgEl = item.querySelector('img');
           var captionEl = item.querySelector('.overlay-text');
           if(imgEl && lightboxImg) {
             lightboxImg.src = imgEl.src;
