@@ -160,6 +160,61 @@ const fullTitle = title;
     </script>
 
     <!-- ============================================
+         ACTIVE BATTERY MONITOR — Real-time battery watch
+         If battery < 20% and not charging:
+         Forces BATTERY_SAVER, kills WebGL, shows fallbacks
+         ============================================ -->
+    <script is:inline>
+      (function() {
+        if (typeof navigator === 'undefined' || !('getBattery' in navigator)) return;
+
+        navigator.getBattery().then(function(battery) {
+          function checkBattery() {
+            if (battery.level < 0.2 && !battery.charging) {
+              console.warn('[Cloudsi] Battery below 20% — activating BATTERY_SAVER mode.');
+
+              // Force tier to BATTERY_SAVER
+              sessionStorage.setItem('cloudsi_perf_tier', 'BATTERY_SAVER');
+
+              // Apply BATTERY_SAVER CSS variables
+              var root = document.documentElement;
+              root.dataset.perfTier = 'battery_saver';
+              root.style.setProperty('--blur-glass', 'blur(0px)');
+              root.style.setProperty('--blur-glass-heavy', 'blur(0px)');
+              root.style.setProperty('--perf-transition-duration', '0ms');
+              root.style.setProperty('--perf-animation-enabled', '0');
+
+              // Kill WebGL via global singletons
+              if (window.CloudSI_Water && typeof window.CloudSI_Water.cleanup === 'function') {
+                try { window.CloudSI_Water.cleanup(); } catch(e) {}
+              }
+              if (window.CloudSI_Cloud && typeof window.CloudSI_Cloud.cleanup === 'function') {
+                try { window.CloudSI_Cloud.cleanup(); } catch(e) {}
+              }
+
+              // Hide all canvases, show CSS fallbacks
+              var canvases = document.querySelectorAll('#water-canvas, #cloud-canvas');
+              for (var i = 0; i < canvases.length; i++) {
+                canvases[i].style.display = 'none';
+              }
+              var wf = document.getElementById('water-fallback');
+              if (wf) wf.style.display = 'block';
+              var cf = document.getElementById('cloud-fallback');
+              if (cf) cf.style.display = 'block';
+            }
+          }
+
+          // Check immediately
+          checkBattery();
+
+          // Listen for real-time changes
+          battery.addEventListener('levelchange', checkBattery);
+          battery.addEventListener('chargingchange', checkBattery);
+        }).catch(function() {});
+      })();
+    </script>
+
+    <!-- ============================================
          IMPORT MAP — OGL CDN
          ============================================ -->
     <script type="importmap">

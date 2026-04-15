@@ -8,7 +8,7 @@
  * - ULTRA: High-end desktop/laptop (8+ GB RAM, 8+ cores)
  * - NORMAL: Mid-range device (4-8 GB RAM, 4-8 cores) 
  * - LOW: Low-end device (2-4 GB RAM, 2-4 cores)
- * - BATTERY_SAVER: Very low-end or battery saver mode
+ * - BATTERY_SAVER: Very low-end or battery saver mode / battery < 20%
  * 
  * NOTE: This is designed to be used as inline script content.
  * Copy the getPerformanceTier() function into <script is:inline> blocks.
@@ -84,6 +84,9 @@ export function getPerformanceTier(): PerformanceTier {
           score += 1;
         }
       }
+      // Explicitly lose the test context to free VRAM
+      const loseCtx = testGl.getExtension('WEBGL_lose_context');
+      if (loseCtx) loseCtx.loseContext();
     }
     // Clean up test canvas
     testCanvas.remove();
@@ -146,4 +149,65 @@ export function applyPerformanceTier(tier: PerformanceTier): void {
       root.style.setProperty('--perf-animation-enabled', '0');
       break;
   }
+}
+
+/**
+ * Active Battery Monitor.
+ * Listens to battery level changes in real-time.
+ * If battery drops below 20% and device is not charging:
+ *   1. Forces tier to BATTERY_SAVER
+ *   2. Triggers global WebGL cleanup (CloudSI_Water, CloudSI_Cloud)
+ *   3. Hides all <canvas> and shows CSS fallback divs
+ * 
+ * Should be called once on app startup.
+ */
+export function initBatteryMonitor(): void {
+  if (typeof navigator === 'undefined') return;
+  if (!('getBattery' in navigator)) return;
+
+  (navigator as any).getBattery().then((battery: any) => {
+    function checkBattery() {
+      if (battery.level < 0.2 && !battery.charging) {
+        console.warn('[Cloudsi] Battery below 20% — activating BATTERY_SAVER mode.');
+
+        // 1. Force tier to BATTERY_SAVER in cache
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('cloudsi_perf_tier', 'BATTERY_SAVER');
+        }
+
+        // 2. Apply BATTERY_SAVER CSS variables
+        applyPerformanceTier('BATTERY_SAVER');
+
+        // 3. Trigger global cleanup functions to kill WebGL immediately
+        const win = window as any;
+        if (win.CloudSI_Water && typeof win.CloudSI_Water.cleanup === 'function') {
+          win.CloudSI_Water.cleanup();
+        }
+        if (win.CloudSI_Cloud && typeof win.CloudSI_Cloud.cleanup === 'function') {
+          win.CloudSI_Cloud.cleanup();
+        }
+
+        // 4. Hide all canvas elements and show fallback CSS divs
+        const canvases = document.querySelectorAll('#water-canvas, #cloud-canvas');
+        canvases.forEach((c: Element) => {
+          (c as HTMLElement).style.display = 'none';
+        });
+
+        const waterFallback = document.getElementById('water-fallback');
+        if (waterFallback) waterFallback.style.display = 'block';
+
+        const cloudFallback = document.getElementById('cloud-fallback');
+        if (cloudFallback) cloudFallback.style.display = 'block';
+      }
+    }
+
+    // Check immediately on init
+    checkBattery();
+
+    // Listen for real-time battery level changes
+    battery.addEventListener('levelchange', checkBattery);
+    battery.addEventListener('chargingchange', checkBattery);
+  }).catch((err: any) => {
+    console.warn('[Cloudsi] Battery API not available:', err);
+  });
 }

@@ -4,6 +4,12 @@
  * OGL-based Physical Water Surface (Spring Simulation)
  * Ultra-smooth, high-res raindrop ripples with pure video refraction (SIAKAD style).
  * 
+ * MEMORY LEAK FIX: Uses Global Singleton Controller pattern.
+ * - window.CloudSI_Water = { initialized, cleanup }
+ * - Explicit VRAM disposal (deleteShader, deleteProgram, deleteBuffer, loseContext)
+ * - No { once: true } on astro:before-swap
+ * - All rAF/setInterval tracked and cancelled
+ * 
  * PERFORMANCE TIERS:
  * - ULTRA: 512x512 simulation, HALF_FLOAT, dpr 2.0
  * - NORMAL: 256x256 simulation, FLOAT, dpr 1.5
@@ -47,10 +53,20 @@
 </style>
 
 <script is:inline>
-  (async function() {
+  (function() {
     'use strict';
 
+    // =============================================
+    // GLOBAL SINGLETON CONTROLLER
+    // =============================================
+    window.CloudSI_Water = window.CloudSI_Water || { initialized: false, cleanup: null };
+
     function initWaterRipple() {
+      // If already initialized, cleanup first to prevent duplicates
+      if (window.CloudSI_Water.initialized && typeof window.CloudSI_Water.cleanup === 'function') {
+        window.CloudSI_Water.cleanup();
+      }
+
       var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) return;
 
@@ -76,7 +92,7 @@
         return;
       }
 
-      // Battery check
+      // Battery check (one-time on init)
       try {
         if ('getBattery' in navigator) {
           navigator.getBattery().then(function(battery) {
@@ -85,6 +101,10 @@
               canvas.style.display = 'none';
               var fallback = document.getElementById('water-fallback');
               if (fallback) fallback.style.display = 'block';
+              // Cleanup if already started
+              if (typeof window.CloudSI_Water.cleanup === 'function') {
+                window.CloudSI_Water.cleanup();
+              }
               return;
             }
           });
@@ -92,6 +112,9 @@
       } catch (e) {}
 
       import('ogl').then(function(OGL) {
+        // Guard: if cleanup was called between import start and resolve
+        if (!document.getElementById('water-canvas')) return;
+
         var Renderer = OGL.Renderer;
         var Program = OGL.Program;
         var Mesh = OGL.Mesh;
@@ -282,7 +305,7 @@
         var renderMesh = new Mesh(gl, { geometry: triangle, program: renderProgram });
 
         var dropQueue = [];
-        var rAFId;
+        var rAFId = null;
 
         function addDrop(x, y) {
            dropQueue.push({ x: x / window.innerWidth, y: 1.0 - (y / window.innerHeight) });
@@ -304,15 +327,17 @@
         var isAnimating = false;
         var isVisible = true;
         var autoDropTimer = null;
+        var isDestroyed = false;
         
         function startLoop() {
-          if (isAnimating || !isVisible) return;
+          if (isAnimating || !isVisible || isDestroyed) return;
           isAnimating = true;
           rAFId = requestAnimationFrame(animate);
           
           // Auto drops to keep animation alive continuously
           if (!autoDropTimer) {
              autoDropTimer = setInterval(function() {
+                if (isDestroyed) return;
                 var rx = (0.2 + Math.random() * 0.6) * window.innerWidth;
                 var ry = (0.2 + Math.random() * 0.6) * window.innerHeight;
                 addDrop(rx, ry);
@@ -323,7 +348,10 @@
         function stopLoop() {
           if (!isAnimating) return;
           isAnimating = false;
-          cancelAnimationFrame(rAFId);
+          if (rAFId !== null) {
+            cancelAnimationFrame(rAFId);
+            rAFId = null;
+          }
           if (autoDropTimer) {
              clearInterval(autoDropTimer);
              autoDropTimer = null;
@@ -331,6 +359,7 @@
         }
         
         var handleDragMove = function(e) {
+          if (isDestroyed) return;
           if (performance.now() - lastMove > moveThrottle) {
              var cx = e.touches ? e.touches[0].clientX : e.clientX;
              var cy = e.touches ? e.touches[0].clientY : e.clientY;
@@ -344,9 +373,10 @@
         window.addEventListener('touchmove', handleDragMove, {passive: true});
         
         // IntersectionObserver: pause when canvas out of view, resume when back
+        var visObserver = null;
         var waterCanvas = document.getElementById('water-canvas');
         if (waterCanvas) {
-          var visObserver = new IntersectionObserver(function(entries) {
+          visObserver = new IntersectionObserver(function(entries) {
             isVisible = entries[0].isIntersecting;
             if (!isVisible) {
               stopLoop();
@@ -358,7 +388,7 @@
         }
         
         function animate(t) {
-          if (!isAnimating) return;
+          if (!isAnimating || isDestroyed) return;
           rAFId = requestAnimationFrame(animate);
 
           // Cek kesiapan sumber background
@@ -405,22 +435,131 @@
           rtOutput = tmp;
         }
 
-        // Initial drop: starts the endless loop
-        setTimeout(function() {
-          addDrop(window.innerWidth/2, window.innerHeight/2);
-          startLoop();
-        }, 500);
+        // =============================================
+        // FULL CLEANUP — VRAM DISPOSAL + LISTENER REMOVAL
+        // =============================================
+        function fullCleanup() {
+          if (isDestroyed) return; // Idempotent guard
+          isDestroyed = true;
+          
+          console.log('[Cloudsi] WaterRipple: Full cleanup — disposing VRAM.');
 
-        document.addEventListener('astro:before-swap', function() {
+          // 1. Stop all animation loops
           stopLoop();
+          dropQueue.length = 0;
+
+          // 2. Remove event listeners
           window.removeEventListener('mousemove', handleDragMove);
           window.removeEventListener('touchmove', handleDragMove);
           window.removeEventListener('resize', onResize);
-          if (visObserver) visObserver.disconnect();
+
+          // 3. Disconnect observer
+          if (visObserver) {
+            visObserver.disconnect();
+            visObserver = null;
+          }
+
+          // 4. Explicit VRAM disposal — delete shaders, programs, buffers
           try {
-            gl.getExtension('WEBGL_lose_context').loseContext();
-          } catch(e) {}
-        }, { once: true });
+            // Delete OGL program shaders (simProgram)
+            if (simProgram && simProgram.gl) {
+              var spGl = simProgram.gl;
+              var spProgram = simProgram.program;
+              if (spProgram) {
+                var shaders = spGl.getAttachedShaders(spProgram);
+                if (shaders) {
+                  for (var i = 0; i < shaders.length; i++) {
+                    spGl.detachShader(spProgram, shaders[i]);
+                    spGl.deleteShader(shaders[i]);
+                  }
+                }
+                spGl.deleteProgram(spProgram);
+              }
+            }
+
+            // Delete OGL program shaders (renderProgram)
+            if (renderProgram && renderProgram.gl) {
+              var rpGl = renderProgram.gl;
+              var rpProgram = renderProgram.program;
+              if (rpProgram) {
+                var rpShaders = rpGl.getAttachedShaders(rpProgram);
+                if (rpShaders) {
+                  for (var j = 0; j < rpShaders.length; j++) {
+                    rpGl.detachShader(rpProgram, rpShaders[j]);
+                    rpGl.deleteShader(rpShaders[j]);
+                  }
+                }
+                rpGl.deleteProgram(rpProgram);
+              }
+            }
+
+            // Delete triangle geometry buffers
+            if (triangle && triangle.attributes) {
+              var attrs = triangle.attributes;
+              for (var key in attrs) {
+                if (attrs[key] && attrs[key].buffer) {
+                  gl.deleteBuffer(attrs[key].buffer);
+                }
+              }
+            }
+
+            // Delete render target textures/framebuffers
+            // OGL RenderTargets hold .texture and .buffer (framebuffer)
+            [rtCurrent, rtPrevious, rtOutput].forEach(function(rt) {
+              if (rt) {
+                if (rt.texture && rt.texture.texture) {
+                  gl.deleteTexture(rt.texture.texture);
+                }
+                if (rt.buffer) {
+                  gl.deleteFramebuffer(rt.buffer);
+                }
+                if (rt.depthBuffer) {
+                  gl.deleteRenderbuffer(rt.depthBuffer);
+                }
+              }
+            });
+
+            // Delete video texture
+            if (videoTex && videoTex.texture) {
+              gl.deleteTexture(videoTex.texture);
+            }
+
+          } catch (e) {
+            console.warn('[Cloudsi] WaterRipple cleanup (GPU resources):', e);
+          }
+
+          // 5. Lose WebGL context entirely
+          try {
+            var ext = gl.getExtension('WEBGL_lose_context');
+            if (ext) ext.loseContext();
+          } catch (e) {}
+
+          // 6. Reset singleton state
+          window.CloudSI_Water.initialized = false;
+          window.CloudSI_Water.cleanup = null;
+        }
+
+        // Register cleanup on the global singleton
+        window.CloudSI_Water.initialized = true;
+        window.CloudSI_Water.cleanup = fullCleanup;
+
+        // Initial drop: starts the endless loop
+        setTimeout(function() {
+          if (!isDestroyed) {
+            addDrop(window.innerWidth/2, window.innerHeight/2);
+            startLoop();
+          }
+        }, 500);
+
+        // =============================================
+        // ASTRO VIEW TRANSITION HANDLER
+        // NO { once: true } — persistent listener
+        // =============================================
+        document.addEventListener('astro:before-swap', function() {
+          if (window.CloudSI_Water && typeof window.CloudSI_Water.cleanup === 'function') {
+            window.CloudSI_Water.cleanup();
+          }
+        });
         
       }).catch(function(err) {
         console.warn('[Cloudsi] Gagal muat modul OGL:', err);
