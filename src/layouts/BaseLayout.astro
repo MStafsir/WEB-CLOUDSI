@@ -22,7 +22,7 @@ interface Props {
 const {
   title = "Cloudsi | Sistem Informasi Untan", 
   description = "Dalam satu ruang kami adalah keluarga besar Sistem Informasi Universitas Tanjungpura, penggerak teknologi masa depan.",
-  ogImage = "/logo-angkatan-25.png",
+  ogImage = "/logo-angkatan-25.webp",
   keywords = "Cloudsi, Angkatan SI, Website Angkatan, Profil Mahasiswa",
 } = Astro.props;
 
@@ -259,13 +259,13 @@ const fullTitle = title;
     <!-- ============================================
          LOGO PRELOAD — Single authoritative request, browser dedup
          ============================================ -->
-    <link rel="preload" as="image" href="/logo-angkatan-25.png" />
+    <link rel="preload" as="image" href="/logo-angkatan-25.webp" />
 
     <!-- ============================================
          FAVICON
          ============================================ -->
-    <link rel="icon" type="image/png" href="/logo-angkatan-25.png" />
-    <link rel="apple-touch-icon" href="/logo-angkatan-25.png" />
+    <link rel="icon" type="image/webp" href="/logo-angkatan-25.webp" />
+    <link rel="apple-touch-icon" href="/logo-angkatan-25.webp" />
 
     <!-- ============================================
          ASTRO VIEW TRANSITIONS (ClientRouter in v5)
@@ -541,14 +541,7 @@ const fullTitle = title;
          ============================================ -->
     <style is:global>
       .css-fade-up, [data-tentang-anim], .lyrics-panel, .gallery-cta-section, [data-member-card], [data-event-card], .member-preview-card, .fade-in {
-        opacity: 0;
-        transform: translateY(40px);
-        transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         will-change: opacity, transform;
-      }
-      .css-fade-up.is-visible, [data-tentang-anim].is-visible, .lyrics-panel.is-visible, .gallery-cta-section.is-visible, [data-member-card].is-visible, [data-event-card].is-visible, .member-preview-card.is-visible, .fade-in.is-visible {
-        opacity: 1;
-        transform: translateY(0);
       }
       
       /* Utilities untuk cascade delay tanpa JS */

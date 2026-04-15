@@ -52,6 +52,7 @@
     -moz-text-size-adjust: 100%;
     text-size-adjust: 100%;
     hanging-punctuation: first last;
+    background-color: var(--color-sky-deep);
   }
 
   /* Body base styles */
@@ -145,6 +146,18 @@
   ::-webkit-scrollbar-thumb:hover {
     background: var(--color-water-surface);
   }
+}
+
+/* ============================================
+   VIEW TRANSITION FIX (Mencegah Layar Putih)
+   ============================================ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+::view-transition-group(root) {
+  background-color: var(--color-sky-deep);
 }
 
 /* ============================================
@@ -259,15 +272,10 @@
 
   /* BASE: Initial fade-in state */
   .fade-in {
-    opacity: 0;
-    transform: translateY(24px);
+    /* Prevent initial hidden state on fast navigations */
     transition: opacity var(--duration-slow) var(--ease-water),
                 transform var(--duration-slow) var(--ease-water);
     visibility: visible;
-    
-    /* Fallback animation: Force show after 5 seconds if is-visible not added */
-    animation: fallback-fade-in-show 0.6s ease-out forwards;
-    animation-delay: 5s;
   }
 
   /* STATE: Visible state */
