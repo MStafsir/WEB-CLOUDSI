@@ -5,7 +5,6 @@
  * Dependencies: BaseLayout, Header, Footer, PageTransition, Timeline, supabase.ts
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import PageTransition from '../components/layout/PageTransition.astro';
 import PerjalananKami from '../components/sections/PerjalananKami.astro';
@@ -15,7 +14,6 @@ const timeline = await getTimeline();
 ---
 
 <BaseLayout title="Tentang | Cloudsi | Sistem Informasi Untan" description="Dalam satu ruang kami adalah keluarga besar Sistem Informasi Universitas Tanjungpura, penggerak teknologi masa depan.">
-  <Header />
   <PageTransition>
     <main id="main-content">
 

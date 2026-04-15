@@ -2,22 +2,34 @@
 /**
  * Header.astro
  * Navigasi utama Cloudsi Connect — Bifurcated responsive morphing menu
+ *
+ * FIX: CSS Containing Block Trap (backdrop-filter)
+ * .mobile-drawer & .mobile-backdrop dipindahkan ke LUAR <header>.
+ * Keduanya kini sibling langsung di DOM level halaman, bukan child dari
+ * .header-nav yang memiliki backdrop-filter (penyebab containing block baru).
+ * Referensi: https://www.w3.org/TR/css-transforms-1/#containing-block-for-all-fixed
  */
 const currentPath = Astro.url.pathname;
 const navLinks = [
   { href: '/', label: 'Beranda' },
   { href: '/tentang', label: 'Tentang' },
-  { href: '/galeri', label: 'Galeri' },
   { href: '/anggota', label: 'Anggota' },
+  { href: '/galeri', label: 'Galeri' },
   { href: '/acara', label: 'Acara' },
   { href: '/kontak', label: 'Kontak' },
   { href: '/lagu', label: 'Lagu Angkatan' },
 ];
 ---
 
+<!-- ═══════════════════════════════════════════════════════════════
+     HEADER — Hanya berisi logo + desktop nav + hamburger button.
+     Tidak ada lagi .mobile-drawer / .mobile-backdrop di sini.
+     Dengan begitu backdrop-filter pada .header-nav tidak lagi
+     membentuk containing block yang menjebak elemen fixed di bawah.
+     ═══════════════════════════════════════════════════════════════ -->
 <header class="header-nav" id="main-header">
   <div class="header-container">
-    
+
     <!-- Logo Typography -->
     <a href="/" class="header-logo-group">
       <img src="/logo-angkatan-25.webp" alt="Logo Cloudsi" class="header-logo-img" />
@@ -27,14 +39,17 @@ const navLinks = [
       </div>
     </a>
 
-    <!-- Desktop Navigation Base -->
+    <!-- Desktop Navigation -->
     <nav class="desktop-nav" aria-label="Desktop menu">
       <ul class="nav-list">
         {navLinks.map((link) => (
           <li>
-            <a 
-              href={link.href} 
-              class:list={['nav-link', { 'active': link.href === currentPath || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
+            <a
+              href={link.href}
+              class:list={['nav-link', {
+                'active': link.href === currentPath ||
+                          (link.href !== '/' && currentPath.startsWith(link.href))
+              }]}
             >
               {link.label}
               <span class="underline-hover"></span>
@@ -45,389 +60,403 @@ const navLinks = [
     </nav>
 
     <!-- Hamburger Toggle (Mobile/Tablet Only) -->
-    <button id="hamburger-btn" class="hamburger-btn glass-btn" aria-label="Open menu" aria-expanded="false">
+    <button
+      id="hamburger-btn"
+      class="hamburger-btn glass-btn"
+      aria-label="Open menu"
+      aria-expanded="false"
+      aria-controls="mobile-drawer"
+    >
       <span class="line line-1"></span>
       <span class="line line-2"></span>
       <span class="line line-3"></span>
     </button>
-  </div>
 
-  <!-- Mobile Morphing Navigation Drawer & Backdrop -->
-  <div class="mobile-backdrop" id="mobile-backdrop" aria-hidden="true"></div>
-  <nav class="mobile-drawer" id="mobile-drawer" aria-label="Mobile menu" aria-hidden="true">
-    <div class="mobile-drawer-header">
-      <button id="close-drawer-btn" class="close-drawer-btn glass-btn" aria-label="Close menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-    <ul class="mobile-nav-list">
-      {navLinks.map((link) => (
-        <li>
-          <a 
-            href={link.href} 
-            class:list={['mobile-nav-link', { 'active': link.href === currentPath || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
-          >
-            {link.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
+  </div>
 </header>
 
-<style>
-  /* === HEADER CONTAINER STYLING === */
+<!-- ═══════════════════════════════════════════════════════════════
+     MOBILE OVERLAY — SENGAJA DI LUAR <header>.
+     
+     WHY THIS WORKS:
+     Kedua elemen ini sekarang hidup di dalam <body> langsung
+     (atau wrapper .relative.z-10 di BaseLayout), bukan di dalam
+     elemen yang punya backdrop-filter. Tidak ada lagi containing
+     block palsu — position: fixed kembali mengacu ke viewport.
+     ═══════════════════════════════════════════════════════════════ -->
+
+<!-- Backdrop (dimmer + blur layer) -->
+<div
+  class="mobile-backdrop"
+  id="mobile-backdrop"
+  aria-hidden="true"
+></div>
+
+<!-- Drawer Navigation -->
+<nav
+  class="mobile-drawer"
+  id="mobile-drawer"
+  aria-label="Mobile menu"
+  aria-hidden="true"
+>
+  <!-- Links Only — No redundant internal header -->
+  <ul class="mobile-nav-list">
+    {navLinks.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class:list={['mobile-nav-link', {
+            'active': link.href === currentPath ||
+                      (link.href !== '/' && currentPath.startsWith(link.href))
+          }]}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style is:global>
+  /* ═══════════════════════════════════════════════════════════════
+   * HEADER NAVIGATION
+   * Desktop (>= 1024px): Horizontal nav
+   * Mobile/Tablet (< 1024px): Hamburger + fullscreen drawer
+   * ═══════════════════════════════════════════════════════════════ */
+
+  :root {
+    --header-height: 80px;
+    --header-height-mobile: 72px;
+    --nav-item-padding: 0.75rem 1rem;
+    --nav-item-font-size: 1rem;
+    --nav-active-color: hsl(210, 100%, 60%);
+    --nav-hover-color: hsl(210, 100%, 70%);
+  }
+
+  /* ── Header bar ── */
   .header-nav {
     position: fixed;
     top: 0;
     left: 0;
+    right: 0;
     width: 100%;
-    z-index: 80; /* Lower than drawer backdrop */
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur-glass-heavy);
-    -webkit-backdrop-filter: var(--blur-glass-heavy);
-    border-bottom: 1px solid var(--glass-border);
-    transition: box-shadow 0.3s ease;
-  }
-
-  .header-nav.scrolled {
-    box-shadow: var(--shadow-glass);
+    height: var(--header-height);
+    background: linear-gradient(
+      180deg,
+      rgba(5, 20, 40, 0.8) 0%,
+      rgba(5, 20, 40, 0.5) 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 998;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* NOTE: backdrop-filter di sini sudah aman karena .mobile-drawer
+       dan .mobile-backdrop bukan lagi child dari elemen ini. */
   }
 
   .header-container {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    height: 60px;
-    padding: 0 var(--gutter);
+    justify-content: space-between; /* Push nav to the right */
+    padding: 0 1.5rem;
+    height: 100%;
+    max-width: 100%;
   }
 
-  @media(min-width: 768px) {
-    .header-container { height: 72px; }
-  }
-
-  /* === LOGO === */
+  /* ── Logo ── */
   .header-logo-group {
     display: flex;
     align-items: center;
-    gap: 12px;
-    color: inherit;
+    gap: 1rem;
     text-decoration: none;
-    z-index: 105;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    transition: opacity 0.3s ease;
   }
 
-  .header-logo-img { height: 36px; width: auto; border-radius: 4px; object-fit: contain; }
-  .header-logo-text-group { display: flex; flex-direction: column; justify-content: center; line-height: 1; }
-  .header-logo-text { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; letter-spacing: 0.2em; color: rgba(255, 255, 255, 0.95); margin: 0; padding: 0; }
-  .header-logo-sub { font-family: var(--font-body); font-size: 0.65rem; opacity: 0.6; margin-top: 4px; letter-spacing: 0.05em; }
+  .header-logo-group:hover { opacity: 0.8; }
 
-  @media(min-width: 768px) {
-    .header-logo-text { font-size: 1.3rem; }
-    .header-logo-img { height: 42px; }
-  }
-  @media(max-width: 480px) {
-    .header-logo-text-group { display: none; }
+  .header-logo-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 8px;
   }
 
-  /* === DESKTOP BASELINE === */
-  .mobile-backdrop, .mobile-drawer, .hamburger-btn { 
-    display: none; 
-  }
-
-  .desktop-nav {
+  .header-logo-text-group {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 2rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .header-logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #fff;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .header-logo-sub {
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Desktop nav ── */
+  .desktop-nav {
+    display: none;
+    flex: 0; /* No grow */
+    margin: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .desktop-nav { display: flex; }
   }
 
   .nav-list {
     display: flex;
-    align-items: center;
+    gap: 0;
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 2rem;
-    flex-wrap: nowrap;
   }
 
   .nav-link {
-    font-family: var(--font-display);
-    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    padding: var(--nav-item-padding);
+    font-size: var(--nav-item-font-size);
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
-    transition: color 0.3s ease;
     position: relative;
-    padding: 0.5rem 0;
-    display: block;
     white-space: nowrap;
-    letter-spacing: 0.05em;
+    transition: color 0.3s ease, opacity 0.3s ease;
   }
 
-  .nav-link:hover, .nav-link.active {
-    color: white;
-  }
-
-  .nav-link.active {
-    font-weight: 600;
-  }
+  .nav-link:hover        { color: var(--nav-hover-color); }
+  .nav-link.active       { color: var(--nav-active-color); }
 
   .underline-hover {
     position: absolute;
-    bottom: -2px;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 2px;
-    background: #38bdf8;
+    background: var(--nav-active-color);
+    opacity: 0;
     transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
-    border-radius: 2px;
+    transform-origin: left;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   .nav-link:hover .underline-hover,
   .nav-link.active .underline-hover {
+    opacity: 1;
     transform: scaleX(1);
-    transform-origin: left;
   }
 
-  /* === MOBILE/TABLET OVERRIDE (Bifurcated Structure) === */
+  /* ── Hamburger ── */
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: auto; /* Push to right on mobile/tablet */
+  }
+
+  .hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  @media (min-width: 1024px) {
+    .hamburger-btn { display: none; }
+  }
+
+  .line {
+    width: 20px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 1px;
+    transition: all 0.3s ease;
+  }
+
+  .hamburger-btn.active .line-1 { transform: translateY(8px)  rotate(45deg); }
+  .hamburger-btn.active .line-2 { opacity: 0; }
+  .hamburger-btn.active .line-3 { transform: translateY(-8px) rotate(-45deg); }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * MOBILE OVERLAY — Backdrop + Drawer
+   *
+   * CRITICAL: Kedua aturan ini menggunakan position: fixed dengan
+   * acuan VIEWPORT (bukan parent), karena elemen-elemen ini sudah
+   * berada di luar <header> yang punya backdrop-filter.
+   * ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Backdrop ── */
+  .mobile-backdrop {
+    display: none;                     /* hidden on desktop */
+    position: fixed;
+    inset: 0;                          /* top/right/bottom/left: 0 */
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 997;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobile-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   @media (max-width: 1023px) {
-    .desktop-nav { 
-      display: none; 
-    }
+    .mobile-backdrop { display: block; }
+  }
 
-    /* Hamburger Button */
-    .hamburger-btn {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      cursor: pointer;
-      width: 42px;
-      height: 42px;
-      padding: 0;
-      position: relative;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-    }
+  /* ── Drawer ── */
+  .mobile-drawer {
+    display: none;                     /* hidden on desktop by default */
+    position: fixed;
+    top: var(--header-height-mobile);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: calc(100dvh - var(--header-height-mobile));
+    overflow-y: auto;
+    background: linear-gradient(
+      180deg,
+      rgba(5, 20, 47, 0.72) 0%,
+      rgba(10, 30, 60, 0.6) 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(45px) saturate(180%);
+    -webkit-backdrop-filter: blur(45px) saturate(180%);
+    z-index: 999;
+    /* Drawer tertutup — sembunyikan dengan visibility + opacity
+       agar tidak mengganggu pointer events saat tidak aktif */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                visibility 0s linear 0.4s;
+  }
 
-    .hamburger-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(56, 189, 248, 0.5);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4), inset 0 0 10px rgba(56, 189, 248, 0.1);
-    }
+  .mobile-drawer.active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                visibility 0s linear 0s;
+  }
 
-    .line {
-      position: absolute;
-      height: 2px;
-      width: 20px;
-      background: white;
-      border-radius: 2px;
-    }
-    .line-1 { top: 12px; }
-    .line-2 { top: 19px; }
-    .line-3 { top: 26px; }
+  @media (max-width: 1023px) {
+    /* Pastikan drawer bisa di-toggle di breakpoint mobile */
+    .mobile-drawer { display: block; }
+  }
 
-    /* MOBILE BACKDROP - PENGGELAP LAYAR */
-    .mobile-backdrop {
-      display: block;
-      position: fixed;
-      inset: 0;
-      z-index: 90 !important;
-      background-color: rgba(0, 0, 0, 0.75) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-    
-    .mobile-backdrop.is-open {
-      opacity: 1;
-      pointer-events: auto;
-    }
+  /* ── Drawer inner ── */
+  .mobile-nav-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 1.5rem 0; /* Add some padding since header is gone */
+  }
 
-    /* MOBILE DRAWER - MENU UTAMA (MORPHING OVAL KE KOTAK) */
-    .mobile-drawer {
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 70vw;
-      max-width: 350px; /* FIX: Syntax Error diperbaiki */
-      z-index: 100 !important;
-      
-      /* BACKGROUND ABSOLUT (Sangat Gelap & Blur Ekstrim) */
-      background-color: rgba(6, 15, 26, 0.95) !important; 
-      backdrop-filter: blur(40px) saturate(150%) !important;
-      -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
-      
-      border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-      box-shadow: -15px 0 50px rgba(0, 0, 0, 0.7) !important;
-      padding: 1.5rem;
-      box-sizing: border-box;
+  .mobile-nav-link {
+    display: block;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+  }
 
-      /* ANIMASI MORPHING STATE (TERTUTUP) */
-      transform: translateX(120%) scale(0.8);
-      border-radius: 50% 0 0 50%;
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
-                  border-radius 0.6s ease, 
-                  opacity 0.4s ease;
-    }
+  .mobile-nav-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--nav-hover-color);
+  }
 
-    /* ANIMASI MORPHING STATE (TERBUKA) */
-    .mobile-drawer.is-open {
-      transform: translateX(0) scale(1);
-      border-radius: 0px;
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* Drawer Header & Close Button */
-    .mobile-drawer-header {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 2.5rem;
-    }
-
-    .close-drawer-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      width: 42px;
-      height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      transition: all 0.3s ease;
-    }
-
-    .close-drawer-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(56, 189, 248, 0.5);
-    }
-
-    /* Drawer Links */
-    .mobile-nav-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .mobile-nav-link {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-      transition: color 0.3s ease;
-      display: block;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .mobile-nav-link.active, .mobile-nav-link:hover {
-      color: white;
-      font-weight: 600;
-      border-bottom-color: rgba(56, 189, 248, 0.5);
-    }
+  .mobile-nav-link.active {
+    background: hsla(210, 100%, 60%, 0.1);
+    color: var(--nav-active-color);
+    font-weight: 600;
+    border-left: 3px solid var(--nav-active-color);
+    padding-left: calc(1.5rem - 3px);
   }
 </style>
 
-<script is:inline>
-  (function() {
-    function setupHeader() {
-      var header = document.getElementById('main-header');
-      var hamburgerBtn = document.getElementById('hamburger-btn');
-      var backdrop = document.getElementById('mobile-backdrop');
-      var drawer = document.getElementById('mobile-drawer');
-      var closeBtn = document.getElementById('close-drawer-btn');
-      
-      // Basic Scroll Shadow Observer
-      var ticking = false;
-      function handleScroll() {
-        if (!ticking && header) {
-          window.requestAnimationFrame(function() {
-            if (window.scrollY > 20) header.classList.add('scrolled');
-            else header.classList.remove('scrolled');
-            ticking = false;
-          });
-          ticking = true;
-        }
-      }
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      if (header && window.scrollY > 20) header.classList.add('scrolled');
+<script>
+  /**
+   * Mobile drawer controller.
+   * Mendukung Astro View Transitions — cleanup + re-init pada setiap swap.
+   */
+  function initMobileNav() {
+    const hamburgerBtn = document.getElementById('hamburger-btn') as HTMLElement | null;
+    const mobileDrawer = document.getElementById('mobile-drawer') as HTMLElement | null;
+    const mobileBackdrop = document.getElementById('mobile-backdrop') as HTMLElement | null;
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-      // Initialize UI Bindings (for devices matching media query <= 1023px)
-      if(!hamburgerBtn || !backdrop || !drawer || !closeBtn) return;
+    if (!hamburgerBtn || !mobileDrawer) return;
 
-      function openMenu() {
-        backdrop.classList.add('is-open');
-        drawer.classList.add('is-open');
-        backdrop.setAttribute('aria-hidden', 'false');
-        drawer.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-      }
-
-      function closeMenu() {
-        backdrop.classList.remove('is-open');
-        drawer.classList.remove('is-open');
-        backdrop.setAttribute('aria-hidden', 'true');
-        drawer.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-      }
-
-      // 1. Destroy old bindings from Astro's View Transitions to prevent double triggers
-      var newHamburger = hamburgerBtn.cloneNode(true);
-      if(hamburgerBtn.parentNode) hamburgerBtn.parentNode.replaceChild(newHamburger, hamburgerBtn);
-      
-      var newCloseBtn = closeBtn.cloneNode(true);
-      if(closeBtn.parentNode) closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-
-      var newBackdrop = backdrop.cloneNode(true);
-      if(backdrop.parentNode) backdrop.parentNode.replaceChild(newBackdrop, backdrop);
-
-      // 2. Attach clean handlers
-      newHamburger.addEventListener('click', openMenu);
-      newCloseBtn.addEventListener('click', closeMenu);
-      newBackdrop.addEventListener('click', closeMenu);
-
-      // 3. Ensure clicking any nav link explicitly closes the Morphing Menu
-      var navLinks = document.querySelectorAll('.mobile-nav-link');
-      navLinks.forEach(function(link) {
-        // Deep clone links to overwrite old event handlers
-        var newLink = link.cloneNode(true);
-        if(link.parentNode) link.parentNode.replaceChild(newLink, link);
-        newLink.addEventListener('click', closeMenu);
-      });
+    function openDrawer() {
+      // We know these exist because of the check above
+      hamburgerBtn!.classList.add('active');
+      hamburgerBtn!.setAttribute('aria-expanded', 'true');
+      mobileDrawer!.classList.add('active');
+      mobileDrawer!.setAttribute('aria-hidden', 'false');
+      mobileBackdrop?.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupHeader);
-    } else {
-      setupHeader();
+    function closeDrawer() {
+      if (!hamburgerBtn || !mobileDrawer) return;
+      hamburgerBtn.classList.remove('active');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      mobileDrawer.classList.remove('active');
+      mobileDrawer.setAttribute('aria-hidden', 'true');
+      mobileBackdrop?.classList.remove('active');
+      document.body.style.overflow = '';
     }
-    
-    // Astro transition support
-    document.addEventListener('astro:after-swap', setupHeader);
-  })();
+
+    hamburgerBtn.addEventListener('click', () => {
+      const isOpen = hamburgerBtn.classList.contains('active');
+      if (isOpen) closeDrawer();
+      else openDrawer();
+    });
+
+    mobileBackdrop?.addEventListener('click', closeDrawer);
+    mobileNavLinks.forEach((link) => {
+      link.addEventListener('click', closeDrawer);
+    });
+
+    // Cleanup for Astro View Transitions
+    document.addEventListener('astro:before-swap', closeDrawer, { once: true });
+  }
+
+  // Init on first load
+  document.addEventListener('DOMContentLoaded', initMobileNav);
+  // Re-init setelah setiap page swap (View Transitions)
+  document.addEventListener('astro:after-swap', initMobileNav);
 </script>

@@ -10,6 +10,7 @@ import { ClientRouter } from 'astro:transitions';
 import CloudBackground from '../components/canvas/CloudBackground.astro';
 import WaterRipple from '../components/canvas/WaterRipple.astro';
 import Preloader from '../components/ui/Preloader.astro';
+import Header from '../components/layout/Header.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -283,8 +284,11 @@ const fullTitle = title;
     <!-- WebGL Water Ripple Canvas — fixed, z-0, pointer-events: none -->
     <WaterRipple />
 
-    <!-- Main Content — z-10 agar di atas canvas -->
-    <div class="relative z-10">
+    <!-- Global Header — z-99999 -->
+    <Header />
+
+    <!-- Main Content — z-1 agar di bawah header -->
+    <div class="relative z-1" style="position: relative; z-index: 1;">
       <slot />
     </div>
 
