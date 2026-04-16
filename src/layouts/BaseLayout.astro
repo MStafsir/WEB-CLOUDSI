@@ -36,17 +36,11 @@ const fullTitle = title;
 <!doctype html>
 <html lang="id" dir="ltr">
   <head>
-    <!-- ============================================
-         META — Charset, Viewport, Theme
-         ============================================ -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="hsl(210, 60%, 6%)" />
     <meta name="color-scheme" content="dark" />
 
-    <!-- ============================================
-         SEO — Title, Description, Canonical
-         ============================================ -->
     <meta
       name="google-site-verification"
       content="jebM0Lyzp4SddAgW4yCHHoaCImLBF-XReSOQlo5zKaY"
@@ -60,9 +54,6 @@ const fullTitle = title;
     <meta name="keywords" content={keywords} />
     <link rel="canonical" href={canonicalUrl.href} />
 
-    <!-- ============================================
-         OPEN GRAPH — Social sharing meta
-         ============================================ -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -74,24 +65,10 @@ const fullTitle = title;
     <meta property="og:site_name" content="Cloudsi" />
     <meta property="og:locale" content="id_ID" />
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={fullTitle} />
-    <meta name="twitter:description" content={description} />
-    <meta
-      name="twitter:image"
-      content={new URL(ogImage, Astro.site ?? "https://cloudsi.vercel.app")}
-    />
-
-    <!-- ============================================
-         PERFORMANCE DETECTOR — Inline, runs FIRST
-         Detects device capability and sets CSS variables
-         ============================================ -->
     <script is:inline>
       (function () {
         "use strict";
 
-        // Check cache first
         var cached = sessionStorage.getItem("cloudsi_perf_tier");
         if (cached) {
           applyTier(cached);
@@ -100,17 +77,15 @@ const fullTitle = title;
 
         var score = 0;
 
-        // 1. Device Memory
         var memory = navigator.deviceMemory;
         if (memory) {
           if (memory >= 8) score += 3;
           else if (memory >= 4) score += 2;
           else if (memory >= 2) score += 1;
         } else {
-          score += 2; // Assume mid-range if API unavailable
+          score += 2;
         }
 
-        // 2. CPU Cores
         var cores = navigator.hardwareConcurrency;
         if (cores) {
           if (cores >= 8) score += 3;
@@ -120,26 +95,22 @@ const fullTitle = title;
           score += 1;
         }
 
-        // 3. Mobile penalty
         var screenWidth = window.screen
           ? window.screen.width
           : window.innerWidth;
         var isMobile = screenWidth < 768 || "ontouchstart" in window;
         if (isMobile) score -= 1;
 
-        // Desktop Mode on mobile: screen fisik kecil + multitouch = HP pura-pura desktop
-        // Penalti ekstra agar tetap dapat tier LOW/BATTERY_SAVER
         var isDesktopModeOnMobile =
-          (window.screen && window.screen.width < 900) &&
-          (navigator.maxTouchPoints > 1) &&
-          !(screenWidth < 768); // innerWidth sudah besar karena desktop mode
+          window.screen &&
+          window.screen.width < 900 &&
+          navigator.maxTouchPoints > 1 &&
+          !(screenWidth < 768);
         if (isDesktopModeOnMobile) score -= 3;
 
-        // High DPR on mobile = more GPU work
         var dpr = window.devicePixelRatio || 1;
         if (isMobile && dpr >= 3) score -= 1;
 
-        // 4. GPU hint
         try {
           var tc = document.createElement("canvas");
           var tgl = tc.getContext("webgl");
@@ -154,14 +125,12 @@ const fullTitle = title;
           }
         } catch (e) {}
 
-        // Determine tier
         var tier;
         if (score >= 6) tier = "ULTRA";
         else if (score >= 4) tier = "NORMAL";
         else if (score >= 2) tier = "LOW";
         else tier = "BATTERY_SAVER";
 
-        // Cache
         sessionStorage.setItem("cloudsi_perf_tier", tier);
         applyTier(tier);
 
@@ -186,11 +155,6 @@ const fullTitle = title;
       })();
     </script>
 
-    <!-- ============================================
-         ACTIVE BATTERY MONITOR — Real-time battery watch
-         If battery < 20% and not charging:
-         Forces BATTERY_SAVER, kills WebGL, shows fallbacks
-         ============================================ -->
     <script is:inline>
       (function () {
         if (typeof navigator === "undefined" || !("getBattery" in navigator))
@@ -205,10 +169,8 @@ const fullTitle = title;
                   "[Cloudsi] Battery below 20% — activating BATTERY_SAVER mode.",
                 );
 
-                // Force tier to BATTERY_SAVER
                 sessionStorage.setItem("cloudsi_perf_tier", "BATTERY_SAVER");
 
-                // Apply BATTERY_SAVER CSS variables
                 var root = document.documentElement;
                 root.dataset.perfTier = "battery_saver";
                 root.style.setProperty("--blur-glass", "blur(0px)");
@@ -216,7 +178,6 @@ const fullTitle = title;
                 root.style.setProperty("--perf-transition-duration", "0ms");
                 root.style.setProperty("--perf-animation-enabled", "0");
 
-                // Kill WebGL via global singletons
                 if (
                   window.CloudSI_Water &&
                   typeof window.CloudSI_Water.cleanup === "function"
@@ -233,8 +194,6 @@ const fullTitle = title;
                     window.CloudSI_Cloud.cleanup();
                   } catch (e) {}
                 }
-
-                // Hide all canvases, show CSS fallbacks
                 var canvases = document.querySelectorAll(
                   "#water-canvas, #cloud-canvas",
                 );
@@ -248,10 +207,7 @@ const fullTitle = title;
               }
             }
 
-            // Check immediately
             checkBattery();
-
-            // Listen for real-time changes
             battery.addEventListener("levelchange", checkBattery);
             battery.addEventListener("chargingchange", checkBattery);
           })
@@ -259,9 +215,6 @@ const fullTitle = title;
       })();
     </script>
 
-    <!-- ============================================
-         IMPORT MAP — OGL CDN
-         ============================================ -->
     <script type="importmap">
       {
         "imports": {
@@ -270,11 +223,6 @@ const fullTitle = title;
       }
     </script>
 
-    <!-- ============================================
-         FONTS — Preconnect + Preload Google Fonts
-         Cormorant Garamond: 300, 400, 600
-         Plus Jakarta Sans: 300–700
-         ============================================ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -295,38 +243,19 @@ const fullTitle = title;
       />
     </noscript>
 
-    <!-- ============================================
-         STYLES — Design Tokens + Global CSS
-         ============================================ -->
-
-    <!-- Video tidak di-preload karena browser tidak support preload as=video -->
-
-    <!-- ============================================
-         LOGO PRELOAD — Single authoritative request, browser dedup
-         ============================================ -->
     <link rel="preload" as="image" href="/logo-angkatan-25.webp" />
 
-    <!-- ============================================
-         FAVICON
-         ============================================ -->
     <link rel="icon" type="image/webp" href="/logo-angkatan-25.webp" />
     <link rel="apple-touch-icon" href="/logo-angkatan-25.webp" />
-
-    <!-- ============================================
-         ============================================ -->
   </head>
 
   <body>
-    <!-- Preloader — Muat semua aset kritis sebelum website ditampilkan -->
     <Preloader />
 
-    <!-- Global Looping Background Canvas -->
     <CloudBackground />
 
-    <!-- Global Header — z-99999 -->
     <Header />
 
-    <!-- Main Content — isolated agar sticky cards tidak bocor menembus header/drawer -->
     <div
       class="main-content-wrapper"
       style="position: relative; z-index: 1; isolation: isolate;"
@@ -334,11 +263,6 @@ const fullTitle = title;
       <slot />
     </div>
 
-    <!-- ============================================
-         LENIS SMOOTH SCROLL — Tier-aware initialization
-         ULTRA/NORMAL: Full Lenis with GSAP integration
-         LOW/BATTERY_SAVER: Native scroll (skip Lenis)
-         ============================================ -->
     <script is:inline>
       (function () {
         function initLenis() {
@@ -348,7 +272,6 @@ const fullTitle = title;
           var isMobile = window.innerWidth < 768;
           if (prefersReduced || isMobile) return;
 
-          // Performance tier check
           var tier = sessionStorage.getItem("cloudsi_perf_tier") || "NORMAL";
           var isMobileHP =
             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -356,8 +279,6 @@ const fullTitle = title;
             ) || window.innerWidth <= 768;
 
           if (isMobileHP || tier === "LOW" || tier === "BATTERY_SAVER") {
-            // DETEKSI HP: Matikan Lenis 100%. Kembalikan kontrol scroll murni ke Hardware (Hardware Compositor).
-            // Ini akan menghilangkan nge-lag sepenuhnya saat scroll di HP.
             return;
           }
 
@@ -392,7 +313,6 @@ const fullTitle = title;
 
               gsap.registerPlugin(ScrollTrigger);
 
-              // NORMAL tier: slightly reduced smoothness for performance
               var duration = tier === "ULTRA" ? 1.4 : 1.1;
               var wheelMult = tier === "ULTRA" ? 1.2 : 1.0;
 
@@ -407,8 +327,6 @@ const fullTitle = title;
 
               lenis.on("scroll", ScrollTrigger.update);
 
-              // ===== IDLE PAUSE/RESUME =====
-              // Only run lenis.raf when user is actively scrolling
               var lenisActive = false;
               var lenisIdleTimer = null;
               var LENIS_IDLE_MS = 150;
@@ -422,7 +340,6 @@ const fullTitle = title;
               }
 
               lenis.on("scroll", onLenisScroll);
-              // Activate on first user interaction
               window.addEventListener(
                 "scroll",
                 function () {
@@ -480,23 +397,15 @@ const fullTitle = title;
       })();
     </script>
 
-    <!-- ============================================
-         MOBILE DRAWER PORTAL
-         Memindahkan mobile-drawer & mobile-backdrop ke akhir <body>
-         agar selalu berada di puncak GPU compositor layer list,
-         mengatasi bug z-index dengan position:sticky cards.
-         ============================================ -->
     <script is:inline>
       (function () {
         function portalDrawer() {
           var drawer = document.getElementById("mobile-drawer");
           var backdrop = document.getElementById("mobile-backdrop");
-          // Selalu pindahkan ke akhir body agar jadi compositor layer terakhir (tertinggi)
-          // Ini mengatasi bug z-index dengan position:sticky cards di galeri
           if (backdrop) document.body.appendChild(backdrop);
           if (drawer) document.body.appendChild(drawer);
         }
-        // Jalankan secepatnya — tidak tunggu DOMContentLoaded penuh
+
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", portalDrawer);
         } else {
@@ -506,26 +415,18 @@ const fullTitle = title;
     </script>
 
     <script>
-      // Paksa browser untuk tidak mengingat posisi scroll
       if ("scrollRestoration" in history) {
         history.scrollRestoration = "manual";
       }
 
-      // Tambahan cadangan: paksa scroll ke atas saat halaman dimuat
       window.scrollTo(0, 0);
     </script>
-    <!-- ============================================
-         GLOBAL FADE-IN OBSERVER
-         Adds .is-visible to .fade-in elements when they enter viewport
-         Tier-aware: BATTERY_SAVER shows instantly
-         ============================================ -->
     <script is:inline>
       (function () {
         function initFadeInObserver() {
           var fadeEls = document.querySelectorAll(".fade-in");
           if (!fadeEls.length) return;
 
-          // BATTERY_SAVER: skip animation, show instantly
           var tier = sessionStorage.getItem("cloudsi_perf_tier") || "NORMAL";
           if (tier === "BATTERY_SAVER") {
             for (var i = 0; i < fadeEls.length; i++) {
@@ -558,21 +459,6 @@ const fullTitle = title;
       })();
     </script>
 
-    <!-- ============================================
-         GLOBAL CONTENT SAFETY NET (is:inline = KEBAL VITE)
-         
-         MENGAPA INI DIPERLUKAN:
-         Komponen seperti Hero.astro, StatsSection.astro, MemberPreview.astro
-         menggunakan <script> (bukan is:inline). Astro mengubah ini menjadi
-         <script type="module"> yang DIPROSES oleh Vite.
-         
-         Jika Vite 504 (cache corruption), MODULE SCRIPT SELURUHNYA gagal load.
-         Akibatnya, kode showAll() fallback di dalam catch block TIDAK PERNAH
-         BISA JALAN — karena file .js nya sendiri yang gagal di-serve.
-         
-         Solusi: inline script ini KEBAL Vite dan akan paksa tampilkan
-         semua konten setelah 3 detik jika masih tersembunyi.
-         ============================================ -->
     <script is:inline>
       setTimeout(function () {
         var selectors = [
@@ -627,14 +513,9 @@ const fullTitle = title;
       }, 3000);
     </script>
 
-    <!-- ============================================
-         NAVIGATION SAFETY NET — Run on every page swap
-         Ensures content is visible after View Transition
-         ============================================ -->
     <script is:inline>
       (function () {
         document.addEventListener("astro:after-swap", function () {
-          // Short delay to let transition complete
           setTimeout(function () {
             var selectors = [
               ".fade-in",
@@ -650,7 +531,6 @@ const fullTitle = title;
               "[data-stat-target]",
             ];
             var allEls = document.querySelectorAll(selectors.join(","));
-            // TWO-PASS: Read all, then write all (avoid forced sync reflow)
             var toFix = [];
             for (var i = 0; i < allEls.length; i++) {
               var el = allEls[i];
@@ -659,7 +539,6 @@ const fullTitle = title;
                 toFix.push(el);
               }
             }
-            // Write pass
             for (var j = 0; j < toFix.length; j++) {
               toFix[j].style.opacity = "1";
               toFix[j].style.transform = "none";
@@ -672,10 +551,6 @@ const fullTitle = title;
       })();
     </script>
 
-    <!-- ============================================
-         GLOBAL LIGHTWEIGHT CSS ANIMATION OBSERVER
-         Menggantikan GSAP untuk efek fade-up elemen
-         ============================================ -->
     <style is:global>
       .css-fade-up,
       [data-tentang-anim],
@@ -688,7 +563,6 @@ const fullTitle = title;
         will-change: opacity, transform;
       }
 
-      /* Utilities untuk cascade delay tanpa JS */
       .delay-100 {
         transition-delay: 100ms;
       }

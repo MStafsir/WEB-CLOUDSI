@@ -576,3 +576,26 @@ footer {
 .fade-in.is-visible {
   will-change: auto;
 }
+
+.footer-bottom {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-bottom p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
+.heart {
+  color: #ff4d4d;
+  /* Merah hati */
+  display: inline-block;
+  margin: 0 4px;
+}

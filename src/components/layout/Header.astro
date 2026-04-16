@@ -11,55 +11,55 @@
  */
 const currentPath = Astro.url.pathname;
 const navLinks = [
-  { href: '/', label: 'Beranda' },
-  { href: '/tentang', label: 'Tentang' },
-  { href: '/anggota', label: 'Anggota' },
-  { href: '/galeri', label: 'Galeri' },
-  { href: '/acara', label: 'Acara' },
-  { href: '/kontak', label: 'Kontak' },
-  { href: '/lagu', label: 'Lagu Angkatan' },
+  { href: "/", label: "Beranda" },
+  { href: "/tentang", label: "Tentang" },
+  { href: "/anggota", label: "Anggota" },
+  { href: "/galeri", label: "Galeri" },
+  { href: "/acara", label: "Acara" },
+  { href: "/kontak", label: "Kontak" },
+  { href: "/lagu", label: "Lagu Angkatan" },
 ];
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════
-     HEADER — Hanya berisi logo + desktop nav + hamburger button.
-     Tidak ada lagi .mobile-drawer / .mobile-backdrop di sini.
-     Dengan begitu backdrop-filter pada .header-nav tidak lagi
-     membentuk containing block yang menjebak elemen fixed di bawah.
-     ═══════════════════════════════════════════════════════════════ -->
 <header class="header-nav" id="main-header">
   <div class="header-container">
-
-    <!-- Logo Typography -->
     <a href="/" class="header-logo-group">
-      <img src="/logo-angkatan-25.webp" alt="Logo Cloudsi" class="header-logo-img" />
+      <img
+        src="/logo-angkatan-25.webp"
+        alt="Logo Cloudsi"
+        class="header-logo-img"
+      />
       <div class="header-logo-text-group">
         <h1 class="header-logo-text">CLOUDSI</h1>
         <span class="header-logo-sub">Sistem Informasi UNTAN</span>
       </div>
     </a>
 
-    <!-- Desktop Navigation -->
     <nav class="desktop-nav" aria-label="Desktop menu">
       <ul class="nav-list">
-        {navLinks.map((link) => (
-          <li>
-            <a
-              href={link.href}
-              class:list={['nav-link', {
-                'active': link.href === currentPath ||
-                          (link.href !== '/' && currentPath.startsWith(link.href))
-              }]}
-            >
-              {link.label}
-              <span class="underline-hover"></span>
-            </a>
-          </li>
-        ))}
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  "nav-link",
+                  {
+                    active:
+                      link.href === currentPath ||
+                      (link.href !== "/" && currentPath.startsWith(link.href)),
+                  },
+                ]}
+              >
+                {link.label}
+                <span class="underline-hover" />
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
 
-    <!-- Hamburger Toggle (Mobile/Tablet Only) -->
     <button
       id="hamburger-btn"
       class="hamburger-btn glass-btn"
@@ -71,59 +71,41 @@ const navLinks = [
       <span class="line line-2"></span>
       <span class="line line-3"></span>
     </button>
-
   </div>
 </header>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MOBILE OVERLAY — SENGAJA DI LUAR <header>.
-     
-     WHY THIS WORKS:
-     Kedua elemen ini sekarang hidup di dalam <body> langsung
-     (atau wrapper .relative.z-10 di BaseLayout), bukan di dalam
-     elemen yang punya backdrop-filter. Tidak ada lagi containing
-     block palsu — position: fixed kembali mengacu ke viewport.
-     ═══════════════════════════════════════════════════════════════ -->
+<div class="mobile-backdrop" id="mobile-backdrop" aria-hidden="true"></div>
 
-<!-- Backdrop (dimmer + blur layer) -->
-<div
-  class="mobile-backdrop"
-  id="mobile-backdrop"
-  aria-hidden="true"
-></div>
-
-<!-- Drawer Navigation -->
 <nav
   class="mobile-drawer"
   id="mobile-drawer"
   aria-label="Mobile menu"
   aria-hidden="true"
 >
-  <!-- Links Only — No redundant internal header -->
   <ul class="mobile-nav-list">
-    {navLinks.map((link) => (
-      <li>
-        <a
-          href={link.href}
-          class:list={['mobile-nav-link', {
-            'active': link.href === currentPath ||
-                      (link.href !== '/' && currentPath.startsWith(link.href))
-          }]}
-        >
-          {link.label}
-        </a>
-      </li>
-    ))}
+    {
+      navLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class:list={[
+              "mobile-nav-link",
+              {
+                active:
+                  link.href === currentPath ||
+                  (link.href !== "/" && currentPath.startsWith(link.href)),
+              },
+            ]}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))
+    }
   </ul>
 </nav>
 
 <style is:global>
-  /* ═══════════════════════════════════════════════════════════════
-   * HEADER NAVIGATION
-   * Desktop (>= 1024px): Horizontal nav
-   * Mobile/Tablet (< 1024px): Hamburger + fullscreen drawer
-   * ═══════════════════════════════════════════════════════════════ */
-
   :root {
     --header-height: 80px;
     --header-height-mobile: 72px;
@@ -133,7 +115,6 @@ const navLinks = [
     --nav-hover-color: hsl(210, 100%, 70%);
   }
 
-  /* ── Header bar ── */
   .header-nav {
     position: fixed;
     top: 0;
@@ -150,14 +131,12 @@ const navLinks = [
     z-index: 998;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    /* NOTE: backdrop-filter di sini sudah aman karena .mobile-drawer
-       dan .mobile-backdrop bukan lagi child dari elemen ini. */
   }
 
   .header-container {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Push nav to the right */
+    justify-content: space-between;
     padding: 0 1.5rem;
     height: 100%;
     max-width: 100%;
@@ -174,7 +153,9 @@ const navLinks = [
     transition: opacity 0.3s ease;
   }
 
-  .header-logo-group:hover { opacity: 0.8; }
+  .header-logo-group:hover {
+    opacity: 0.8;
+  }
 
   .header-logo-img {
     width: 48px;
@@ -206,15 +187,16 @@ const navLinks = [
     letter-spacing: 0.05em;
   }
 
-  /* ── Desktop nav ── */
   .desktop-nav {
     display: none;
-    flex: 0; /* No grow */
+    flex: 0;
     margin: 0;
   }
 
   @media (min-width: 1024px) {
-    .desktop-nav { display: flex; }
+    .desktop-nav {
+      display: flex;
+    }
   }
 
   .nav-list {
@@ -235,11 +217,17 @@ const navLinks = [
     text-decoration: none;
     position: relative;
     white-space: nowrap;
-    transition: color 0.3s ease, opacity 0.3s ease;
+    transition:
+      color 0.3s ease,
+      opacity 0.3s ease;
   }
 
-  .nav-link:hover        { color: var(--nav-hover-color); }
-  .nav-link.active       { color: var(--nav-active-color); }
+  .nav-link:hover {
+    color: var(--nav-hover-color);
+  }
+  .nav-link.active {
+    color: var(--nav-active-color);
+  }
 
   .underline-hover {
     position: absolute;
@@ -251,7 +239,9 @@ const navLinks = [
     opacity: 0;
     transform: scaleX(0);
     transform-origin: left;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
   }
 
   .nav-link:hover .underline-hover,
@@ -260,7 +250,6 @@ const navLinks = [
     transform: scaleX(1);
   }
 
-  /* ── Hamburger ── */
   .hamburger-btn {
     display: flex;
     align-items: center;
@@ -275,7 +264,7 @@ const navLinks = [
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-left: auto; /* Push to right on mobile/tablet */
+    margin-left: auto;
   }
 
   .hamburger-btn:hover {
@@ -284,7 +273,9 @@ const navLinks = [
   }
 
   @media (min-width: 1024px) {
-    .hamburger-btn { display: none; }
+    .hamburger-btn {
+      display: none;
+    }
   }
 
   .line {
@@ -295,25 +286,21 @@ const navLinks = [
     transition: all 0.3s ease;
   }
 
-  .hamburger-btn.active .line-1 { transform: translateY(8px)  rotate(45deg); }
-  .hamburger-btn.active .line-2 { opacity: 0; }
-  .hamburger-btn.active .line-3 { transform: translateY(-8px) rotate(-45deg); }
+  .hamburger-btn.active .line-1 {
+    transform: translateY(8px) rotate(45deg);
+  }
+  .hamburger-btn.active .line-2 {
+    opacity: 0;
+  }
+  .hamburger-btn.active .line-3 {
+    transform: translateY(-8px) rotate(-45deg);
+  }
 
-  /* ═══════════════════════════════════════════════════════════════
-   * MOBILE OVERLAY — Backdrop + Drawer
-   *
-   * CRITICAL: Kedua aturan ini menggunakan position: fixed dengan
-   * acuan VIEWPORT (bukan parent), karena elemen-elemen ini sudah
-   * berada di luar <header> yang punya backdrop-filter.
-   * ═══════════════════════════════════════════════════════════════ */
-
-  /* ── Backdrop ── */
   .mobile-backdrop {
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    /* Backdrop blur mematikan performa HP — dihapus dari mobile */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     z-index: 9998;
@@ -328,10 +315,11 @@ const navLinks = [
   }
 
   @media (max-width: 1023px) {
-    .mobile-backdrop { display: block; }
+    .mobile-backdrop {
+      display: block;
+    }
   }
 
-  /* ── Drawer ── */
   .mobile-drawer {
     display: none;
     position: fixed;
@@ -341,21 +329,20 @@ const navLinks = [
     width: 100%;
     max-height: calc(100dvh - var(--header-height-mobile));
     overflow-y: auto;
-    background: rgba(5, 20, 47, 0.96); /* Solid background — tanpa blur di HP */
+    background: rgba(5, 20, 47, 0.96);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    /* PERFORMANCE: Hapus backdrop-filter berat di mobile drawer */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     z-index: 9999;
     visibility: hidden;
     opacity: 0;
-    transform: translateY(-12px); /* Kurangi travel distance agar lebih cepat */
-    transition: opacity 0.25s ease, 
-                transform 0.25s ease, 
-                visibility 0s linear 0.25s;
+    transform: translateY(-12px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0s linear 0.25s;
   }
 
-  /* Pada layar besar (desktop), aktifkan kembali blur effect */
   @media (min-width: 1024px) {
     .mobile-drawer {
       backdrop-filter: blur(45px) saturate(180%);
@@ -372,23 +359,24 @@ const navLinks = [
     visibility: visible;
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                visibility 0s linear 0s;
+    transition:
+      opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0s linear 0s;
   }
 
   @media (max-width: 1023px) {
-    /* Pastikan drawer bisa di-toggle di breakpoint mobile */
-    .mobile-drawer { display: block; }
+    .mobile-drawer {
+      display: block;
+    }
   }
 
-  /* ── Drawer inner ── */
   .mobile-nav-list {
     display: flex;
     flex-direction: column;
     list-style: none;
     margin: 0;
-    padding: 1.5rem 0; /* Add some padding since header is gone */
+    padding: 1.5rem 0;
   }
 
   .mobile-nav-link {
@@ -417,55 +405,53 @@ const navLinks = [
 </style>
 
 <script>
-  /**
-   * Mobile drawer controller.
-   * Mendukung Astro View Transitions — cleanup + re-init pada setiap swap.
-   */
   function initMobileNav() {
-    const hamburgerBtn = document.getElementById('hamburger-btn') as HTMLElement | null;
-    const mobileDrawer = document.getElementById('mobile-drawer') as HTMLElement | null;
-    const mobileBackdrop = document.getElementById('mobile-backdrop') as HTMLElement | null;
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    const hamburgerBtn = document.getElementById(
+      "hamburger-btn",
+    ) as HTMLElement | null;
+    const mobileDrawer = document.getElementById(
+      "mobile-drawer",
+    ) as HTMLElement | null;
+    const mobileBackdrop = document.getElementById(
+      "mobile-backdrop",
+    ) as HTMLElement | null;
+    const mobileNavLinks = document.querySelectorAll(".mobile-nav-link");
 
     if (!hamburgerBtn || !mobileDrawer) return;
 
     function openDrawer() {
-      // We know these exist because of the check above
-      hamburgerBtn!.classList.add('active');
-      hamburgerBtn!.setAttribute('aria-expanded', 'true');
-      mobileDrawer!.classList.add('active');
-      mobileDrawer!.setAttribute('aria-hidden', 'false');
-      mobileBackdrop?.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      hamburgerBtn!.classList.add("active");
+      hamburgerBtn!.setAttribute("aria-expanded", "true");
+      mobileDrawer!.classList.add("active");
+      mobileDrawer!.setAttribute("aria-hidden", "false");
+      mobileBackdrop?.classList.add("active");
+      document.body.style.overflow = "hidden";
     }
 
     function closeDrawer() {
       if (!hamburgerBtn || !mobileDrawer) return;
-      hamburgerBtn.classList.remove('active');
-      hamburgerBtn.setAttribute('aria-expanded', 'false');
-      mobileDrawer.classList.remove('active');
-      mobileDrawer.setAttribute('aria-hidden', 'true');
-      mobileBackdrop?.classList.remove('active');
-      document.body.style.overflow = '';
+      hamburgerBtn.classList.remove("active");
+      hamburgerBtn.setAttribute("aria-expanded", "false");
+      mobileDrawer.classList.remove("active");
+      mobileDrawer.setAttribute("aria-hidden", "true");
+      mobileBackdrop?.classList.remove("active");
+      document.body.style.overflow = "";
     }
 
-    hamburgerBtn.addEventListener('click', () => {
-      const isOpen = hamburgerBtn.classList.contains('active');
+    hamburgerBtn.addEventListener("click", () => {
+      const isOpen = hamburgerBtn.classList.contains("active");
       if (isOpen) closeDrawer();
       else openDrawer();
     });
 
-    mobileBackdrop?.addEventListener('click', closeDrawer);
+    mobileBackdrop?.addEventListener("click", closeDrawer);
     mobileNavLinks.forEach((link) => {
-      link.addEventListener('click', closeDrawer);
+      link.addEventListener("click", closeDrawer);
     });
 
-    // Cleanup for Astro View Transitions
-    document.addEventListener('astro:before-swap', closeDrawer, { once: true });
+    document.addEventListener("astro:before-swap", closeDrawer, { once: true });
   }
 
-  // Init on first load
-  document.addEventListener('DOMContentLoaded', initMobileNav);
-  // Re-init setelah setiap page swap (View Transitions)
-  document.addEventListener('astro:after-swap', initMobileNav);
+  document.addEventListener("DOMContentLoaded", initMobileNav);
+  document.addEventListener("astro:after-swap", initMobileNav);
 </script>
