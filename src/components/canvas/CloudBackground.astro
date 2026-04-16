@@ -407,27 +407,29 @@
 
       var overlayEl = document.getElementById("cloud-overlay");
 
-      function animate(now) {
+      // =============================================
+      // STATIC RENDER — freeze time, render-on-demand
+      // Render sekali di awal, lalu hanya re-render saat scroll.
+      // GPU idle = 0% saat tidak scroll.
+      // =============================================
+      var FROZEN_TIME = 42.0; // snapshot waktu yang menarik dari shader
+      var pendingRender = false;
+
+      function drawFrame() {
         if (isDestroyed) return;
-        rafId = requestAnimationFrame(animate);
+        pendingRender = false;
 
-        // FPS throttle — skip frame if too soon
-        if (now - lastFrameTime < fpsInterval) return;
-        lastFrameTime = now;
+        // Waktu dibekukan — awan tidak bergerak
+        gl.uniform1f(timeUnif, FROZEN_TIME);
 
-        var elapsedTime = (Date.now() - startTime) / 1000.0;
-        gl.uniform1f(timeUnif, elapsedTime);
-
-        // LERP Target Progress
-        var targetScrollProgress = Math.max(
+        // Update scroll progress instan (tidak perlu LERP karena sudah static)
+        renderScrollProgress = Math.max(
           0.0,
           Math.min(1.0, rawScrollY / docHeight),
         );
-        renderScrollProgress +=
-          (targetScrollProgress - renderScrollProgress) * 0.08;
         gl.uniform1f(scrollUnif, renderScrollProgress);
 
-        // Update overlay alpha based on progress
+        // Update overlay alpha
         if (overlayEl) {
           var overlayAlpha = 0.4 - (0.4 - 0.05) * renderScrollProgress;
           overlayEl.style.setProperty(
@@ -438,7 +440,25 @@
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       }
-      animate(0);
+
+      function requestDraw() {
+        if (pendingRender || isDestroyed) return;
+        pendingRender = true;
+        rafId = requestAnimationFrame(drawFrame);
+      }
+
+      // Render ulang saat scroll (untuk day/night transition)
+      var _origOnScroll = onScroll;
+      window.removeEventListener("scroll", onScroll);
+      function onScrollStatic() {
+        rawScrollY = window.scrollY || 0.0;
+        requestDraw();
+      }
+      window.addEventListener("scroll", onScrollStatic, { passive: true });
+      onScroll = onScrollStatic; // update ref untuk cleanup
+
+      // Render awal sekali
+      drawFrame();
 
       // =============================================
       // FULL CLEANUP — VRAM DISPOSAL + LISTENER REMOVAL
