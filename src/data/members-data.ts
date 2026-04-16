@@ -118,8 +118,6 @@ export const MEMBERS_DATA: Member[] = [
   // NIM: H1101251058
   { id: "1077", full_name: "Novi Aulia", nickname: "Novi", role: "Anggota", quote: "", photo_url: "/members/1077.webp", social_ig: "https://www.instagram.com/_nvauliaaa?igsh=MWxzc3RkdjNsaDc0dQ==", social_in: "khairunisa-ansyari", is_visible: true },
   // NIM: H1101251058
-  { id: "1058", full_name: "Salsabilla Fitri Nur R.", nickname: "Salsabilla", role: "Anggota", quote: "", photo_url: "/members/1058.webp", social_ig: "", social_in: "salsabilla-fitri-nur", is_visible: true },
-  // NIM: H1101251059
   { id: "1019", full_name: "Lika Lidia Astutik", nickname: "Lika", role: "Anggota", quote: "", photo_url: "/members/1019.webp", social_ig: "https://www.instagram.com/likaaldast?igsh=MTJ4YTk0M3VpYzA0bg%3D%3D&utm_source=qr", social_in: "lika-lidia-astutik", is_visible: true },
   // NIM: H1101251060
   { id: "1059", full_name: "M. Dimas Aditya", nickname: "Dimas A.", role: "Anggota", quote: "", photo_url: "/members/1059.webp", social_ig: "https://www.instagram.com/dimaadty", social_in: "dimas-aditya", is_visible: true },
