@@ -86,7 +86,12 @@
 
       // DETEKSI HP if HP=disable
       var physicalScreenSmall = window.screen && window.screen.width < 900;
+      var isMobileHardware =
+        /Mobi|Android|iPhone/i.test(navigator.userAgent) ||
+        navigator.maxTouchPoints > 0;
       var hasMultiTouch = navigator.maxTouchPoints > 1;
+      var resDpr = isMobileHardware ? 0.25 : tier === "ULTRA" ? 0.5 : 0.35;
+      var fbmIterations = isMobileHardware ? 2 : tier === "LOW" ? 3 : 5;
       var uaIsMobile =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
           navigator.userAgent,
@@ -106,8 +111,8 @@
       // =============================================
       var tier = sessionStorage.getItem("cloudsi_perf_tier") || "NORMAL";
 
-      // BATTERY_SAVER: Static gradient, no WebGL
-      if (tier === "BATTERY_SAVER") {
+      // BATTERY_SAVER / LOW: Static gradient, no WebGL
+      if (tier === "BATTERY_SAVER" || tier === "LOW") {
         canvas.style.display = "none";
         var fallback = document.getElementById("cloud-fallback");
         if (fallback) fallback.style.display = "block";
@@ -356,11 +361,8 @@
       var timeUnif = gl.getUniformLocation(program, "u_time");
       var scrollUnif = gl.getUniformLocation(program, "u_scrollProgress");
 
-      // Resolution: LOW tier gets half resolution
-      var resDpr =
-        tier === "LOW"
-          ? Math.min(window.devicePixelRatio || 1, 0.75)
-          : Math.min(window.devicePixelRatio || 1, 2);
+      // ULTRA: 0.5x | NORMAL: 0.35x
+      var resDpr = tier === "ULTRA" ? 0.5 : 0.35;
 
       // FPS cap per tier — cuts GPU load without removing the effect
       // ULTRA: 60fps | NORMAL: 30fps | LOW: 20fps
@@ -462,7 +464,8 @@
       window.addEventListener("scroll", onScrollStatic, { passive: true });
       onScroll = onScrollStatic; // update ref untuk cleanup
 
-      // Render awal sekali
+      // Render awal sekali — WebGL tetap hidup agar day/night cycle bisa
+      // update saat scroll. Shader sudah di-compile, re-render per event murah.
       drawFrame();
 
       // =============================================
