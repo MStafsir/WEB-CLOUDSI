@@ -386,8 +386,21 @@
       var rafId = null;
       var isDestroyed = false;
 
+      // =============================================
+      // TIME-OF-DAY DETECTION — initial state follows clock
+      // 3 stages: noon (1.0), sunset (0.3), night (0.0)
+      // =============================================
+      var _hour = new Date().getHours();
+      var timeBaseProgress;
+      if (_hour >= 6 && _hour < 16)
+        timeBaseProgress = 1.0; // Noon (siang)
+      else if (_hour >= 16 && _hour < 19)
+        timeBaseProgress = 0.3; // Sunset (senja)
+      else timeBaseProgress = 0.0; // Night (malam)
+      var isDaytime = timeBaseProgress >= 0.5;
+
       var rawScrollY = window.scrollY || 0.0;
-      var renderScrollProgress = 0.0;
+      var renderScrollProgress = timeBaseProgress;
 
       function calculateDocHeight() {
         var h1 = document.body ? document.body.scrollHeight : 0;
@@ -429,11 +442,20 @@
         // Waktu dibekukan — awan tidak bergerak
         gl.uniform1f(timeUnif, FROZEN_TIME);
 
-        // Update scroll progress instan (tidak perlu LERP karena sudah static)
-        renderScrollProgress = Math.max(
+        // Update scroll progress — initial state follows time-of-day
+        // Noon/Sunset: scroll down → toward night (0.0)
+        // Night: scroll down → toward noon (1.0)
+        var scrollFraction = Math.max(
           0.0,
           Math.min(1.0, rawScrollY / docHeight),
         );
+        if (timeBaseProgress > 0.0) {
+          // Noon (1.0) or Sunset (0.3): scale down toward night
+          renderScrollProgress = timeBaseProgress * (1.0 - scrollFraction);
+        } else {
+          // Night (0.0): scale up toward noon
+          renderScrollProgress = scrollFraction;
+        }
         gl.uniform1f(scrollUnif, renderScrollProgress);
 
         // Update overlay alpha
