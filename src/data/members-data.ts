@@ -10,7 +10,6 @@ import type { Member } from '../types/index';
 export const MEMBERS_DATA: Member[] = [
   // === PENGURUS INTI (Posisi 1-6) ===
   { id: "1001", full_name: "Phasacola Grey Kalista", nickname: "Phasacola", role: "Ketua", quote: "", photo_url: "/members/1001.webp", social_ig: "https://www.instagram.com/phasacola?igsh=azlhNzRiZHYxMWdl", social_in: "phasacola-grey", social_gh: "https://github.com/Phasacola25", is_visible: true },
-  { id: "1002", full_name: "Rifkitio Hardiono", nickname: "Rifkitio", role: "Wakil Ketua", quote: "", photo_url: "/members/1002.webp", social_ig: "", social_in: "rifkitio-hardiono", is_visible: true },
   { id: "1003", full_name: "Ellen Fitri Shanika Karrin Malau", nickname: "Ellen", role: "Sekretaris", quote: "", photo_url: "/members/1003.webp", social_ig: "https://www.instagram.com/shaskyrell8?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==", social_in: "ellen-fitri-shanika", social_gh: "https://github.com/elfishakar87", is_visible: true },
   { id: "1004", full_name: "Dhini Zakiyatul Wafa", nickname: "Dhini", role: "Sekretaris", quote: "", photo_url: "/members/1004.webp", social_ig: "https://www.instagram.com/zkwaf.xz?igsh=NTJqaTFqcm96dTg2", social_in: "dhini-zakiyatul-wafa", is_visible: true },
   { id: "1005", full_name: "Syarifah Putri", nickname: "Syarifah", role: "Bendahara", quote: "", photo_url: "/members/1005.webp", social_ig: "https://www.instagram.com/syarifahpuutri/", social_in: "syarifah-putri", is_visible: true },
