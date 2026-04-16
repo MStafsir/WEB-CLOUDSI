@@ -11,7 +11,7 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
-
+import compress from "astro-compress";
 export default defineConfig({
   output: 'server',
   adapter: vercel(),
@@ -19,7 +19,16 @@ export default defineConfig({
   prefetch: true,
   integrations: [
     tailwind(),
-    sitemap()
+    sitemap(),
+    compress({
+      HTML: {
+        removeComments: true,
+        collapseWhitespace: true,
+      },
+      CSS: true,
+      JavaScript: true,
+      Image: false,
+    }),
   ],
   vite: {
     build: {
