@@ -1,73 +1,97 @@
 ---
-/**
- * galeri.astro
- * Halaman Galeri Statis — CSS Bento Grid khusus untuk 7 Foto + Stacking Cards
- * Animasi interaktif: parallax + 3D tilt + Sticky Scroll-Driven Animations
- * Dependencies: BaseLayout, Header, Footer, PageTransition
- */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Footer from "../components/layout/Footer.astro";
 import PageTransition from "../components/layout/PageTransition.astro";
+import { Image } from "astro:assets";
 
-// Data Stacking Cards sesuai urutan galeri
-const stackData = [
+const galleryData = [
   {
     id: 1,
-    title: "SINTA 2025",
+    caption: "SINTA 2025",
+    badge: "Awal Perjalanan",
     year: "2025",
     desc: "(System Information Academic Training) kegiatan pelatihan akademik untuk mahasiswa Sistem Informasi FMIPA UNTAN. Acara ini bertujuan memperkenalkan ilmu SI lebih dalam berupa Kuliah umum atau workshop.",
-    badge: "Awal Perjalanan",
   },
   {
     id: 2,
-    title: "CIS",
-    year: "2025",
-    desc: "Celebration of Information System Merupakan bentuk Transoformasi DNS/Dies Natalis Sistem Informasi untuk memperingatkan terbentuknya jurusan Sistem Informasi FMIPA UNTAN yang dimana kami disini sedang mensupport angkatan kami yang sedang bertanding di CIS.",
+    caption: "CIS",
     badge: "Pengabdian",
+    year: "2025",
+    desc: "Celebration of Information System — bentuk transformasi Dies Natalis SI untuk memperingati terbentuknya jurusan SI FMIPA UNTAN, dimana kami mensupport angkatan kami yang bertanding di CIS.",
   },
   {
     id: 3,
-    title: "OSI Badminton",
-    year: "2025",
-    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi",
+    caption: "OSI Badminton",
     badge: "Wawasan",
+    year: "2025",
+    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi.",
   },
   {
     id: 4,
-    title: "OSI Badminton (Mahasiswi)",
-    year: "2025 ",
-    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami yang dimana ini adalah sesi foto para Mahasiswi Cloudsi di kegiatan OSI Badminton",
+    caption: "OSI Badminton (Mahasiswi)",
     badge: "Puncak Harapan",
+    year: "2025",
+    desc: "Sesi foto para Mahasiswi Cloudsi di kegiatan OSI Badminton — mempererat kebersamaan dan Chemistry solidaritas kami.",
   },
   {
     id: 5,
-    title: "Pertandingan Voli",
-    year: "2025",
-    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan dan Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi",
+    caption: "Pertandingan Voli",
     badge: "Prestasi",
+    year: "2025",
+    desc: "OSI Badminton adalah Olahraga Sistem Informasi yang kami ikuti untuk mempererat kebersamaan, Chemistry dan solidaritas kami serta sekalian pengumpulan White Book day Kaderisasi kami Cloudsi.",
   },
   {
     id: 6,
-    title: "Foto Angkatan Pertama",
-    year: "2025",
-    desc: "FOTO ANGKATAN Pertama setelah pengurusan berkas dan Ospek Fakultas, kami berinisiasi untuk melakukan Foto bersama Angkatan Sistem Informasi untuk pertama kalinya dan disini tempat kami berkenalan kepada para keluarga Cloudsi kami",
+    caption: "Foto Angkatan Pertama",
     badge: "Keakraban",
+    year: "2025",
+    desc: "FOTO ANGKATAN Pertama setelah pengurusan berkas dan Ospek Fakultas — momen berkenalan kepada para keluarga Cloudsi untuk pertama kalinya.",
   },
   {
     id: 7,
-    title: "Bukber Pertama",
+    caption: "Bakti Sosial",
+    badge: "Kepedulian",
     year: "2026",
-    desc: "BUKBER yang dimana ini merupakan BUKBER pertama angkatan Cloudsi dan kami berharap dari adanya inisiatif kegiatan seperti ini kami menjadi lebih akrab dan memperkuat keharmonisan yang dihadiri Lintas Agama di Cloudsi",
+    desc: "Bakti Sosial sebagai salah satu kegiatan acara SIG 2025 yang kami adakan untuk menghibur dan melakukan penggalangan dana untuk anak yatim.",
+  },
+  {
+    id: 8,
+    caption: "SIG 2025",
+    badge: "Kekompakan",
+    year: "2026",
+    desc: "SIG 2025 adalah momen dimana kami dipercayakan pertama kali menjadi panitia dalam kegiatan besar yang diadakan oleh Himpunan Mahasiswa Sistem Informasi Universitas Tanjungpura.",
+  },
+  {
+    id: 9,
+    caption: "Bukber Pertama",
     badge: "Selamanya",
+    year: "2026",
+    desc: "BUKBER pertama angkatan Cloudsi — inisiatif kegiatan untuk mempererat keharmonisan yang dihadiri Lintas Agama di Cloudsi.",
   },
 ];
+
+const SIZE_CYCLE = [
+  "large",
+  "normal",
+  "tall",
+  "wide",
+  "normal",
+  "wide",
+  "normal",
+] as const;
+const SIZE_CLASS: Record<string, string> = {
+  large: "item-large",
+  tall: "item-tall",
+  wide: "item-wide",
+  full: "item-full",
+  normal: "",
+};
 ---
 
 <BaseLayout
   title="Galeri | Cloudsi | Sistem Informasi Untan"
   description="Dalam satu ruang kami adalah keluarga besar Sistem Informasi Universitas Tanjungpura, penggerak teknologi masa depan."
 >
-  <!-- Efek Ambience Water Orbs -->
   <div class="water-orb orb-1"></div>
   <div class="water-orb orb-2"></div>
 
@@ -79,122 +103,42 @@ const stackData = [
           <p class="eyebrow">CloudSI · 2025</p>
           <h1 class="galeri-title">Album <em>Kenangan</em></h1>
           <p class="galeri-sub">
-            Tujuh bingkai sejarah yang mengukir cerita kita bersama.
+            {galleryData.length} bingkai sejarah yang mengukir cerita kita bersama.
           </p>
           <div class="water-line"></div>
         </div>
       </section>
 
-      <!-- Bento Grid Interaktif (7 Fotos Tanpa Spasi Kosong) -->
       <section class="galeri-grid-section section-pad">
         <div class="container-main bento-container">
           <div class="gallery-grid" id="galleryGrid">
-            <!-- FOTO 1: Besar 2x2 (R1C1, R1C2, R2C1, R2C2) -->
-            <div class="photo-frame item-large" style="transition-delay:0ms;">
-              <div class="photo-inner ph-1">
-                <img
-                  src="/galeri/1.webp"
-                  alt="Foto 1"
-                  width="800"
-                  height="600"
-                  loading="eager"
-                  fetchpriority="high"
-                />
-                <span class="caption overlay-text">SINTA 2025</span>
-              </div>
-            </div>
-
-            <!-- FOTO 2: Normal (R1C3) -->
-            <div class="photo-frame" style="transition-delay:80ms;">
-              <div class="photo-inner ph-2">
-                <img
-                  src="/galeri/2.webp"
-                  alt="Foto 2"
-                  width="800"
-                  height="600"
-                  loading="eager"
-                  fetchpriority="high"
-                />
-                <span class="caption overlay-text">CIS</span>
-              </div>
-            </div>
-
-            <!-- FOTO 3: Tinggi 1x2 -> R2C3, R3C3 -->
-            <div class="photo-frame item-tall" style="transition-delay:120ms;">
-              <div class="photo-inner ph-3">
-                <img
-                  src="/galeri/3.webp"
-                  alt="Foto 3"
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                />
-                <span class="caption overlay-text">OSI Badminton</span>
-              </div>
-            </div>
-
-            <!-- FOTO 4: Lebar 2x1 -> R3C1, R3C2 -->
-            <div class="photo-frame item-wide" style="transition-delay:160ms;">
-              <div class="photo-inner ph-4">
-                <img
-                  src="/galeri/4.webp"
-                  alt="Foto 4"
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                />
-                <span class="caption overlay-text"
-                  >OSI Badminton (Mahasiswi)</span
-                >
-              </div>
-            </div>
-
-            <!-- FOTO 5: Lebar 2x1 -> R4C1, R4C2 -->
-            <div class="photo-frame item-wide" style="transition-delay:200ms;">
-              <div class="photo-inner ph-5">
-                <img
-                  src="/galeri/5.webp"
-                  alt="Foto 5"
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                />
-                <span class="caption overlay-text">Pertandingan Voli</span>
-              </div>
-            </div>
-
-            <!-- FOTO 6: Normal 1x1 -> R4C3 -->
-            <div class="photo-frame" style="transition-delay:240ms;">
-              <div class="photo-inner ph-6">
-                <img
-                  src="/galeri/6.webp"
-                  alt="Foto 6"
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                />
-                <span class="caption overlay-text">Foto Angkatan Pertama</span>
-              </div>
-            </div>
-
-            <!-- FOTO 7: Full 3x1 -> R5C1, R5C2, R5C3 -->
-            <div class="photo-frame item-full" style="transition-delay:280ms;">
-              <div class="photo-inner ph-7" style="background-color: #081a30;">
-                <img
-                  src="/galeri/7.webp"
-                  alt="Foto 7"
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                />
-                <span class="caption overlay-text">Bukber CloudSI</span>
-              </div>
-            </div>
+            {
+              galleryData.map((photo, i) => {
+                const size = SIZE_CYCLE[i % SIZE_CYCLE.length];
+                return (
+                  <div
+                    class={`photo-frame ${SIZE_CLASS[size]}`}
+                    style={`transition-delay:${i * 40}ms;`}
+                  >
+                    <div class="photo-inner">
+                      <img
+                        src={`/galeri/${photo.id}.webp`}
+                        alt={photo.caption}
+                        width="800"
+                        height="600"
+                        loading={i < 3 ? "eager" : "lazy"}
+                        fetchpriority={i === 0 ? "high" : undefined}
+                      />
+                      <span class="caption overlay-text">{photo.caption}</span>
+                    </div>
+                  </div>
+                );
+              })
+            }
           </div>
         </div>
       </section>
 
-      <!-- Sticky Stacking Cards Section -->
       <section class="stick-stack-section">
         <div class="container-main">
           <div class="stack-header">
@@ -211,13 +155,13 @@ const stackData = [
 
           <div class="stacking-container" id="stacking-container">
             {
-              stackData.map((card, i) => (
+              galleryData.map((card, i) => (
                 <div class="stack-card glass" style={`--card-index: ${i};`}>
                   <div class="stack-card-inner">
                     <div class="stack-img-col">
-                      <img
+                      <Image
                         src={`/galeri/${card.id}.webp`}
-                        alt={card.title}
+                        alt={card.caption}
                         width="800"
                         height="600"
                         loading="lazy"
@@ -225,7 +169,7 @@ const stackData = [
                     </div>
                     <div class="stack-txt-col">
                       <div class="stack-badge">{card.badge}</div>
-                      <h3 class="stack-title">{card.title}</h3>
+                      <h3 class="stack-title">{card.caption}</h3>
                       <div class="stack-year">{card.year}</div>
                       <p class="stack-desc">{card.desc}</p>
                     </div>
@@ -237,7 +181,6 @@ const stackData = [
         </div>
       </section>
 
-      <!-- Lightbox (Tetap Dipertahankan untuk Bento Grid) -->
       <div
         class="lightbox"
         id="lightbox"
@@ -298,10 +241,6 @@ const stackData = [
 </BaseLayout>
 
 <style>
-  /* =====================================================
-     ALBUM KENANGAN — UI Bento & Orbs
-     ===================================================== */
-
   .water-orb {
     position: fixed;
     border-radius: 50%;
@@ -393,11 +332,11 @@ const stackData = [
     z-index: 10;
   }
 
-  /* Bento Grid Layout - Exactly matching 3x4 design then expanding */
   .gallery-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 200px;
+    grid-auto-flow: dense;
     gap: 12px;
   }
   .item-large {
@@ -434,7 +373,6 @@ const stackData = [
     }
   }
 
-  /* Photo Frame Interaktif */
   .photo-frame {
     border-radius: 16px;
     overflow: hidden;
@@ -536,9 +474,6 @@ const stackData = [
     transform: translateX(100%);
   }
 
-  /* =====================================================
-     STICKY STACKING CARDS SECTION
-     ===================================================== */
   .stick-stack-section {
     padding: 4rem 0 10rem;
     position: relative;
@@ -557,7 +492,6 @@ const stackData = [
     margin: 0 auto;
   }
 
-  /* Mekanisme Tumpukan */
   .stack-card {
     position: sticky;
     top: calc(80px + (var(--card-index) * 20px));
@@ -566,8 +500,6 @@ const stackData = [
     width: 100%;
     margin-bottom: 60vh;
     border-radius: 24px;
-    /* BUGFIX: backdrop-filter pada sticky card menyebabkan compositor layer
-       yang "bocor" menembus mobile drawer. Ganti dengan solid background. */
     background: rgba(8, 25, 55, 0.95);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -589,21 +521,16 @@ const stackData = [
     opacity: 1;
   }
 
-  /* CSS Scroll-Driven Animations */
   @supports (animation-timeline: view()) {
     .stack-card {
-      /* Reset state dari IntersectionObserver fallback */
       transform: none;
       opacity: 1;
 
-      /* Scale Down animasi saat didorong ke belakang oleh kartu berikutnya */
       animation: stackScaleDown linear both;
       animation-timeline: view();
-      /* Mulai animasi saat kartu ini melewati posisi `exit` (saat scroller utamanya melewatinya) */
       animation-range: exit 0% exit 100%;
     }
 
-    /* Animasi masuknya juga via view(), sehingga tidak perlu JS */
     .stack-card-inner {
       animation: stackEnterFromBottom linear both;
       animation-timeline: view();
@@ -632,7 +559,6 @@ const stackData = [
     }
   }
 
-  /* Layout Konten Kartu (Kiri: Foto Besar, Kanan: Teks) */
   .stack-card-inner {
     display: flex;
     height: 100%;
@@ -703,12 +629,12 @@ const stackData = [
     }
 
     .stack-card {
-      position: sticky; /* Pertahankan efek stacking */
+      position: sticky;
       top: calc(72px + (var(--card-index) * 6px));
       z-index: calc(10 + var(--card-index));
       height: auto;
       min-height: auto;
-      margin-bottom: 80vh; /* Cukup untuk baca deskripsi */
+      margin-bottom: 80vh;
       border-radius: 16px;
     }
 
@@ -749,7 +675,6 @@ const stackData = [
     }
   }
 
-  /* ========== LIGHTBOX ======================= */
   .lightbox {
     position: fixed;
     inset: 0;
@@ -836,7 +761,6 @@ const stackData = [
       var bentoFrames = document.querySelectorAll("#galleryGrid .photo-frame");
       var stackCards = document.querySelectorAll(".stack-card");
 
-      // 1. BENTO: INTERSECTION OBSERVER
       if (bentoFrames.length > 0) {
         var observer = new IntersectionObserver(
           function (entries) {
@@ -852,7 +776,6 @@ const stackData = [
         });
       }
 
-      // 3. STACKING CARDS: JS FALLBACK
       var stackObserver;
       if (
         stackCards.length > 0 &&
@@ -879,7 +802,6 @@ const stackData = [
           var scrollY = window.scrollY;
           var viewHeight = window.innerHeight;
 
-          // ===== READ PASS =====
           var cardData = [];
           stackCards.forEach(function (card) {
             if (!card.classList.contains("in-view")) {
@@ -897,7 +819,6 @@ const stackData = [
             });
           });
 
-          // ===== WRITE PASS =====
           for (var i = 0; i < cardData.length; i++) {
             var data = cardData[i];
             if (!data) continue;
@@ -943,7 +864,6 @@ const stackData = [
       };
       document.addEventListener("astro:before-swap", cleanup);
 
-      // 5. LIGHTBOX
       var lightbox = document.getElementById("lightbox");
       var lightboxImg = document.getElementById("lightbox-img");
       var lightboxCaption = document.getElementById("lightbox-caption");
@@ -991,7 +911,6 @@ const stackData = [
     document.addEventListener("DOMContentLoaded", initGaleriInteraktif);
     document.addEventListener("astro:after-swap", initGaleriInteraktif);
 
-    // IO pause/resume for orb drift animations
     function initOrbIO() {
       var orbs = document.querySelectorAll(".water-orb");
       if (!orbs.length) return;
