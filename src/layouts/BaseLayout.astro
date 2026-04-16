@@ -127,6 +127,14 @@ const fullTitle = title;
         var isMobile = screenWidth < 768 || "ontouchstart" in window;
         if (isMobile) score -= 1;
 
+        // Desktop Mode on mobile: screen fisik kecil + multitouch = HP pura-pura desktop
+        // Penalti ekstra agar tetap dapat tier LOW/BATTERY_SAVER
+        var isDesktopModeOnMobile =
+          (window.screen && window.screen.width < 900) &&
+          (navigator.maxTouchPoints > 1) &&
+          !(screenWidth < 768); // innerWidth sudah besar karena desktop mode
+        if (isDesktopModeOnMobile) score -= 3;
+
         // High DPR on mobile = more GPU work
         var dpr = window.devicePixelRatio || 1;
         if (isMobile && dpr >= 3) score -= 1;
