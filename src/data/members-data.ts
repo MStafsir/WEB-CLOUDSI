@@ -16,7 +16,7 @@ export const MEMBERS_DATA: Member[] = [
   { id: "1006", full_name: "Andini Putri Malaya", nickname: "Andini", role: "Bendahara", quote: "", photo_url: "/members/1006.webp", social_ig: "https://www.instagram.com/layaaya__?igsh=ajlrMm5zcXJiNzdv", social_in: "andini-putri-malaya", is_visible: true },
 
   // === DEV — Posisi 7 (Baris 2 Kolom 3) ===
-  { id: "1024", full_name: "Muhammad Sholichin Tafsir Srilintang", nickname: "Srilintang", role: "DEV", quote: "", photo_url: "/members/1024.webp", social_ig: "https://www.instagram.com/srilintang_/", social_in: "https://www.linkedin.com/in/muhamad-sholichin-tafsir-srilintang-b89867379/?skipRedirect=true&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3BpCER9gozQuK0wfkqOfftKA%3D%3D", social_gh: "https://github.com/MStafsir", is_visible: true },
+  { id: "1024", full_name: "Muhammad Sholichin Tafsir Srilintang", nickname: "Srilintang", role: "FULLS", quote: "", photo_url: "/members/1024.webp", social_ig: "https://www.instagram.com/srilintang_/", social_in: "https://www.linkedin.com/in/muhamad-sholichin-tafsir-srilintang-b89867379/?skipRedirect=true&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3BpCER9gozQuK0wfkqOfftKA%3D%3D", social_gh: "https://github.com/MStafsir", is_visible: true },
 
   // === ANGGOTA — Diurutkan berdasarkan NIM terkecil ke terbesar ===
   // NIM: H1101251002
