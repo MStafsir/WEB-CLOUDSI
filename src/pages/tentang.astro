@@ -101,6 +101,8 @@ const timeline = await getTimeline();
     color: white;
     margin: 0;
     opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
     will-change: transform, opacity;
   }
 
@@ -112,6 +114,8 @@ const timeline = await getTimeline();
     letter-spacing: 0.08em;
     margin-top: 0.75rem;
     opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.15s, transform 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.15s;
     will-change: transform, opacity;
   }
 
@@ -227,7 +231,11 @@ const timeline = await getTimeline();
       var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) { showAll(); return; }
 
-
+      // FEATURE: Hero Animation
+      // Memicu fade-in langsung mendahului Global Scroll Observer
+      requestAnimationFrame(function() {
+        setTimeout(showAll, 50); // Jeda mini agar masuk setelah ViewTransition kelar
+      });
     }
 
     document.addEventListener('DOMContentLoaded', initTentang);

@@ -87,8 +87,10 @@
       var canvas = document.getElementById("water-canvas");
       if (!canvas) return;
 
-      // Cek if mobile takda animasi
-      var isMobileCheck = window.innerWidth < 768 || "ontouchstart" in window;
+      var isMobileCheck =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        ) || window.innerWidth <= 768;
       if (isMobileCheck) {
         canvas.style.display = "none";
         var fallback = document.getElementById("water-fallback");

@@ -6,7 +6,6 @@
  * Dependencies: tokens.css, global.css, WaterRipple.astro, ViewTransitions
  */
 
-import { ClientRouter } from "astro:transitions";
 import CloudBackground from "../components/canvas/CloudBackground.astro";
 import WaterRipple from "../components/canvas/WaterRipple.astro";
 import Preloader from "../components/ui/Preloader.astro";
@@ -302,9 +301,7 @@ const fullTitle = title;
     <link rel="apple-touch-icon" href="/logo-angkatan-25.webp" />
 
     <!-- ============================================
-         ASTRO VIEW TRANSITIONS (ClientRouter in v5)
          ============================================ -->
-    <ClientRouter />
   </head>
 
   <body>
@@ -320,8 +317,11 @@ const fullTitle = title;
     <!-- Global Header — z-99999 -->
     <Header />
 
-    <!-- Main Content — z-1 agar di bawah header -->
-    <div class="relative z-1" style="position: relative; z-index: 1;">
+    <!-- Main Content — isolated agar sticky cards tidak bocor menembus header/drawer -->
+    <div
+      class="main-content-wrapper"
+      style="position: relative; z-index: 1; isolation: isolate;"
+    >
       <slot />
     </div>
 
@@ -341,8 +341,14 @@ const fullTitle = title;
 
           // Performance tier check
           var tier = sessionStorage.getItem("cloudsi_perf_tier") || "NORMAL";
-          if (tier === "LOW" || tier === "BATTERY_SAVER") {
-            // Native scroll — no Lenis overhead
+          var isMobileHP =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              navigator.userAgent,
+            ) || window.innerWidth <= 768;
+
+          if (isMobileHP || tier === "LOW" || tier === "BATTERY_SAVER") {
+            // DETEKSI HP: Matikan Lenis 100%. Kembalikan kontrol scroll murni ke Hardware (Hardware Compositor).
+            // Ini akan menghilangkan nge-lag sepenuhnya saat scroll di HP.
             return;
           }
 
@@ -465,6 +471,40 @@ const fullTitle = title;
       })();
     </script>
 
+    <!-- ============================================
+         MOBILE DRAWER PORTAL
+         Memindahkan mobile-drawer & mobile-backdrop ke akhir <body>
+         agar selalu berada di puncak GPU compositor layer list,
+         mengatasi bug z-index dengan position:sticky cards.
+         ============================================ -->
+    <script is:inline>
+      (function () {
+        function portalDrawer() {
+          var drawer = document.getElementById("mobile-drawer");
+          var backdrop = document.getElementById("mobile-backdrop");
+          // Selalu pindahkan ke akhir body agar jadi compositor layer terakhir (tertinggi)
+          // Ini mengatasi bug z-index dengan position:sticky cards di galeri
+          if (backdrop) document.body.appendChild(backdrop);
+          if (drawer) document.body.appendChild(drawer);
+        }
+        // Jalankan secepatnya — tidak tunggu DOMContentLoaded penuh
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", portalDrawer);
+        } else {
+          portalDrawer();
+        }
+      })();
+    </script>
+
+    <script>
+      // Paksa browser untuk tidak mengingat posisi scroll
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+
+      // Tambahan cadangan: paksa scroll ke atas saat halaman dimuat
+      window.scrollTo(0, 0);
+    </script>
     <!-- ============================================
          GLOBAL FADE-IN OBSERVER
          Adds .is-visible to .fade-in elements when they enter viewport

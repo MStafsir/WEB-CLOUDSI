@@ -31,7 +31,7 @@ const sortedMembers = members;
     <main id="main-content">
       <!-- 40vh Hero Section -->
       <section class="anggota-hero" aria-label="Hero Anggota">
-        <div class="anggota-hero-content fade-in">
+        <div class="anggota-hero-content hero-fade-up">
           <h1 class="hero-title">Mahasiswa Cloudsi</h1>
           <p class="hero-counter">Dalam satu Angkatan</p>
         </div>
@@ -363,7 +363,8 @@ const sortedMembers = members;
 
   .member-item {
     content-visibility: auto;
-    contain-intrinsic-size: 300px;
+    contain-intrinsic-size: auto 300px;
+    min-width: 0;
   }
 
   .member-item:hover {

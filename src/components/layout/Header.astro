@@ -309,16 +309,17 @@ const navLinks = [
 
   /* ── Backdrop ── */
   .mobile-backdrop {
-    display: none;                     /* hidden on desktop */
+    display: none;
     position: fixed;
-    inset: 0;                          /* top/right/bottom/left: 0 */
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 997;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    /* Backdrop blur mematikan performa HP — dihapus dari mobile */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    z-index: 9998;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.25s ease;
   }
 
   .mobile-backdrop.active {
@@ -332,7 +333,7 @@ const navLinks = [
 
   /* ── Drawer ── */
   .mobile-drawer {
-    display: none;                     /* hidden on desktop by default */
+    display: none;
     position: fixed;
     top: var(--header-height-mobile);
     left: 0;
@@ -340,23 +341,31 @@ const navLinks = [
     width: 100%;
     max-height: calc(100dvh - var(--header-height-mobile));
     overflow-y: auto;
-    background: linear-gradient(
-      180deg,
-      rgba(5, 20, 47, 0.72) 0%,
-      rgba(10, 30, 60, 0.6) 100%
-    );
+    background: rgba(5, 20, 47, 0.96); /* Solid background — tanpa blur di HP */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(45px) saturate(180%);
-    -webkit-backdrop-filter: blur(45px) saturate(180%);
-    z-index: 999;
-    /* Drawer tertutup — sembunyikan dengan visibility + opacity
-       agar tidak mengganggu pointer events saat tidak aktif */
+    /* PERFORMANCE: Hapus backdrop-filter berat di mobile drawer */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    z-index: 9999;
     visibility: hidden;
     opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                visibility 0s linear 0.4s;
+    transform: translateY(-12px); /* Kurangi travel distance agar lebih cepat */
+    transition: opacity 0.25s ease, 
+                transform 0.25s ease, 
+                visibility 0s linear 0.25s;
+  }
+
+  /* Pada layar besar (desktop), aktifkan kembali blur effect */
+  @media (min-width: 1024px) {
+    .mobile-drawer {
+      backdrop-filter: blur(45px) saturate(180%);
+      -webkit-backdrop-filter: blur(45px) saturate(180%);
+      background: linear-gradient(
+        180deg,
+        rgba(5, 20, 47, 0.72) 0%,
+        rgba(10, 30, 60, 0.6) 100%
+      );
+    }
   }
 
   .mobile-drawer.active {

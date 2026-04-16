@@ -75,7 +75,7 @@ const stackData = [
     <main id="main-content">
       <!-- Hero mini -->
       <section class="galeri-hero">
-        <div class="container-main galeri-hero-inner">
+        <div class="container-main galeri-hero-inner hero-fade-up">
           <p class="eyebrow">CloudSI · 2025</p>
           <h1 class="galeri-title">Album <em>Kenangan</em></h1>
           <p class="galeri-sub">
@@ -566,9 +566,11 @@ const stackData = [
     width: 100%;
     margin-bottom: 60vh;
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* BUGFIX: backdrop-filter pada sticky card menyebabkan compositor layer
+       yang "bocor" menembus mobile drawer. Ganti dengan solid background. */
+    background: rgba(8, 25, 55, 0.95);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow:
       0 -10px 40px rgba(0, 0, 0, 0.3),
@@ -578,7 +580,6 @@ const stackData = [
     transition:
       transform 0.4s ease-out,
       opacity 0.4s ease-out;
-    /* Mulai dari bawah untuk fallback & animasi awal */
     transform: translateY(100px);
     opacity: 0;
   }
@@ -697,10 +698,20 @@ const stackData = [
   }
 
   @media (max-width: 900px) {
-    .stack-card {
-      height: auto;
-      min-height: 80vh;
+    .stacking-container {
+      padding-bottom: 2rem;
     }
+
+    .stack-card {
+      position: sticky; /* Pertahankan efek stacking */
+      top: calc(72px + (var(--card-index) * 6px));
+      z-index: calc(10 + var(--card-index));
+      height: auto;
+      min-height: auto;
+      margin-bottom: 80vh; /* Cukup untuk baca deskripsi */
+      border-radius: 16px;
+    }
+
     .stack-card-inner {
       flex-direction: column;
     }
@@ -716,19 +727,25 @@ const stackData = [
     }
     .stack-txt-col {
       flex: none;
-      padding: 2rem 1.5rem;
-      text-align: center;
+      padding: 1.25rem 1.5rem 1.5rem;
+      text-align: left;
       justify-content: flex-start;
     }
     .stack-badge {
-      align-self: center;
-      margin-bottom: 1.5rem;
+      align-self: flex-start;
+      margin-bottom: 0.75rem;
     }
     .stack-title {
-      font-size: 2.2rem;
+      font-size: 1.5rem;
+      margin-bottom: 0.2rem;
+    }
+    .stack-year {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
     }
     .stack-desc {
-      font-size: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.65;
     }
   }
 
