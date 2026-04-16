@@ -22,7 +22,9 @@
 
 <!-- Backdrop blur overlay -->
 <div
-  class="fixed inset-0 bg-[hsla(210,60%,6%,0.4)] backdrop-blur-[1px] pointer-events-none"
+  id="cloud-overlay"
+  class="fixed inset-0 pointer-events-none"
+  style="background-color: hsla(210, 60%, 6%, var(--overlay-alpha, 0.40)); backdrop-filter: blur(1px); -webkit-backdrop-filter: blur(1px);"
 >
 </div>
 
@@ -180,21 +182,19 @@
               vec2 r = vec2(fbm(pos + 0.3 * q + time * 0.015), fbm(pos + 0.3 * q + vec2(4.1, 1.9) + time * 0.015));
               
               float cloudVal = fbm(pos + 0.6 * r);
-              
               float alpha = smoothstep(densityMin, densityMax, cloudVal);
               
               float lightSample = fbm(pos + 0.6 * r + lightDir * 0.1); 
               float rimLight = clamp(cloudVal - lightSample, 0.0, 1.0);
               rimLight = smoothstep(0.0, 0.4, rimLight);
-              
               float shadow = smoothstep(densityMin, densityMax * 1.2, cloudVal);
               
-              vec3 cDarkNight = vec3(0.03, 0.05, 0.09); 
-              vec3 cMidNight = vec3(0.10, 0.14, 0.20);  
+              vec3 cDarkNight = vec3(0.05, 0.07, 0.12); 
+              vec3 cMidNight = vec3(0.12, 0.16, 0.22);  
               vec3 cLightNight = vec3(0.35, 0.45, 0.55); 
               
-              vec3 cDarkDay = vec3(0.45, 0.55, 0.68);
-              vec3 cMidDay = vec3(0.90, 0.95, 1.00);
+              vec3 cDarkDay = vec3(0.35, 0.45, 0.60);
+              vec3 cMidDay = vec3(0.65, 0.75, 0.85);
               vec3 cLightDay = vec3(1.0, 1.0, 1.0);
               
               vec3 cDark = mix(cDarkNight, cDarkDay, scrollProg);
@@ -202,7 +202,12 @@
               vec3 cLight = mix(cLightNight, cLightDay, scrollProg);
               
               vec3 color = mix(cDark, cMid, shadow);
-              color = mix(color, cLight, rimLight * 0.8); 
+              
+              float contrast = mix(1.0, 1.3, scrollProg);
+              color = (color - 0.5) * contrast + 0.5;
+              
+              float rimMult = mix(0.5, 1.2, scrollProg);
+              color = mix(color, cLight, rimLight * rimMult); 
               
               return vec4(color, alpha);
           }
@@ -214,11 +219,37 @@
 
               vec2 lightDir = normalize(vec2(0.2, 1.0));
 
-              vec3 skyBaseNight = mix(vec3(0.02, 0.03, 0.06), vec3(0.002, 0.005, 0.01), uvOrig.y);
-              vec3 skyBaseDay = mix(vec3(0.60, 0.80, 0.95), vec3(0.15, 0.45, 0.80), uvOrig.y);
+              vec3 nightZenith = vec3(0.002, 0.005, 0.015);
+              vec3 nightHorizon = vec3(0.03, 0.05, 0.12);
+              vec3 dayZenith = vec3(0.15, 0.35, 0.75);
+              vec3 dayHorizon = vec3(0.65, 0.82, 0.96);
               
-              vec3 skyBase = mix(skyBaseNight, skyBaseDay, u_scrollProgress);
+              vec3 skyNight = mix(nightHorizon, nightZenith, smoothstep(0.0, 0.6, uvOrig.y));
+              vec3 skyDay = mix(dayHorizon, dayZenith, smoothstep(0.0, 0.7, uvOrig.y));
+              vec3 skyBase = mix(skyNight, skyDay, u_scrollProgress);
+              
+              float sunriseIntensity = smoothstep(0.1, 0.3, u_scrollProgress) * smoothstep(0.5, 0.3, u_scrollProgress);
+              vec3 sunriseColor = vec3(1.0, 0.5, 0.3); 
+              float sunriseBand = smoothstep(0.6, 0.0, uvOrig.y) * sunriseIntensity;
+              skyBase = mix(skyBase, sunriseColor, sunriseBand * 0.6);
+              
               vec3 finalColor = skyBase;
+
+              vec2 mPos = vec2(1.2, 0.7); 
+              float mDist = length(p - mPos);
+              float mFade = smoothstep(0.3, 0.1, u_scrollProgress);
+              float mCore = smoothstep(0.08, 0.06, mDist);
+              float mGlow = exp(-mDist * 3.0) * 0.4;
+              vec3 mColor = vec3(0.9, 0.95, 1.0) * mFade;
+              finalColor += (mCore + mGlow) * mColor;
+              
+              vec2 sPos = vec2(1.0, 0.6);
+              float sDist = length(p - sPos);
+              float sFade = smoothstep(0.5, 0.7, u_scrollProgress);
+              float sCore = smoothstep(0.1, 0.05, sDist);
+              float sGlow = exp(-sDist * 1.5) * 0.8;
+              vec3 sColor = vec3(1.0, 0.9, 0.8) * sFade;
+              finalColor += (sCore + sGlow) * sColor;
 
               vec2 starGrid = floor(p * 120.0); 
               float starRnd = hash(starGrid);  
@@ -226,14 +257,12 @@
               if(starRnd > 0.92) {
                   float phase = hash(starGrid + vec2(13.5, 42.1)) * 6.2831; 
                   float blinkSpeed = 1.0 + hash(starGrid + vec2(73.1, 12.4)) * 2.0; 
-                  
                   float twinkle = 0.3 + 0.7 * sin(u_time * blinkSpeed + phase);
                   
                   vec2 starPosWithinGrid = fract(p * 120.0) - 0.5;
                   float starGlow = exp(-length(starPosWithinGrid) * 22.0);
                   
-                  float starFade = smoothstep(0.3, 0.0, u_scrollProgress);
-                  
+                  float starFade = smoothstep(0.35, 0.0, u_scrollProgress);
                   finalColor += vec3(0.85, 0.9, 1.0) * starGlow * twinkle * starFade;
               }
 
@@ -334,19 +363,54 @@
       window.addEventListener("resize", resize);
       resize();
 
-      // Scroll listener removed for performance: locked to night sky (0.0)
-
+      // =============================================
+      // SCROLL ENGINE & LIFECYCLE
+      // =============================================
       var startTime = Date.now();
       var rafId = null;
       var isDestroyed = false;
+
+      var rawScrollY = window.scrollY || 0.0;
+      var renderScrollProgress = 0.0;
+      
+      function calculateDocHeight() {
+          var h1 = document.body ? document.body.scrollHeight : 0;
+          var h2 = document.documentElement ? document.documentElement.scrollHeight : 0;
+          var maxH = Math.max(h1, h2);
+          return Math.max(1, maxH - window.innerHeight);
+      }
+      
+      var docHeight = calculateDocHeight();
+
+      var resizeObserver = new ResizeObserver(function() {
+          docHeight = calculateDocHeight();
+      });
+      if(document.documentElement) {
+          resizeObserver.observe(document.documentElement);
+      }
+
+      function onScroll() {
+          rawScrollY = window.scrollY || 0.0;
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      var overlayEl = document.getElementById("cloud-overlay");
 
       function animate() {
         if (isDestroyed) return;
         var elapsedTime = (Date.now() - startTime) / 1000.0;
         gl.uniform1f(timeUnif, elapsedTime);
 
-        // Locked to night sky (0.0)
-        gl.uniform1f(scrollUnif, 0.0);
+        // LERP Target Progress
+        var targetScrollProgress = Math.max(0.0, Math.min(1.0, rawScrollY / docHeight));
+        renderScrollProgress += (targetScrollProgress - renderScrollProgress) * 0.08;
+        gl.uniform1f(scrollUnif, renderScrollProgress);
+        
+        // Update overlay alpha based on progress
+        if(overlayEl) {
+            var overlayAlpha = 0.40 - (0.40 - 0.05) * renderScrollProgress;
+            overlayEl.style.setProperty('--overlay-alpha', overlayAlpha.toFixed(4));
+        }
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         rafId = requestAnimationFrame(animate);
@@ -357,8 +421,7 @@
       // FULL CLEANUP — VRAM DISPOSAL + LISTENER REMOVAL
       // =============================================
       function fullCleanup() {
-        if (isDestroyed) return; // Idempotent guard
-        isDestroyed = true;
+        isDestroyed = true; // First operation
 
         console.log(
           "[Cloudsi] CloudBackground: Full cleanup — disposing VRAM.",
@@ -372,6 +435,8 @@
 
         // 2. Remove event listeners
         window.removeEventListener("resize", resize);
+        window.removeEventListener("scroll", onScroll);
+        if (resizeObserver) resizeObserver.disconnect();
 
         // 3. Explicit VRAM disposal — delete shaders, programs, buffers
         try {
