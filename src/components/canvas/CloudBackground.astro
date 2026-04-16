@@ -24,7 +24,7 @@
 <div
   id="cloud-overlay"
   class="fixed inset-0 pointer-events-none"
-  style="background-color: hsla(210, 60%, 6%, var(--overlay-alpha, 0.40)); backdrop-filter: blur(1px); -webkit-backdrop-filter: blur(1px);"
+  style="background-color: hsla(210, 60%, 6%, var(--overlay-alpha, 0.40));  -webkit-backdrop-filter: blur(1px);"
 >
 </div>
 
@@ -85,7 +85,10 @@
       if (!canvas) return;
 
       // DETEKSI HP: Matikan rendering untuk menghemat CPU/GPU
-      var isMobileCheck = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      var isMobileCheck =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        ) || window.innerWidth <= 768;
       if (isMobileCheck) {
         canvas.style.display = "none";
         var fallback = document.getElementById("cloud-fallback");
@@ -351,8 +354,14 @@
       // Resolution: LOW tier gets half resolution
       var resDpr =
         tier === "LOW"
-          ? Math.min(window.devicePixelRatio || 1, 1)
+          ? Math.min(window.devicePixelRatio || 1, 0.75)
           : Math.min(window.devicePixelRatio || 1, 2);
+
+      // FPS cap per tier — cuts GPU load without removing the effect
+      // ULTRA: 60fps | NORMAL: 30fps | LOW: 20fps
+      var fpsTarget = tier === "ULTRA" ? 60 : tier === "LOW" ? 20 : 30;
+      var fpsInterval = 1000 / fpsTarget;
+      var lastFrameTime = 0;
 
       function resize() {
         canvas.width = window.innerWidth * resDpr;
@@ -372,50 +381,64 @@
 
       var rawScrollY = window.scrollY || 0.0;
       var renderScrollProgress = 0.0;
-      
+
       function calculateDocHeight() {
-          var h1 = document.body ? document.body.scrollHeight : 0;
-          var h2 = document.documentElement ? document.documentElement.scrollHeight : 0;
-          var maxH = Math.max(h1, h2);
-          return Math.max(1, maxH - window.innerHeight);
+        var h1 = document.body ? document.body.scrollHeight : 0;
+        var h2 = document.documentElement
+          ? document.documentElement.scrollHeight
+          : 0;
+        var maxH = Math.max(h1, h2);
+        return Math.max(1, maxH - window.innerHeight);
       }
-      
+
       var docHeight = calculateDocHeight();
 
-      var resizeObserver = new ResizeObserver(function() {
-          docHeight = calculateDocHeight();
+      var resizeObserver = new ResizeObserver(function () {
+        docHeight = calculateDocHeight();
       });
-      if(document.documentElement) {
-          resizeObserver.observe(document.documentElement);
+      if (document.documentElement) {
+        resizeObserver.observe(document.documentElement);
       }
 
       function onScroll() {
-          rawScrollY = window.scrollY || 0.0;
+        rawScrollY = window.scrollY || 0.0;
       }
       window.addEventListener("scroll", onScroll, { passive: true });
 
       var overlayEl = document.getElementById("cloud-overlay");
 
-      function animate() {
+      function animate(now) {
         if (isDestroyed) return;
+        rafId = requestAnimationFrame(animate);
+
+        // FPS throttle — skip frame if too soon
+        if (now - lastFrameTime < fpsInterval) return;
+        lastFrameTime = now;
+
         var elapsedTime = (Date.now() - startTime) / 1000.0;
         gl.uniform1f(timeUnif, elapsedTime);
 
         // LERP Target Progress
-        var targetScrollProgress = Math.max(0.0, Math.min(1.0, rawScrollY / docHeight));
-        renderScrollProgress += (targetScrollProgress - renderScrollProgress) * 0.08;
+        var targetScrollProgress = Math.max(
+          0.0,
+          Math.min(1.0, rawScrollY / docHeight),
+        );
+        renderScrollProgress +=
+          (targetScrollProgress - renderScrollProgress) * 0.08;
         gl.uniform1f(scrollUnif, renderScrollProgress);
-        
+
         // Update overlay alpha based on progress
-        if(overlayEl) {
-            var overlayAlpha = 0.40 - (0.40 - 0.05) * renderScrollProgress;
-            overlayEl.style.setProperty('--overlay-alpha', overlayAlpha.toFixed(4));
+        if (overlayEl) {
+          var overlayAlpha = 0.4 - (0.4 - 0.05) * renderScrollProgress;
+          overlayEl.style.setProperty(
+            "--overlay-alpha",
+            overlayAlpha.toFixed(4),
+          );
         }
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
-        rafId = requestAnimationFrame(animate);
       }
-      animate();
+      animate(0);
 
       // =============================================
       // FULL CLEANUP — VRAM DISPOSAL + LISTENER REMOVAL
