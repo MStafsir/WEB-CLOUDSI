@@ -37,6 +37,7 @@ const { members } = Astro.props;
               src={member.photo_url}
               alt={`Foto ${member.full_name}`}
               loading={index < 2 ? "eager" : "lazy"} 
+              decoding="async"
               class="member-img"
               width="400"
               height="533"
