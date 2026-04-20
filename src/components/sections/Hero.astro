@@ -3,30 +3,25 @@
  * Hero.astro
  * Section hero utama — judul besar, tagline, CTA buttons, ScrollIndicator
  */
-import Button from '../ui/Button.astro';
+import Button from "../ui/Button.astro";
 ---
 
 <section class="hero-section" aria-label="Hero">
   <div class="hero-container container-main">
-    
     <!-- 1. Badge Kecil -->
     <div class="hero-badge" data-hero-badge>
       ANGKATAN 2025 &middot; SISTEM INFORMASI
     </div>
 
     <!-- 2. Heading Utama -->
-    <h1 class="hero-heading" data-hero-heading>
-      CLOUDSI
-    </h1>
+    <h1 class="hero-heading" data-hero-heading>CLOUDSI</h1>
 
     <!-- 3. Subheading -->
-    <h2 class="hero-subheading" data-hero-anim="sub">
-      SOLIDARITAS
-    </h2>
+    <h2 class="hero-subheading" data-hero-anim="sub">SOLIDARITAS</h2>
 
     <!-- 4. Deskripsi -->
     <p class="hero-desc" data-hero-anim="desc">
-      76 Anggota dalam satu angkatan
+      75 Anggota dalam satu angkatan
     </p>
 
     <!-- 5. CTA Buttons -->
@@ -34,17 +29,19 @@ import Button from '../ui/Button.astro';
       <Button variant="secondary" size="lg" href="/anggota" class="cta-kenali">
         Kenali Kami
       </Button>
-      <a href="/tentang" class="cta-perjalanan">
-        Perjalanan Kami
-      </a>
+      <a href="/tentang" class="cta-perjalanan"> Perjalanan Kami </a>
     </div>
-
   </div>
 
   <!-- 6. Scroll Indicator -->
   <div class="scroll-indicator" id="hero-scroll-indicator">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="chevron">
-      <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path
+        d="M6 9L12 15L18 9"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
     </svg>
   </div>
 </section>
@@ -94,7 +91,12 @@ import Button from '../ui/Button.astro';
     letter-spacing: 0.15em;
     margin: 0;
     line-height: 1.1;
-    background: linear-gradient(135deg, #ffffff 0%, var(--color-water-light) 50%, var(--color-accent-gold) 100%);
+    background: linear-gradient(
+      135deg,
+      #ffffff 0%,
+      var(--color-water-light) 50%,
+      var(--color-accent-gold) 100%
+    );
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -150,20 +152,48 @@ import Button from '../ui/Button.astro';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1.75rem; /* Menyamai Button size lg/md */
+    padding: 0.75rem 1.75rem; /* Sama dengan btn--md */
     font-family: var(--font-body);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     border-radius: 12px;
-    border: 1px solid transparent; /* Border transparan default */
+    /* Glass — mirrors .btn--secondary */
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
     color: var(--color-accent-gold);
     text-decoration: none;
-    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-glass);
   }
 
   .cta-perjalanan:hover {
-    background: hsla(45, 85%, 65%, 0.08); /* Gold tipis */
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--shadow-glass-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Ripple effect — sama dengan .btn::after */
+  .cta-perjalanan::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, hsla(45, 85%, 65%, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity var(--duration-fast), transform var(--duration-normal) var(--ease-water);
+  }
+
+  .cta-perjalanan:active::after {
+    opacity: 1;
+    transform: scale(2.5);
+    transition: opacity 0ms, transform 0ms;
   }
 
   /* 6. Scroll Indicator */
@@ -190,142 +220,197 @@ import Button from '../ui/Button.astro';
   }
 
   @keyframes bounce {
-    0%, 100% { transform: translate(-50%, 0); }
-    50% { transform: translate(-50%, 8px); }
+    0%,
+    100% {
+      transform: translate(-50%, 0);
+    }
+    50% {
+      transform: translate(-50%, 8px);
+    }
   }
 
-  @media(max-width: 768px) {
-    .hero-heading { letter-spacing: 0.1em; }
-    .hero-subheading { letter-spacing: 0.15em; }
+  @media (max-width: 768px) {
+    .hero-heading {
+      letter-spacing: 0.1em;
+    }
+    .hero-subheading {
+      letter-spacing: 0.15em;
+    }
   }
 </style>
 
 <script is:inline>
-  (function() {
+  (function () {
     function initHero() {
-      var badge = document.querySelector('[data-hero-badge]');
-      var heading = document.querySelector('[data-hero-heading]');
+      var badge = document.querySelector("[data-hero-badge]");
+      var heading = document.querySelector("[data-hero-heading]");
       var sub = document.querySelector('[data-hero-anim="sub"]');
       var desc = document.querySelector('[data-hero-anim="desc"]');
       var cta = document.querySelector('[data-hero-anim="cta"]');
       var allEls = [badge, heading, sub, desc, cta];
-      
-      if(!badge || !heading) return;
+
+      if (!badge || !heading) return;
 
       function showAll() {
-        allEls.forEach(function(el) {
-          if(el) {
-            el.style.opacity = '1';
-            el.style.transform = 'none';
+        allEls.forEach(function (el) {
+          if (el) {
+            el.style.opacity = "1";
+            el.style.transform = "none";
           }
         });
       }
 
-      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) { showAll(); return; }
+      var prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (prefersReduced) {
+        showAll();
+        return;
+      }
 
       function importWithTimeout(fn, ms) {
         ms = ms || 5000;
         return Promise.race([
           fn(),
-          new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Import timeout')); }, ms); })
+          new Promise(function (_, rej) {
+            setTimeout(function () {
+              rej(new Error("Import timeout"));
+            }, ms);
+          }),
         ]);
       }
 
       Promise.all([
-        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm'); }),
-        importWithTimeout(function() { return import('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm'); })
-      ]).then(function(modules) {
-        var gsap = modules[0].gsap || modules[0].default;
-        var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
-        gsap.registerPlugin(ScrollTrigger);
+        importWithTimeout(function () {
+          return import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm");
+        }),
+        importWithTimeout(function () {
+          return import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm");
+        }),
+      ])
+        .then(function (modules) {
+          var gsap = modules[0].gsap || modules[0].default;
+          var ScrollTrigger = modules[1].ScrollTrigger || modules[1].default;
+          gsap.registerPlugin(ScrollTrigger);
 
-        var tl = gsap.timeline();
-        
-        tl.fromTo(badge, 
-          { y: 20, opacity: 0 }, 
-          { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.2 }
-        )
-        .fromTo(heading, 
-          { scale: 0.95, opacity: 0 }, 
-          { scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" },
-          0.4
-        )
-        .fromTo(sub,
-          { y: 15, opacity: 0 },
-          { y: 0, opacity: 0.6, duration: 0.6, ease: "power2.out" },
-          0.6
-        )
-        .fromTo(desc,
-          { y: 15, opacity: 0 },
-          { y: 0, opacity: 0.75, duration: 0.6, ease: "power2.out" },
-          0.8
-        )
-        .fromTo(cta,
-          { y: 15, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
-          1.0
-        );
+          var tl = gsap.timeline();
 
-        // Type B: Lazy-init parallax scrubs via IntersectionObserver
-        var heroSection = document.querySelector('.hero-section');
-        var parallaxCreated = false;
-        var parallaxTriggers = [];
-        
+          tl.fromTo(
+            badge,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.2 },
+          )
+            .fromTo(
+              heading,
+              { scale: 0.95, opacity: 0 },
+              { scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" },
+              0.4,
+            )
+            .fromTo(
+              sub,
+              { y: 15, opacity: 0 },
+              { y: 0, opacity: 0.6, duration: 0.6, ease: "power2.out" },
+              0.6,
+            )
+            .fromTo(
+              desc,
+              { y: 15, opacity: 0 },
+              { y: 0, opacity: 0.75, duration: 0.6, ease: "power2.out" },
+              0.8,
+            )
+            .fromTo(
+              cta,
+              { y: 15, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
+              1.0,
+            );
+
+          // Type B: Lazy-init parallax scrubs via IntersectionObserver
+          var heroSection = document.querySelector(".hero-section");
+          var parallaxCreated = false;
+          var parallaxTriggers = [];
+
+          if (heroSection) {
+            var lazyParallax = new IntersectionObserver(
+              function (entries) {
+                if (entries[0].isIntersecting && !parallaxCreated) {
+                  parallaxCreated = true;
+
+                  var st1 = gsap.to(heading, {
+                    yPercent: 30,
+                    ease: "none",
+                    scrollTrigger: {
+                      trigger: ".hero-section",
+                      start: "top top",
+                      end: "bottom top",
+                      scrub: 1,
+                    },
+                  });
+
+                  var st2 = gsap.to(badge, {
+                    yPercent: 50,
+                    ease: "none",
+                    scrollTrigger: {
+                      trigger: ".hero-section",
+                      start: "top top",
+                      end: "bottom top",
+                      scrub: 1,
+                    },
+                  });
+
+                  if (st1.scrollTrigger)
+                    parallaxTriggers.push(st1.scrollTrigger);
+                  if (st2.scrollTrigger)
+                    parallaxTriggers.push(st2.scrollTrigger);
+
+                  lazyParallax.disconnect();
+                }
+              },
+              { threshold: 0.1 },
+            );
+            lazyParallax.observe(heroSection);
+
+            // Cleanup on View Transition
+            document.addEventListener(
+              "astro:before-swap",
+              function () {
+                lazyParallax.disconnect();
+                parallaxTriggers.forEach(function (st) {
+                  st.kill();
+                });
+                parallaxTriggers = [];
+              },
+              { once: true },
+            );
+          }
+        })
+        .catch(function (err) {
+          console.warn("[Cloudsi] GSAP load gagal:", err);
+          showAll();
+        });
+
+      var indicator = document.getElementById("hero-scroll-indicator");
+      if (indicator) {
+        var heroSection = document.querySelector(".hero-section");
         if (heroSection) {
-          var lazyParallax = new IntersectionObserver(function(entries) {
-            if (entries[0].isIntersecting && !parallaxCreated) {
-              parallaxCreated = true;
-              
-              var st1 = gsap.to(heading, {
-                yPercent: 30, ease: "none",
-                scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
-              });
-              
-              var st2 = gsap.to(badge, {
-                yPercent: 50, ease: "none",
-                scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
-              });
-              
-              if (st1.scrollTrigger) parallaxTriggers.push(st1.scrollTrigger);
-              if (st2.scrollTrigger) parallaxTriggers.push(st2.scrollTrigger);
-              
-              lazyParallax.disconnect();
-            }
-          }, { threshold: 0.1 });
-          lazyParallax.observe(heroSection);
-          
-          // Cleanup on View Transition
-          document.addEventListener('astro:before-swap', function() {
-            lazyParallax.disconnect();
-            parallaxTriggers.forEach(function(st) { st.kill(); });
-            parallaxTriggers = [];
-          }, { once: true });
-        }
-      }).catch(function(err) {
-        console.warn('[Cloudsi] GSAP load gagal:', err);
-        showAll();
-      });
-
-      var indicator = document.getElementById('hero-scroll-indicator');
-      if(indicator) {
-        var heroSection = document.querySelector('.hero-section');
-        if (heroSection) {
-          var observer = new IntersectionObserver(function(entries) {
-            if(entries[0].intersectionRatio < 0.9) {
-              indicator.classList.add('fade-out');
-              indicator.style.animationPlayState = 'paused';
-            } else {
-              indicator.classList.remove('fade-out');
-              indicator.style.animationPlayState = 'running';
-            }
-          }, { threshold: [0.9] });
+          var observer = new IntersectionObserver(
+            function (entries) {
+              if (entries[0].intersectionRatio < 0.9) {
+                indicator.classList.add("fade-out");
+                indicator.style.animationPlayState = "paused";
+              } else {
+                indicator.classList.remove("fade-out");
+                indicator.style.animationPlayState = "running";
+              }
+            },
+            { threshold: [0.9] },
+          );
           observer.observe(heroSection);
         }
       }
     }
 
-    document.addEventListener('DOMContentLoaded', initHero);
-    document.addEventListener('astro:after-swap', initHero);
+    document.addEventListener("DOMContentLoaded", initHero);
+    document.addEventListener("astro:after-swap", initHero);
   })();
 </script>
