@@ -706,6 +706,99 @@ import Header from "../components/layout/Header.astro";
     );
   }
 
-  document.addEventListener("DOMContentLoaded", initMP3Player);
-  document.addEventListener("astro:after-swap", initMP3Player);
+  function initAutoScroll() {
+    const globalWindow = window as any;
+    globalWindow._laguScrollListeners = globalWindow._laguScrollListeners || [];
+    globalWindow._laguScrollListeners.forEach((l: { type: string, fn: EventListener }) => 
+      window.removeEventListener(l.type, l.fn)
+    );
+    globalWindow._laguScrollListeners = [];
+
+    // Hanya jalan di halaman lagu dan ukuran layar mobile/tablet
+    if (!document.querySelector('.lagu-hero')) return;
+    if (window.innerWidth > 1024) return;
+
+    let isScrolling = false;
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    let animationFrameId: number | null = null;
+    let exactScrollY = window.scrollY;
+
+    function autoScrollStep() {
+      if (!isScrolling) return;
+
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const bodyHeight = document.documentElement.scrollHeight;
+      
+      // Jika belum di paling bawah, lanjut scroll halus
+      if (scrollPosition < bodyHeight - 10) {
+        // Sinkronisasi posisi jika ada pergeseran manual kecil yang tidak terdeteksi
+        if (Math.abs(exactScrollY - window.scrollY) > 2) {
+          exactScrollY = window.scrollY;
+        }
+
+        exactScrollY += 0.5; // Akumulasi desimal agar browser tetap mau scroll
+        window.scrollTo(0, exactScrollY); 
+        animationFrameId = requestAnimationFrame(autoScrollStep);
+      } else {
+        isScrolling = false; // Langsung diam saat sampai bawah
+      }
+    }
+
+    function resumeScroll() {
+      if (!isScrolling) {
+        // Update titik awal scroll sebelum jalan
+        exactScrollY = window.scrollY;
+        isScrolling = true;
+        animationFrameId = requestAnimationFrame(autoScrollStep);
+      }
+    }
+
+    function pauseScroll() {
+      isScrolling = false;
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      
+      if (scrollTimeout !== null) {
+        clearTimeout(scrollTimeout);
+      }
+      // Lanjutkan scroll otomatis setelah 3 detik tidak ada sentuhan dari user
+      scrollTimeout = setTimeout(() => {
+        if (!document.querySelector('.lagu-hero')) return;
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const bodyHeight = document.documentElement.scrollHeight;
+        if (scrollPosition < bodyHeight - 10) {
+          resumeScroll();
+        }
+      }, 3000);
+    }
+
+    const attachEvent = (type: string, fn: EventListener) => {
+      window.addEventListener(type, fn, { passive: true });
+      globalWindow._laguScrollListeners.push({ type, fn });
+    };
+
+    // Saat user geser sendiri (pakai tangan/mouse), pause auto-scroll
+    attachEvent('touchstart', pauseScroll as EventListener);
+    attachEvent('touchmove', pauseScroll as EventListener);
+    attachEvent('wheel', pauseScroll as EventListener);
+
+    // Mulai otomatis dengan delay 3 detik awal agar user siap-siap dulu
+    setTimeout(() => {
+      if (document.querySelector('.lagu-hero')) {
+        resumeScroll();
+      }
+    }, 3000);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initMP3Player();
+    initAutoScroll();
+  });
+  
+  document.addEventListener("astro:after-swap", () => {
+    initMP3Player();
+    initAutoScroll();
+  });
 </script>

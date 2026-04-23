@@ -280,22 +280,23 @@
               }
 
               float hBias = uvOrig.y * 0.25; 
+              float cloudTime = 42.0; // Bekukan awan
               
-              vec4 c1 = renderCloud(p, 2.5, 0.010, u_time, 0.25 + hBias, 0.8, lightDir, u_scrollProgress);
+              vec4 c1 = renderCloud(p, 2.5, 0.010, cloudTime, 0.25 + hBias, 0.8, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c1.rgb, c1.a * 0.90);
               
-              vec4 c2 = renderCloud(p + vec2(1.1), 1.8, 0.015, u_time, 0.30 + hBias, 0.85, lightDir, u_scrollProgress);
+              vec4 c2 = renderCloud(p + vec2(1.1), 1.8, 0.015, cloudTime, 0.30 + hBias, 0.85, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c2.rgb, c2.a * 0.90);
               
-              vec4 c3 = renderCloud(p + vec2(2.2), 1.2, 0.025, u_time, 0.35 + hBias, 0.9, lightDir, u_scrollProgress);
+              vec4 c3 = renderCloud(p + vec2(2.2), 1.2, 0.025, cloudTime, 0.35 + hBias, 0.9, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c3.rgb, c3.a * 0.95);
               ` +
         (tier !== "LOW"
           ? `
-              vec4 c4 = renderCloud(p + vec2(3.3), 0.7, 0.035, u_time, 0.40 + hBias, 0.95, lightDir, u_scrollProgress);
+              vec4 c4 = renderCloud(p + vec2(3.3), 0.7, 0.035, cloudTime, 0.40 + hBias, 0.95, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c4.rgb, c4.a * 0.95);
               
-              vec4 c5 = renderCloud(p + vec2(4.4), 0.3, 0.050, u_time, 0.50 + hBias, 1.0, lightDir, u_scrollProgress);
+              vec4 c5 = renderCloud(p + vec2(4.4), 0.3, 0.050, cloudTime, 0.50 + hBias, 1.0, lightDir, u_scrollProgress);
               finalColor = mix(finalColor, c5.rgb, c5.a * 0.95);
               `
           : "") +
@@ -428,32 +429,40 @@
       var overlayEl = document.getElementById("cloud-overlay");
 
       // =============================================
-      // STATIC RENDER — freeze time, render-on-demand
-      // Render sekali di awal, lalu hanya re-render saat scroll.
-      // GPU idle = 0% saat tidak scroll.
+      // RENDER ENGINE — Bintang Kedip di Desktop Saja
+      // Awan tetap statis/beku untuk semua perangkat.
       // =============================================
-      var FROZEN_TIME = 42.0; // snapshot waktu yang menarik dari shader
+      var FROZEN_TIME = 42.0; 
       var pendingRender = false;
+      var isDesktop = !isMobileCheck;
+      var timeAccumulator = FROZEN_TIME;
+      var lastTimestamp = 0;
 
-      function drawFrame() {
+      function drawFrame(timestamp) {
         if (isDestroyed) return;
         pendingRender = false;
 
-        // Waktu dibekukan — awan tidak bergerak
-        gl.uniform1f(timeUnif, FROZEN_TIME);
+        // Animasikan u_time hanya di desktop untuk kedipan bintang
+        if (isDesktop && timestamp) {
+          if (!lastTimestamp) lastTimestamp = timestamp;
+          var dt = (timestamp - lastTimestamp) / 1000.0;
+          if (dt > 0.1) dt = 0.1; // clamp
+          timeAccumulator += dt;
+          lastTimestamp = timestamp;
+          gl.uniform1f(timeUnif, timeAccumulator);
+        } else {
+          // Mobile: waktu dibekukan penuh
+          gl.uniform1f(timeUnif, FROZEN_TIME);
+        }
 
-        // Update scroll progress — initial state follows time-of-day
-        // Noon/Sunset: scroll down → toward night (0.0)
-        // Night: scroll down → toward noon (1.0)
+        // Update scroll progress (Siang/Malam transisi)
         var scrollFraction = Math.max(
           0.0,
           Math.min(1.0, rawScrollY / docHeight),
         );
         if (timeBaseProgress > 0.0) {
-          // Noon (1.0) or Sunset (0.3): scale down toward night
           renderScrollProgress = timeBaseProgress * (1.0 - scrollFraction);
         } else {
-          // Night (0.0): scale up toward noon
           renderScrollProgress = scrollFraction;
         }
         gl.uniform1f(scrollUnif, renderScrollProgress);
@@ -468,15 +477,21 @@
         }
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        // Terus melooping animasi jika di desktop
+        if (isDesktop) {
+          rafId = requestAnimationFrame(drawFrame);
+        }
       }
 
       function requestDraw() {
-        if (pendingRender || isDestroyed) return;
+        // Desktop tidak butuh request manual karena sudah looping otomatis
+        if (pendingRender || isDestroyed || isDesktop) return; 
         pendingRender = true;
         rafId = requestAnimationFrame(drawFrame);
       }
 
-      // Render ulang saat scroll (untuk day/night transition)
+      // Render ulang saat scroll (sangat penting untuk mobile)
       var _origOnScroll = onScroll;
       window.removeEventListener("scroll", onScroll);
       function onScrollStatic() {
@@ -486,9 +501,12 @@
       window.addEventListener("scroll", onScrollStatic, { passive: true });
       onScroll = onScrollStatic; // update ref untuk cleanup
 
-      // Render awal sekali — WebGL tetap hidup agar day/night cycle bisa
-      // update saat scroll. Shader sudah di-compile, re-render per event murah.
-      drawFrame();
+      // Mulai render pertama kali
+      if (isDesktop) {
+        rafId = requestAnimationFrame(drawFrame);
+      } else {
+        drawFrame();
+      }
 
       // =============================================
       // FULL CLEANUP — VRAM DISPOSAL + LISTENER REMOVAL
